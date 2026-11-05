@@ -1,0 +1,74 @@
+@import 'tailwindcss';
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+@source '../**/*.blade.php';
+@source '../**/*.js';
+
+
+@theme {
+    --font-sans: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+        'Segoe UI Symbol', 'Noto Color Emoji';
+}
+
+@import '../../vendor/tallstackui/tallstackui/css/v4.css';
+
+@plugin '@tailwindcss/forms';
+
+@source '../../vendor/tallstackui/tallstackui/**/*.php';
+
+
+[x-cloak] {
+    display: none !important;
+}
+
+
+/* Dropdown floating (select, date, time) & tooltip di-teleport ke body dengan z-50 sehingga tertutup modal/elemen bertumpuk. */
+[data-floating],
+[data-tsui-tooltip] {
+    z-index: 100;
+}
+
+/* Sidebar Menu Active State */
+.sidebar-link.active {
+    background-color: #ffffff;
+    color: #065f46;
+    font-weight: 600;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+/* Chrome, Edge, Safari */
+::-webkit-scrollbar {
+    width: 10px;
+    /* lebar scrollbar */
+    height: 10px;
+    /* tinggi scrollbar horizontal */
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    /* warna track */
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #888;
+    /* warna thumb */
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #555;
+    /* warna saat hover */
+}
+
+/* Firefox */
+* {
+    scrollbar-width: thin;
+    /* auto | thin | none */
+    scrollbar-color: #888 #f1f1f1;
+    /* thumb | track */
+}

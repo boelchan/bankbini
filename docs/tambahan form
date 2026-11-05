@@ -1,0 +1,83 @@
+tambah pencatatan nifas setelah melahirkan
+- tanggal kunjungan
+- sistol
+- diastol
+- suhu
+- nadi
+- TFU
+- lochea
+- jalan lahir
+- asi 
+- BAB (ya tidak)
+- BAK (ya tidak)
+- Masalah Nifas
+    Preeklamsi/eklamsi	
+    Perdarahan Nifas	
+    Infeksi	
+    TB	
+    Malaria	
+    Jantung	
+    DM	
+    Positif Covid19	
+    Obesitas	
+    Lainnya (kolom isian)
+
+
+tambahkan di bagian kontrol
+1. form USG (ya/tidak)
+2. form masalah kehamilan (pilihan)
+    Hiper Emisis	
+    Preeklamsi/eklamsi	
+    Perdarahan Kehamilan	
+    Infeksi	
+    TB	
+    Malaria	
+    Jantung	
+    DM	
+    Positif Covid19	
+    Obesitas	
+    Lainnya (kolom isian)
+3. form Tanggal Kontrol Selanjutnya (next_encounter_date)
+4. filter tanggal kontrol di halaman Kantong Kehamilan (Jadwal Kontrol Selanjutnya / Tanggal Periksa ANC / Semua)
+
+tambahkan di bagian selesai -> melahirkan -> masalah persalinan
+    Abortus	
+    Preeklamsi/eklamsi	
+    Perdarahan Persalinan	
+    Partus Lama	
+    Infeksi	
+    TB	
+    Malaria	
+    Jantung	
+    DM	
+    Positif Covid19	
+    Obesitas	
+    Lainnya (kolom isian)
+
+
+
+Kunjungan Neonatal (datanya bisa lebih dari 1 kali)
+form kunjungan neonatal dapat di tambahkan setelah kunjungan nifas (beda form dan tombol)
+datanya kolomnya:
+KN1 
+    - tanggal
+    - BB
+    - TB
+    - Salep mata
+    - VIT K
+    - IMD
+    - HB0
+    - SHK
+    - HBiG
+    - RR
+    - tali pusat
+    - PJB (Normal / Tidak)
+
+KN2 dan KN3
+    - tanggal
+    - BB
+    - TB
+    - Suhu
+    - Warna kulit
+    - RR
+    - tali pusat
