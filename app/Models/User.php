@@ -1,37 +1,39 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
-use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
-use Spatie\Permission\Traits\HasRoles;
-use Illuminate\Database\Eloquent\Attributes\Table;
+use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
+use Illuminate\Database\Eloquent\Attributes\Table;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
+use Spatie\Permission\Traits\HasRoles;
 
 #[Table(name: 'users', key: 'id')]
 #[Fillable([
     'name',
     'email',
     'password',
-    'nik',
-    'ihs_number',
+    'phone',
     'status',
     'jabatan',
     'email_verified_at',
-    'village_code',
 ])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
+    /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable, HasRoles;
 
-
     /**
-     * Get the attributes that should be cast.
+     * Konfigurasi konversi tipe data atribut model.
      *
      * @return array<string, string>
      */
@@ -40,59 +42,78 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
-            'village_code' => 'integer',
         ];
     }
 
-    public function village()
+    /**
+     * Relasi ke daftar kantong keuangan milik pengguna.
+     *
+     * @return HasMany<Wallet, $this>
+     */
+    public function wallets(): HasMany
     {
-        return $this->belongsTo(IndonesiaRegion::class, 'village_code', 'code');
+        return $this->hasMany(Wallet::class, 'user_id');
     }
 
     /**
-     * Memutus seluruh sesi login aktif & token "ingat saya" milik pengguna ini.
-     * Dipanggil saat administrator mereset password atau menonaktifkan akun.
+     * Relasi ke seluruh transaksi milik pengguna.
+     *
+     * @return HasMany<Transaction, $this>
+     */
+    public function transactions(): HasMany
+    {
+        return $this->hasMany(Transaction::class, 'user_id');
+    }
+
+    /**
+     * Relasi ke daftar transfer antar kantong milik pengguna.
+     *
+     * @return HasMany<Transfer, $this>
+     */
+    public function transfers(): HasMany
+    {
+        return $this->hasMany(Transfer::class, 'user_id');
+    }
+
+    /**
+     * Relasi ke kategori transaksi kustom milik pengguna.
+     *
+     * @return HasMany<TransactionCategory, $this>
+     */
+    public function transactionCategories(): HasMany
+    {
+        return $this->hasMany(TransactionCategory::class, 'user_id');
+    }
+
+    /**
+     * Relasi ke catatan log aktivitas kantong.
+     *
+     * @return HasMany<WalletActivityLog, $this>
+     */
+    public function walletActivityLogs(): HasMany
+    {
+        return $this->hasMany(WalletActivityLog::class, 'user_id');
+    }
+
+    /**
+     * Memutus seluruh sesi login aktif dan token ingat saya milik pengguna ini.
      */
     public function invalidateSessions(): void
     {
         if (config('session.driver') === 'database') {
-            \Illuminate\Support\Facades\DB::table(config('session.table', 'sessions'))
+            DB::table(config('session.table', 'sessions'))
                 ->where('user_id', $this->getKey())
                 ->delete();
         }
 
-        $this->forceFill(['remember_token' => \Illuminate\Support\Str::random(60)])->saveQuietly();
+        $this->forceFill(['remember_token' => Str::random(60)])->saveQuietly();
     }
 
     /**
-     * Memeriksa apakah user memiliki peran Koordinator Bidan atau Administrator.
-     */
-    public function isKoordinatorOrAdmin(): bool
-    {
-        return $this->hasRole(['administrator', 'koordinator-bidan']);
-    }
-
-    /**
-     * Memeriksa apakah user memiliki peran Koordinator Bidan.
-     */
-    public function isKoordinator(): bool
-    {
-        return $this->hasRole('koordinator-bidan');
-    }
-
-    /**
-     * Memeriksa apakah user memiliki peran Administrator.
+     * Memeriksa apakah pengguna memiliki peran Administrator.
      */
     public function isAdmin(): bool
     {
         return $this->hasRole('administrator');
-    }
-
-    /**
-     * Memeriksa apakah user memiliki peran Bidan.
-     */
-    public function isBidan(): bool
-    {
-        return $this->hasRole('bidan');
     }
 }

@@ -1,67 +1,62 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Enums\RolesEnum;
+use App\Enums\UserStatusEnum;
 use App\Models\User;
-use App\Models\IndonesiaRegion;
 use Illuminate\Support\Facades\Hash;
+use Livewire\Attributes\Title;
 use Livewire\Component;
-use Spatie\Permission\Models\Role;
 use TallStackUi\Traits\Interactions;
 
-new class extends Component
+new #[Title('Tambah Pengguna')] class extends Component
 {
     use Interactions;
 
-    public $name;
-    public $email;
-    public $password;
-    public $password_confirmation;
-    public $nik;
-    public $role;
-    public ?int $village_code = null;
+    public string $name = '';
+    public string $email = '';
+    public string $password = '';
+    public string $password_confirmation = '';
+    public ?string $phone = null;
+    public ?string $jabatan = 'Pemilik Dompet';
+    public string $role = RolesEnum::MEMBER->value;
+    public string $status = UserStatusEnum::ACTIVE->value;
 
-    public $roles;
-    public $villages;
-    public $status = 'active';
-
-    public function mount()
-    {
-        $this->roles = Role::pluck('name', 'id')->all();
-        $this->villages = IndonesiaRegion::where('parent', 352911)
-            ->orderBy('name', 'ASC')
-            ->get()
-            ->map(fn($item) => ['label' => $item->name, 'value' => (int) $item->code])
-            ->toArray();
-    }
-
-    public function store()
+    /**
+     * Menyimpan pengguna baru ke dalam database.
+     */
+    public function store(): mixed
     {
         $this->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|max:255|unique:users,email',
-            'password' => 'required|string|min:8|confirmed',
-            'nik' => 'nullable|string|size:16|unique:users,nik',
-            'role' => 'required',
-            'status' => 'required',
-            'village_code' => 'nullable|integer',
+            'name' => 'required|string|max:191',
+            'email' => 'required|email|max:191|unique:users,email',
+            'password' => 'required|string|min:6|confirmed',
+            'phone' => 'nullable|string|max:30',
+            'jabatan' => 'nullable|string|max:80',
+            'role' => 'required|string',
+            'status' => 'required|in:active,inactive',
         ], [
-            'password.required' => 'Password wajib diisi.',
-            'password.min' => 'Password minimal 8 karakter.',
-            'password.confirmed' => 'Konfirmasi password tidak cocok.',
+            'name.required' => 'Nama lengkap wajib diisi.',
+            'email.required' => 'Alamat email wajib diisi.',
+            'email.unique' => 'Alamat email sudah terdaftar.',
+            'password.required' => 'Kata sandi wajib diisi.',
+            'password.min' => 'Kata sandi minimal 6 karakter.',
+            'password.confirmed' => 'Konfirmasi kata sandi tidak cocok.',
         ]);
 
         $user = User::create([
             'name' => $this->name,
             'email' => $this->email,
             'password' => Hash::make($this->password),
-            'nik' => $this->nik,
+            'phone' => $this->phone,
+            'jabatan' => $this->jabatan,
             'status' => $this->status,
-            'village_code' => $this->village_code ? (int) $this->village_code : null,
         ]);
 
         $user->assignRole($this->role);
 
-        $this->toast()->success('User berhasil ditambahkan')->flash()->send();
+        $this->toast()->success('Berhasil', 'Pengguna baru berhasil ditambahkan.')->flash()->send();
 
         return to_route('user');
     }

@@ -102,7 +102,10 @@ Gunakan **Modul User** (`resources/views/pages/user/`) sebagai standar acuan uta
 
 ---
 
-## 2. Filosofi Desain: Clean, Refined & Elegan
+## 2. Filosofi Desain: Clean, Refined, Cute & Elegan (Bank BINI Edition)
+
+* **Karakter Visual Khusus Bank BINI**: Tampilan wajib **cute, hangat, ramah, dan menarik** karena aplikasi digunakan oleh istri untuk mengelola kantong keuangan keluarga (inspirasi *Pocket* Bank Jago), namun tetap rapi, profesional, dan memenuhi standar kontras keterbacaan WCAG AA.
+* Gunakan sentuhan warna pastel lembut yang manis (`rose`, `pink`, `emerald`, `amber`, `sky`, `violet`), sudut membulat yang bersahabat (`rounded-2xl` untuk kartu kantong, `rounded-xl` untuk tombol), serta sapaan/mikrokopi Bahasa Indonesia yang hangat dan manusiawi.
 
 ### 🚨 Larangan Desain "AI Slop":
 * **Dilarang** menggunakan gradien pelangi atau kombinasi warna mencolok (`from-purple-... to-pink-...`, background neon, dsb.).

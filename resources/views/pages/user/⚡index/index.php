@@ -1,55 +1,87 @@
 <?php
 
+declare(strict_types=1);
+
+use App\Enums\RolesEnum;
+use App\Enums\UserStatusEnum;
 use App\Livewire\Traits\WithTableX;
 use App\Models\User;
-use Livewire\Component;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Livewire\Attributes\Computed;
+use Livewire\Attributes\Title;
 use Livewire\Attributes\Url;
-use Spatie\Permission\Models\Role;
+use Livewire\Component;
 use TallStackUi\Traits\Interactions;
 
-new class extends Component
+new #[Title('Kelola Pengguna')] class extends Component
 {
-    use WithTableX, Interactions;
+    use Interactions, WithTableX;
 
-    public $sortFieldDefault = 'name';
-    public $sortDirectionDefault = 'asc';
+    public string $sortFieldDefault = 'name';
+    public string $sortDirectionDefault = 'asc';
 
     #[Url]
-    public $search_name = '';
-    #[Url]
-    public $search_email = '';
-    #[Url]
-    public $search_role = '';
-    #[Url]
-    public $search_status = '';
+    public string $search_name = '';
 
-    public $roles;
-    public $status;
+    #[Url]
+    public string $search_email = '';
 
-    public function mount()
-    {
-        $this->roles = Role::pluck('name', 'id')->toArray();
-        $this->status = ['active' => 'active', 'inactive' => 'inactive'];
-    }
+    #[Url]
+    public ?string $search_role = null;
 
+    #[Url]
+    public ?string $search_status = null;
+
+    /**
+     * Mengambil daftar pengguna dengan filter dan paginasi.
+     */
     #[Computed]
-    public function dataTable()
+    public function dataTable(): LengthAwarePaginator
     {
-        return User::with('roles')->with('village')
-            ->when($this->search_name, fn($q) => $q->where('name', 'like', '%' . $this->search_name . '%'))
-            ->when($this->search_email, fn($q) => $q->where('email', 'like', '%' . $this->search_email . '%'))
-            ->when($this->search_role, fn($q) => $q->whereHas('roles', fn($q) => $q->where('name', $this->search_role)))
-            ->when($this->search_status, fn($q) => $q->where('status', $this->search_status))
+        return User::with('roles')
+            ->withCount('wallets')
+            ->when($this->search_name !== '', fn ($q) => $q->where('name', 'like', '%' . $this->search_name . '%'))
+            ->when($this->search_email !== '', fn ($q) => $q->where('email', 'like', '%' . $this->search_email . '%'))
+            ->when($this->search_role, fn ($q) => $q->whereHas('roles', fn ($rq) => $rq->where('name', $this->search_role)))
+            ->when($this->search_status, fn ($q) => $q->where('status', $this->search_status))
             ->orderBy($this->sortField, $this->sortDirection)
             ->paginate($this->perPage);
     }
 
-
-    public function delete($id)
+    /**
+     * Mengambil opsi peran pengguna dari Enum.
+     *
+     * @return array<int, array{label: string, value: string}>
+     */
+    #[Computed]
+    public function roleOptions(): array
     {
+        return RolesEnum::choices();
+    }
+
+    /**
+     * Mengambil opsi status pengguna dari Enum.
+     *
+     * @return array<int, array{label: string, value: string}>
+     */
+    #[Computed]
+    public function statusOptions(): array
+    {
+        return UserStatusEnum::choices();
+    }
+
+    /**
+     * Menghapus pengguna setelah konfirmasi.
+     */
+    public function delete(int $id): void
+    {
+        if ($id === 1 || $id === (int) auth()->id()) {
+            $this->toast()->error('Gagal', 'Akun utama atau akun yang sedang digunakan tidak dapat dihapus.')->send();
+            return;
+        }
+
         $user = User::findOrFail($id);
         $user->delete();
-        $this->toast()->success('User berhasil dihapus')->send();
+        $this->toast()->success('Berhasil', 'Pengguna berhasil dihapus.')->send();
     }
 };

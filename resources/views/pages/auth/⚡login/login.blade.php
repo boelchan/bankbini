@@ -1,145 +1,108 @@
 <div>
     @push('styles')
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        body {
-            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background-color: #f8fafc;
-        }
-
-        /* Latar belakang arsitektural halus & tenang */
-        .bg-grid-subtle {
-            background-color: #f8fafc;
-            background-image: 
-                radial-gradient(rgba(16, 185, 129, 0.15) 1px, transparent 1px),
-                linear-gradient(to right, rgba(226, 232, 240, 0.65) 1px, transparent 1px),
-                linear-gradient(to bottom, rgba(226, 232, 240, 0.65) 1px, transparent 1px);
-            background-size: 32px 32px;
-        }
-
-        .ambient-header-glow {
-            position: absolute;
-            top: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 100%;
-            max-width: 900px;
-            height: 480px;
-            background: radial-gradient(ellipse 65% 50% at 50% 0%, rgba(16, 185, 129, 0.14) 0%, rgba(209, 250, 229, 0.15) 45%, transparent 75%);
-            pointer-events-none;
-            z-index: 0;
+        .bankbini-login-bg {
+            background-color: #fffbfa;
+            background-image:
+                radial-gradient(ellipse 70% 50% at 50% 0%, rgba(244, 63, 94, 0.10) 0%, rgba(16, 185, 129, 0.08) 50%, transparent 80%);
         }
     </style>
     @endpush
 
-    <!-- Lapisan Latar Belakang -->
-    <div class="fixed inset-0 pointer-events-none -z-10 bg-grid-subtle [mask-image:radial-gradient(ellipse_80%_65%_at_50%_15%,#000_50%,transparent_100%)] opacity-75"></div>
-    <div class="ambient-header-glow"></div>
-
-    <!-- Tombol Kembali ke Beranda -->
-    {{-- <div class="fixed top-4 left-4 z-50">
-        <a href="/" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white hover:bg-slate-50 text-slate-700 hover:text-emerald-700 border border-slate-200/80 shadow-xs text-sm font-medium transition-colors">
-            <x-ti-arrow-left class="size-4" />
-            <span>Kembali ke Beranda</span>
-        </a>
-    </div> --}}
-
-    <!-- Konten Utama Halaman Masuk -->
-    <div class="relative z-10 flex min-h-screen items-center justify-center p-4 py-16">
+    <div class="bankbini-login-bg relative min-h-screen flex items-center justify-center p-4 py-12">
         <div class="w-full max-w-md">
-            
-            <!-- Logo & Identitas Faskes -->
+            <!-- Identitas Brand Bank BINI -->
             <div class="mb-6 text-center">
-                <div class="inline-flex items-center justify-center size-16 rounded-2xl bg-emerald-600 text-white shadow-xs mb-4">
-                    <x-ti-hospital class="size-8" />
+                <div class="inline-flex items-center justify-center size-16 rounded-2xl bg-rose-100 text-rose-700 border border-rose-200 shadow-xs mb-3.5">
+                    <x-ti-wallet class="size-8" />
                 </div>
-                
-                <h1 class="text-2xl font-bold tracking-tight text-slate-900 mb-1">
-                    UPTD Puskesmas Pragaan
+
+                <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold mb-2">
+                    <x-ti-heart class="size-3.5 text-rose-600" />
+                    <span>Dompet Manis Keluarga</span>
+                </div>
+
+                <h1 class="text-2xl font-bold tracking-tight text-slate-900">
+                    Bank BINI
                 </h1>
-                <p class="text-sm font-medium text-slate-600">
-                    Sistem Informasi Pemantauan Kantong Kehamilan
+                <p class="text-sm text-slate-600 mt-1">
+                    Kelola saldo, kantong belanja, dan tabungan impian dengan rapi dan menyenangkan.
                 </p>
             </div>
 
-            <!-- Kartu Masuk / Formulir Autentikasi -->
-            <div class="bg-white rounded-2xl p-6 sm:p-8 border border-slate-200/80 shadow-xs">
-                
-                <div class="mb-6 pb-4 border-b border-slate-100">
-                    <h2 class="text-lg font-bold text-slate-900 flex items-center gap-2">
-                        <x-ti-lock class="size-5 text-emerald-700" />
-                        Masuk ke Akun
+            <!-- Kartu Masuk -->
+            <x-card class="bg-white border border-rose-200/80 shadow-xs rounded-2xl">
+                <div class="mb-5 pb-3.5 border-b border-slate-100">
+                    <h2 class="text-base font-bold text-slate-900 flex items-center gap-2">
+                        <x-ti-sparkles class="size-5 text-rose-600" />
+                        <span>Selamat Datang Kembali</span>
                     </h2>
-                    <p class="text-sm text-slate-500 mt-1">
-                        Silakan masukkan kredensial akun tenaga medis atau administrator Anda.
+                    <p class="text-xs text-slate-600 mt-1">
+                        Masukkan alamat email dan kata sandi untuk membuka kantong keuangan Anda.
                     </p>
                 </div>
 
                 @if (session('error'))
-                    <div class="mb-5">
+                    <div class="mb-4">
                         <x-alert color="red" light :text="session('error')" />
                     </div>
                 @endif
 
                 <form class="space-y-4" wire:submit="authenticate">
                     <div>
-                        <x-input 
-                            type="email" 
-                            label="Alamat Email" 
-                            placeholder="nama@puskesmaspragaan.id"
-                            wire:model="email" 
+                        <x-input
+                            type="email"
+                            label="Alamat Email"
+                            placeholder="istri@bankbini.id"
+                            wire:model="email"
                         />
                     </div>
-                    
+
                     <div>
-                        <x-password 
-                            label="Kata Sandi" 
-                            placeholder="••••••••"
-                            wire:model="password" 
+                        <x-password
+                            label="Kata Sandi"
+                            placeholder="Masukkan kata sandi"
+                            wire:model="password"
                         />
                     </div>
 
                     <div class="flex items-center justify-between pt-1">
-                        <x-checkbox 
-                            label="Ingat saya" 
-                            wire:model="remember" 
-                            color="emerald" 
+                        <x-checkbox
+                            label="Ingat sesi saya di perangkat ini"
+                            wire:model="remember"
+                            color="emerald"
                         />
                     </div>
 
                     <div class="pt-2">
-                        <x-button 
-                            submit 
-                            color="emerald" 
-                            loading="authenticate" 
-                            class="w-full justify-center text-sm font-semibold py-3"
+                        <x-button
+                            submit
+                            color="emerald"
+                            loading="authenticate"
+                            class="w-full justify-center text-sm font-semibold py-2.5 rounded-xl cursor-pointer"
                         >
-                            <span>Masuk ke Sistem</span>
-                            <x-ti-arrow-right class="size-4 ml-1.5" />
+                            <x-ti-login-2 class="size-4 mr-1.5" />
+                            <span>Buka Dompet Saya</span>
                         </x-button>
                     </div>
                 </form>
 
-                <!-- Informasi Keamanan Akses -->
-                <div class="mt-6 p-4 rounded-xl bg-slate-50 border border-slate-200 text-left flex items-start gap-3">
-                    <x-ti-shield-check class="size-5 text-emerald-700 shrink-0 mt-0.5" />
-                    <p class="text-sm leading-relaxed text-slate-600">
-                        Akses sistem terproteksi khusus untuk <strong>Bidan Desa</strong>, <strong>Dokter</strong>, dan <strong>Administrator</strong> UPTD Puskesmas Pragaan.
-                        Pendaftaran dan penyetelan ulang kata sandi dikelola oleh administrator.
-                    </p>
+                <!-- Petunjuk Akun Siap Pakai -->
+                <div class="mt-5 p-3.5 rounded-xl bg-rose-50/70 border border-rose-200/80 text-xs text-slate-700 space-y-1.5">
+                    <div class="font-semibold text-rose-950 flex items-center gap-1.5">
+                        <x-ti-heart-handshake class="size-4 text-rose-600 shrink-0" />
+                        <span>Akun Keluarga Siap Pakai:</span>
+                    </div>
+                    <div class="grid grid-cols-1 gap-1 text-slate-700">
+                        <div>Email Utama: <code class="font-semibold text-slate-900">istri@bankbini.id</code> atau <code class="font-semibold text-slate-900">admin@app.com</code></div>
+                        <div>Kata Sandi: <code class="font-semibold text-slate-900">123</code></div>
+                    </div>
                 </div>
+            </x-card>
 
-                <!-- Hak Cipta & Informasi Pengembang -->
-                <div class="mt-6 text-center border-t border-slate-100 pt-4">
-                    <p class="text-sm text-slate-500">
-                        &copy; {{ date('Y') }} UPTD Puskesmas Pragaan &bull; Kabupaten Sumenep<br>
-                        Dikembangkan oleh <a href="https://wa.me/081934955229" target="_blank" class="text-emerald-700 hover:text-emerald-800 font-semibold transition-colors">BulyanDev</a>
-                    </p>
-                </div>
-            </div>
-
+            <p class="mt-5 text-center text-xs text-slate-500">
+                &copy; {{ date('Y') }} Bank BINI &bull; Pencatatan Kantong Keuangan Rumah Tangga
+            </p>
         </div>
     </div>
 </div>

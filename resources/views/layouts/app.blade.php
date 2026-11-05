@@ -8,10 +8,9 @@
     <link type="image/svg+xml" href="{{ asset('favicon/favicon.svg') }}" rel="icon" />
     <link href="{{ asset('favicon/favicon.ico') }}" rel="shortcut icon" />
     <link href="{{ asset('favicon/apple-touch-icon.png') }}" rel="apple-touch-icon" sizes="180x180" />
-    <meta name="apple-mobile-web-app-title" content="Kantong Kehamilan" />
-    <link href="{{ asset('favicon/manifest.json') }}" rel="manifest" />
+    <meta name="apple-mobile-web-app-title" content="Bank BINI" />
 
-    <title>{{ $title ?? config('app.name') }}</title>
+    <title>{{ isset($title) ? $title . ' - Bank BINI' : 'Bank BINI - Dompet & Kantong Keuangan Keluarga' }}</title>
 
     <!-- Tipografi: Plus Jakarta Sans -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -21,17 +20,16 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
     @livewireStyles
-    @livewireMapStyles
     <tallstackui:script />
     @stack('styles')
 </head>
 
-<body class="bg-neutral-100 text-slate-900 antialiased font-sans">
+<body class="bg-slate-50 text-slate-900 antialiased font-sans">
     <x-toast />
     <x-dialog />
 
     <div
-        class="relative min-h-screen w-full bg-neutral-100 flex flex-col lg:flex-row"
+        class="relative min-h-screen w-full bg-slate-50 flex flex-col lg:flex-row"
         x-data="{
             sidebarOpen: localStorage.getItem('sidebar_expanded') !== 'false',
             mobileSidebarOpen: false,
@@ -63,196 +61,208 @@
             x-cloak
         ></div>
 
-        <!-- Sidebar Navigation -->
+        <!-- Sidebar Navigation (Panel Slate Netral Sesuai Pedoman) -->
         @if (Auth::check())
             <aside
                 id="sidebar"
-                class="fixed inset-y-0 left-0 z-50 flex flex-col bg-white border-r border-neutral-200 p-3 transition-all duration-300 ease-in-out lg:static lg:h-screen lg:sticky lg:top-0 lg:z-30 select-none overflow-hidden"
+                aria-label="Navigasi Utama"
+                class="fixed inset-y-0 left-0 z-50 flex flex-col bg-slate-100 border-r border-slate-200 p-3 transition-all duration-300 ease-in-out lg:static lg:h-screen lg:sticky lg:top-0 lg:z-30 select-none overflow-hidden"
                 :class="[
                     mobileSidebarOpen ? 'translate-x-0 shadow-lg w-72 max-w-[85vw]' : '-translate-x-full lg:translate-x-0',
-                    sidebarOpen ? 'lg:w-64 lg:p-3' : 'lg:w-16 lg:p-2'
+                    sidebarOpen ? 'lg:w-64 lg:p-3.5' : 'lg:w-18 lg:p-2.5'
                 ]"
             >
-                {{-- Scrollable content wrapper --}}
                 <div class="relative z-10 flex h-full flex-col min-h-0">
-                    {{-- Header when Sidebar is Expanded (or on Mobile) --}}
-                    <div class="flex items-center justify-between pb-3 mb-1" x-show="sidebarOpen || window.innerWidth < 1024">
-                        <a href="{{ route('dashboard') }}" class="flex items-center gap-2.5 min-w-0 rounded-md p-1 hover:bg-neutral-100 transition-colors" wire:navigate @click="closeMobile()">
-                            <div class="flex size-8 shrink-0 items-center justify-center rounded-md border border-neutral-200 bg-white">
-                                <img class="size-5 object-contain" src="{{ asset('favicon/web-app-manifest-192x192.png') }}" alt="logo">
+                    {{-- Header saat Sidebar Terbuka --}}
+                    <div class="flex items-center justify-between pb-3 mb-2 border-b border-slate-200/80" x-show="sidebarOpen || window.innerWidth < 1024">
+                        <a href="{{ route('dashboard') }}" class="flex items-center gap-2.5 min-w-0 rounded-xl p-1.5 hover:bg-white/80 transition-colors" wire:navigate @click="closeMobile()">
+                            <div class="flex size-9 shrink-0 items-center justify-center rounded-xl border border-rose-200 bg-rose-100 text-rose-700 shadow-2xs">
+                                <x-ti-wallet class="size-5" aria-hidden="true" />
                             </div>
                             <div class="leading-tight truncate">
-                                <span class="block text-sm font-semibold text-neutral-900 truncate">Kantong Kehamilan</span>
-                                <span class="block text-xs text-neutral-500">Puskesmas Pragaan</span>
+                                <span class="flex items-center gap-1 text-sm font-bold text-slate-900 truncate">
+                                    <span>Bank BINI</span>
+                                    <x-ti-heart class="size-3.5 text-rose-500 shrink-0" aria-hidden="true" />
+                                </span>
+                                <span class="block text-xs text-slate-600 truncate">Kantong Manis Keluarga</span>
                             </div>
                         </a>
 
                         <button
                             type="button"
                             @click="closeMobile()"
-                            class="inline-flex size-7 shrink-0 items-center justify-center rounded-md text-neutral-500 hover:bg-neutral-100 hover:text-neutral-900 transition-colors focus:outline-none lg:hidden"
+                            class="inline-flex size-8 shrink-0 items-center justify-center rounded-xl text-slate-600 hover:bg-slate-200/70 hover:text-slate-900 transition-colors focus-visible:outline-2 focus-visible:outline-emerald-600 lg:hidden"
                             title="Tutup Menu"
+                            aria-label="Tutup Menu"
                         >
-                            <x-ti-x class="size-4" />
+                            <x-ti-x class="size-4.5" aria-hidden="true" />
                         </button>
                         <button
                             type="button"
                             @click="toggleSidebar()"
-                            class="hidden lg:inline-flex size-7 shrink-0 items-center justify-center rounded-md text-neutral-500 hover:bg-neutral-100 hover:text-neutral-900 transition-colors focus:outline-none"
+                            class="hidden lg:inline-flex size-8 shrink-0 items-center justify-center rounded-xl text-slate-600 hover:bg-slate-200/70 hover:text-slate-900 transition-colors focus-visible:outline-2 focus-visible:outline-emerald-600"
                             title="Perkecil Sidebar"
+                            aria-label="Perkecil Sidebar"
                         >
-                            <x-ti-layout-sidebar-left-collapse class="size-4" />
+                            <x-ti-layout-sidebar-left-collapse class="size-4.5" aria-hidden="true" />
                         </button>
                     </div>
 
-                    {{-- Header when Sidebar is Collapsed on Desktop (Icon-only mode) --}}
-                    <div class="hidden lg:flex flex-col items-center gap-2 pb-3 mb-1" x-show="!sidebarOpen" x-cloak>
+                    {{-- Header saat Sidebar Diciutkan di Desktop --}}
+                    <div class="hidden lg:flex flex-col items-center gap-2 pb-3 mb-2 border-b border-slate-200/80" x-show="!sidebarOpen" x-cloak>
                         <a
                             href="{{ route('dashboard') }}"
-                            class="flex size-8 shrink-0 items-center justify-center rounded-md border border-neutral-200 bg-white hover:bg-neutral-100 transition-colors"
+                            class="flex size-9 shrink-0 items-center justify-center rounded-xl border border-rose-200 bg-rose-100 text-rose-700 hover:bg-rose-200/70 transition-colors"
                             wire:navigate
-                            x-tooltip="Kantong Kehamilan"
+                            x-tooltip="Bank BINI"
                             data-position="right"
                             data-tooltip-delay="flash"
                             x-bind:data-tooltip-disabled="sidebarOpen || mobileSidebarOpen"
-                            aria-label="Kantong Kehamilan"
+                            aria-label="Bank BINI"
                         >
-                            <img class="size-5 object-contain" src="{{ asset('favicon/web-app-manifest-192x192.png') }}" alt="logo">
+                            <x-ti-wallet class="size-5" aria-hidden="true" />
                         </a>
                         <button
                             type="button"
                             @click="toggleSidebar()"
-                            class="inline-flex size-7 items-center justify-center rounded-md text-neutral-500 hover:text-neutral-900 hover:bg-neutral-100 transition-colors focus:outline-none"
+                            class="inline-flex size-8 items-center justify-center rounded-xl text-slate-600 hover:text-slate-900 hover:bg-slate-200/70 transition-colors focus-visible:outline-2 focus-visible:outline-emerald-600"
                             x-tooltip="Perbesar Sidebar"
                             data-position="right"
                             data-tooltip-delay="flash"
                             x-bind:data-tooltip-disabled="sidebarOpen || mobileSidebarOpen"
                             aria-label="Perbesar Sidebar"
                         >
-                            <x-ti-layout-sidebar-left-expand class="size-4.5" />
+                            <x-ti-layout-sidebar-left-expand class="size-4.5" aria-hidden="true" />
                         </button>
                     </div>
 
-                    {{-- Navigation Links --}}
-                    <nav class="flex-1 overflow-y-auto space-y-1">
+                    {{-- Tombol Aksi Cepat di Sidebar --}}
+                    <div class="mb-3" x-show="sidebarOpen || window.innerWidth < 1024">
+                        <div class="grid grid-cols-3 gap-1.5 rounded-2xl bg-white p-1.5 border border-slate-200/90 shadow-2xs">
+                            <a
+                                href="{{ route('transactions.index', ['action' => 'income']) }}"
+                                wire:navigate
+                                @click="closeMobile()"
+                                class="flex flex-col items-center justify-center gap-1 rounded-xl py-2 px-1 text-xs font-semibold text-emerald-800 bg-emerald-50 hover:bg-emerald-100/80 border border-emerald-200/70 transition-colors"
+                                title="Tambah Pemasukan"
+                            >
+                                <x-ti-plus class="size-4 text-emerald-700" aria-hidden="true" />
+                                <span>Masuk</span>
+                            </a>
+                            <a
+                                href="{{ route('transactions.index', ['action' => 'expense']) }}"
+                                wire:navigate
+                                @click="closeMobile()"
+                                class="flex flex-col items-center justify-center gap-1 rounded-xl py-2 px-1 text-xs font-semibold text-rose-800 bg-rose-50 hover:bg-rose-100/80 border border-rose-200/70 transition-colors"
+                                title="Catat Pengeluaran"
+                            >
+                                <x-ti-minus class="size-4 text-rose-700" aria-hidden="true" />
+                                <span>Keluar</span>
+                            </a>
+                            <a
+                                href="{{ route('transfers.index') }}"
+                                wire:navigate
+                                @click="closeMobile()"
+                                class="flex flex-col items-center justify-center gap-1 rounded-xl py-2 px-1 text-xs font-semibold text-sky-800 bg-sky-50 hover:bg-sky-100/80 border border-sky-200/70 transition-colors"
+                                title="Transfer Antar Kantong"
+                            >
+                                <x-ti-arrows-exchange class="size-4 text-sky-700" aria-hidden="true" />
+                                <span>Transfer</span>
+                            </a>
+                        </div>
+                    </div>
+
+                    {{-- Navigasi Utama --}}
+                    <nav class="flex-1 overflow-y-auto space-y-1" aria-label="Menu Dompet">
                         <ul class="flex flex-col gap-1 w-full ps-0">
-                            @auth
-                                <x-sidebar.item
-                                    href="{{ route('dashboard') }}"
-                                    icon="layout-dashboard"
-                                    title="Dasbor"
-                                />
-                            @endauth
+                            <x-sidebar.item
+                                href="{{ route('dashboard') }}"
+                                icon="layout-dashboard"
+                                title="Dashboard"
+                                :active="request()->routeIs('dashboard')"
+                            />
 
-                            @can('pasien-list')
-                                <x-sidebar.item
-                                    href="{{ route('patient.index') }}"
-                                    icon="users"
-                                    title="Pasien"
-                                />
-                            @endcan
+                            <x-sidebar.item
+                                href="{{ route('pockets.index') }}"
+                                icon="wallet"
+                                title="Kantong"
+                                :active="request()->routeIs('pockets.*')"
+                            />
 
-                                <x-sidebar.item
-                                    href="{{ route('kantong-kehamilan.index') }}"
-                                    icon="heart-handshake"
-                                    title="Kantong Kehamilan"
-                                />
+                            <x-sidebar.item
+                                href="{{ route('transactions.index') }}"
+                                icon="list-details"
+                                title="Transaksi"
+                                :active="request()->routeIs('transactions.*')"
+                            />
 
-                            <x-sidebar.heading title="Laporan" />
+                            <x-sidebar.item
+                                href="{{ route('transfers.index') }}"
+                                icon="arrows-exchange"
+                                title="Transfer"
+                                :active="request()->routeIs('transfers.*')"
+                            />
 
-                                <x-sidebar.item
-                                    href="{{ route('laporan.pws-ibu') }}"
-                                    icon="file-analytics"
-                                    title="PWS Ibu"
-                                    :active="request()->routeIs('laporan.pws-ibu')"
-                                />
+                            <x-sidebar.item
+                                href="{{ route('reports.index') }}"
+                                icon="chart-bar"
+                                title="Laporan"
+                                :active="request()->routeIs('reports.*')"
+                            />
 
-                                <x-sidebar.item
-                                    href="{{ route('laporan.lb3-maternal') }}"
-                                    icon="file-report"
-                                    title="LB3 Maternal"
-                                    :active="request()->routeIs('laporan.lb3-maternal')"
-                                />
+                            <x-sidebar.heading title="Akun & Sistem" />
 
-                                <x-sidebar.item
-                                    href="{{ route('laporan.pws-bayi') }}"
-                                    icon="baby-bottle"
-                                    title="PWS Bayi"
-                                    :active="request()->routeIs('laporan.pws-bayi')"
-                                />
-                                
-                                <x-sidebar.item
-                                    href="{{ route('laporan.lb3-neonatal') }}"
-                                    icon="first-aid-kit"
-                                    title="LB3 Neonatal"
-                                    :active="request()->routeIs('laporan.lb3-neonatal')"
-                                />
-
-
-                            @can('posting-pamflet')
-                            
-                                <x-sidebar.heading title="Informasi" />
-
-                                <x-sidebar.item
-                                    href="{{ route('post.index') }}"
-                                    icon="news"
-                                    title="Pamflet"
-                                />
-                            @endcan
+                            <x-sidebar.item
+                                href="{{ route('account') }}"
+                                icon="settings"
+                                title="Pengaturan"
+                                :active="request()->routeIs('account')"
+                            />
 
                             @role('administrator')
-                                <x-sidebar.heading title="Pengaturan Sistem" />
-
                                 <x-sidebar.item
                                     href="{{ route('user') }}"
                                     icon="users"
                                     title="Pengguna"
-                                    :active="Str::startsWith(url()->current(), url('user')) && !Str::startsWith(url()->current(), url('user/role-permission')) && !Str::startsWith(url()->current(), url('role-permission'))"
-                                />
-
-                                <x-sidebar.item
-                                    href="{{ route('user.role_permission') }}"
-                                    icon="lock-access"
-                                    title="Peran & Hak Akses"
-                                    :active="Str::startsWith(url()->current(), url('user/role-permission')) || Str::startsWith(url()->current(), url('role-permission'))"
+                                    :active="request()->routeIs('user') || request()->routeIs('user.create') || request()->routeIs('user.edit')"
                                 />
                             @endrole
                         </ul>
                     </nav>
 
-                    {{-- User Profile Card at Sidebar Bottom --}}
+                    {{-- Kartu Profil Pengguna di Bawah Sidebar --}}
                     <div class="mt-auto pt-2">
                         <div class="relative w-full" x-data="{ sidebarUserMenuOpen: false }">
                             <button
                                 type="button"
                                 x-ref="userMenuTrigger"
-                                class="flex w-full items-center rounded-xl p-2 bg-white/70 hover:bg-white border border-slate-200/80 shadow-2xs transition-all text-left focus:outline-none"
+                                class="flex w-full items-center rounded-xl p-2 bg-white hover:bg-rose-50/40 border border-slate-200/90 shadow-2xs transition-all text-left focus-visible:outline-2 focus-visible:outline-emerald-600"
                                 :class="sidebarOpen ? 'justify-between' : 'lg:justify-center'"
                                 @click="sidebarUserMenuOpen = !sidebarUserMenuOpen"
                                 x-tooltip="{{ e(Auth::user()?->name) }}"
                                 data-position="right"
                                 data-tooltip-delay="flash"
                                 x-bind:data-tooltip-disabled="sidebarOpen || mobileSidebarOpen || sidebarUserMenuOpen"
-                                aria-label="{{ Auth::user()?->name }}"
+                                aria-label="Menu akun {{ Auth::user()?->name }}"
                             >
                                 <div class="flex items-center gap-2.5 min-w-0" :class="sidebarOpen ? '' : 'lg:justify-center'">
-                                    <div class="flex size-8 shrink-0 items-center justify-center rounded-full bg-neutral-200 text-neutral-800 font-semibold text-xs uppercase">
+                                    <div class="flex size-8 shrink-0 items-center justify-center rounded-xl bg-rose-100 text-rose-800 border border-rose-200 font-bold text-xs uppercase">
                                         {{ substr(auth()->user()->name, 0, 2) }}
                                     </div>
                                     <div class="truncate leading-tight" :class="sidebarOpen ? 'block' : 'lg:hidden'">
-                                        <p class="text-sm font-medium text-neutral-900 truncate">{{ Auth::user()?->name }}</p>
-                                        <p class="text-xs text-neutral-500 truncate">{{ Auth::user()?->email }}</p>
+                                        <p class="text-sm font-semibold text-slate-900 truncate">{{ Auth::user()?->name }}</p>
+                                        <p class="text-xs text-slate-500 truncate">{{ Auth::user()?->jabatan ?? Auth::user()?->email }}</p>
                                     </div>
                                 </div>
                                 <div :class="sidebarOpen ? 'block' : 'lg:hidden'">
-                                    <x-ti-selector class="size-4 text-neutral-500 shrink-0" />
+                                    <x-ti-selector class="size-4 text-slate-500 shrink-0" aria-hidden="true" />
                                 </div>
                             </button>
 
                             <template x-teleport="body">
                                 <div
                                     data-floating
-                                    class="absolute z-50 w-56 rounded-lg border border-neutral-200 bg-white p-1 shadow-md"
+                                    class="absolute z-50 w-56 rounded-2xl border border-slate-200 bg-white p-1.5 shadow-md"
                                     x-show="sidebarUserMenuOpen"
                                     x-anchor.top-start.offset.8="$refs.userMenuTrigger"
                                     @click.outside="if (!$refs.userMenuTrigger?.contains($event.target)) sidebarUserMenuOpen = false"
@@ -266,18 +276,20 @@
                                     x-cloak
                                 >
                                     <div class="px-3 py-2 border-b border-slate-100">
-                                        <p class="font-semibold text-sm text-slate-800 truncate">{{ Auth::user()?->name }}</p>
-                                        <p class="text-sm text-slate-500 truncate">{{ Auth::user()?->email }}</p>
+                                        <p class="font-semibold text-sm text-slate-900 truncate">{{ Auth::user()?->name }}</p>
+                                        <p class="text-xs text-slate-500 truncate">{{ Auth::user()?->email }}</p>
                                     </div>
                                     <div class="mt-1 space-y-0.5">
-                                        <a class="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100/70 transition-colors" href="{{ route('account') }}" wire:navigate @click="sidebarUserMenuOpen = false; closeMobile()">
-                                            <x-ti-user-edit class="size-4 text-slate-500" /> Profil & Akun
+                                        <a class="flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100 transition-colors" href="{{ route('account') }}" wire:navigate @click="sidebarUserMenuOpen = false; closeMobile()">
+                                            <x-ti-settings class="size-4 text-slate-500" aria-hidden="true" /> Pengaturan & Akun
                                         </a>
-                                        <a class="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium text-rose-600 hover:bg-rose-50 transition-colors" href="#"
-                                            onclick="event.preventDefault(); document.getElementById('logout-form').submit();"
+                                        <button
+                                            type="button"
+                                            class="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-sm font-medium text-rose-700 hover:bg-rose-50 transition-colors"
+                                            onclick="document.getElementById('logout-form').submit();"
                                         >
-                                            <x-ti-logout class="size-4 text-rose-500" /> Keluar
-                                        </a>
+                                            <x-ti-logout class="size-4 text-rose-600" aria-hidden="true" /> Keluar
+                                        </button>
                                     </div>
                                 </div>
                             </template>
@@ -288,117 +300,139 @@
         @endif
 
         <!-- Form logout tersembunyi -->
-        <form class="hidden" id="logout-form" action="/logout" method="POST">
+        <form class="hidden" id="logout-form" action="{{ route('logout') }}" method="POST">
             @csrf
         </form>
 
         <div class="flex flex-1 flex-col min-w-0">
-            <!-- Mobile Header (Sticky at top, clean, flush, minimal) -->
+            <!-- Header Mobile -->
             @auth
                 <header
                     class="sticky top-0 z-30 flex h-14 w-full shrink-0 items-center justify-between border-b border-slate-200/80 bg-white/95 px-3.5 sm:px-5 backdrop-blur-md lg:hidden select-none"
                 >
-                    <div class="flex items-center gap-2.5">
+                    <div class="flex items-center gap-2">
                         <button
                             type="button"
                             @click="toggleSidebar()"
-                            class="inline-flex size-9 items-center justify-center rounded-xl text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition-colors focus:outline-none"
+                            class="inline-flex size-11 items-center justify-center rounded-xl text-slate-700 hover:bg-slate-100 hover:text-slate-900 transition-colors focus-visible:outline-2 focus-visible:outline-emerald-600"
                             id="hamburger-btn"
-                            aria-label="Buka Menu Sidebar"
+                            aria-label="Buka Menu Navigasi"
                         >
-                            <x-ti-menu-2 class="size-5" />
+                            <x-ti-menu-2 class="size-5" aria-hidden="true" />
                         </button>
                         <a href="{{ route('dashboard') }}" class="flex items-center gap-2" wire:navigate>
-                            <img class="size-7 object-contain" src="{{ asset('favicon/web-app-manifest-192x192.png') }}" alt="logo">
-                            <span class="text-sm font-bold text-slate-900 tracking-tight">Kantong Kehamilan</span>
+                            <div class="flex size-8 items-center justify-center rounded-xl bg-rose-100 text-rose-700 border border-rose-200">
+                                <x-ti-wallet class="size-4.5" aria-hidden="true" />
+                            </div>
+                            <span class="text-sm font-bold text-slate-900 tracking-tight flex items-center gap-1">
+                                <span>Bank BINI</span>
+                                <x-ti-heart class="size-3.5 text-rose-500" aria-hidden="true" />
+                            </span>
                         </a>
                     </div>
 
                     <div class="flex items-center gap-1.5">
-                        <a href="{{ route('kantong-kehamilan.index') }}" class="inline-flex size-9 items-center justify-center rounded-xl text-slate-600 hover:bg-emerald-50 hover:text-emerald-700 transition-colors" title="Kantong Kehamilan" wire:navigate>
-                            <x-ti-heart-handshake class="size-5" />
+                        <a
+                            href="{{ route('transactions.index', ['action' => 'income']) }}"
+                            wire:navigate
+                            class="inline-flex h-9 items-center gap-1 rounded-xl bg-emerald-50 px-2.5 text-xs font-semibold text-emerald-800 border border-emerald-200 hover:bg-emerald-100 transition-colors"
+                            title="Tambah Pemasukan"
+                        >
+                            <x-ti-plus class="size-3.5 text-emerald-700" aria-hidden="true" />
+                            <span class="hidden sm:inline">Pemasukan</span>
                         </a>
-                        <a href="{{ route('patient.index') }}" class="inline-flex size-9 items-center justify-center rounded-xl text-slate-600 hover:bg-emerald-50 hover:text-emerald-700 transition-colors" title="Pasien" wire:navigate>
-                            <x-ti-users class="size-5" />
+                        <a
+                            href="{{ route('transactions.index', ['action' => 'expense']) }}"
+                            wire:navigate
+                            class="inline-flex h-9 items-center gap-1 rounded-xl bg-rose-50 px-2.5 text-xs font-semibold text-rose-800 border border-rose-200 hover:bg-rose-100 transition-colors"
+                            title="Catat Pengeluaran"
+                        >
+                            <x-ti-minus class="size-3.5 text-rose-700" aria-hidden="true" />
+                            <span class="hidden sm:inline">Pengeluaran</span>
                         </a>
-
-                        <div class="relative ml-1" x-data="{ mobileUserOpen: false }">
-                            <button
-                                type="button"
-                                class="flex size-9 items-center justify-center rounded-lg bg-emerald-600 text-white font-bold text-sm shadow-xs hover:opacity-90 transition-opacity focus:outline-none"
-                                @click="mobileUserOpen = !mobileUserOpen"
-                                aria-label="Menu Pengguna"
-                            >
-                                {{ substr(auth()->user()->name, 0, 2) }}
-                            </button>
-                            <div
-                                class="absolute right-0 top-full z-50 mt-2 w-56 rounded-2xl border border-slate-200/80 bg-white p-1.5 shadow-xl"
-                                x-show="mobileUserOpen"
-                                @click.outside="mobileUserOpen = false"
-                                x-transition:enter="transition ease-out duration-150"
-                                x-transition:enter-start="opacity-0 translate-y-1"
-                                x-transition:enter-end="opacity-100 translate-y-0"
-                                x-transition:leave="transition ease-in duration-100"
-                                x-transition:leave-start="opacity-100 translate-y-0"
-                                x-transition:leave-end="opacity-0 translate-y-1"
-                                x-cloak
-                            >
-                                <div class="px-3 py-2 border-b border-slate-100">
-                                    <span class="block font-semibold text-sm text-slate-800 truncate">{{ Auth::user()?->name }}</span>
-                                    <span class="text-sm text-slate-500 truncate block">{{ Auth::user()?->email }}</span>
-                                </div>
-                                <div class="mt-1 space-y-0.5">
-                                    <a class="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100/70 transition-colors" href="{{ route('account') }}" wire:navigate>
-                                        <x-ti-user-edit class="size-4 text-slate-500" /> Profil & Akun
-                                    </a>
-                                    <a class="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium text-rose-600 hover:bg-rose-50 transition-colors" href="#"
-                                        onclick="event.preventDefault(); document.getElementById('logout-form').submit();"
-                                    >
-                                        <x-ti-logout class="size-4 text-rose-500" /> Keluar
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
+                        <a
+                            href="{{ route('account') }}"
+                            wire:navigate
+                            class="inline-flex size-9 items-center justify-center rounded-xl bg-rose-100 text-rose-800 border border-rose-200 font-bold text-xs uppercase"
+                            aria-label="Pengaturan Akun"
+                        >
+                            {{ substr(auth()->user()->name, 0, 2) }}
+                        </a>
                     </div>
                 </header>
             @endauth
 
-            <!-- Main Content -->
-            <main class="w-full flex-1 overflow-y-auto flex flex-col min-h-screen lg:min-h-0">
-                <div class="flex-1 p-4 sm:p-6 lg:p-8">
+            <!-- Konten Utama (diberi ruang pb-24 pada mobile agar tidak tertutup bottom navigation) -->
+            <main id="main-content" class="w-full flex-1 overflow-y-auto flex flex-col min-h-screen lg:min-h-0 pb-20 lg:pb-0">
+                <div class="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto">
                     {{ $slot }}
                 </div>
 
-                <!-- Footer Hak Cipta & Informasi Pengembang -->
-                <footer class="mt-auto border-t border-slate-200/80 bg-white/60 backdrop-blur-xs py-3.5 px-4 sm:px-6 lg:px-8 text-center text-xs text-slate-500 select-none">
+                <footer class="mt-auto border-t border-slate-200/80 bg-white/70 py-3.5 px-4 sm:px-6 lg:px-8 text-center text-xs text-slate-500 select-none">
                     <p class="leading-relaxed">
-                        &copy; {{ date('Y') }} UPTD Puskesmas Pragaan &bull; Kabupaten Sumenep
-                        <span class="hidden sm:inline mx-1 text-slate-300">&bull;</span>
-                        <br class="sm:hidden">
-                        Dikembangkan oleh <a href="https://wa.me/081934955229" target="_blank" rel="noopener noreferrer" class="text-emerald-700 hover:text-emerald-800 font-semibold transition-colors">BulyanDev</a>
+                        &copy; {{ date('Y') }} <strong class="text-slate-700">Bank BINI</strong> &bull; Aplikasi Kantong Keuangan Keluarga
                     </p>
                 </footer>
             </main>
+
+            <!-- Bottom Navigation Khusus Mobile (Target Sentuh >= 44px) -->
+            @auth
+                <nav
+                    aria-label="Navigasi Bawah Ponsel"
+                    class="fixed bottom-0 inset-x-0 z-30 border-t border-slate-200 bg-white/95 backdrop-blur-md px-2 py-1 lg:hidden select-none shadow-sm"
+                >
+                    <div class="grid grid-cols-5 gap-1 max-w-md mx-auto">
+                        <a
+                            href="{{ route('dashboard') }}"
+                            wire:navigate
+                            class="flex flex-col items-center justify-center min-h-12 rounded-xl px-1 py-1 text-xs font-medium transition-colors {{ request()->routeIs('dashboard') ? 'text-emerald-800 bg-emerald-50/90 font-semibold' : 'text-slate-600 hover:text-slate-900' }}"
+                        >
+                            <x-ti-layout-dashboard class="size-5 {{ request()->routeIs('dashboard') ? 'text-emerald-600' : 'text-slate-500' }}" aria-hidden="true" />
+                            <span class="mt-0.5 truncate">Dasbor</span>
+                        </a>
+
+                        <a
+                            href="{{ route('pockets.index') }}"
+                            wire:navigate
+                            class="flex flex-col items-center justify-center min-h-12 rounded-xl px-1 py-1 text-xs font-medium transition-colors {{ request()->routeIs('pockets.*') ? 'text-emerald-800 bg-emerald-50/90 font-semibold' : 'text-slate-600 hover:text-slate-900' }}"
+                        >
+                            <x-ti-wallet class="size-5 {{ request()->routeIs('pockets.*') ? 'text-emerald-600' : 'text-slate-500' }}" aria-hidden="true" />
+                            <span class="mt-0.5 truncate">Kantong</span>
+                        </a>
+
+                        <a
+                            href="{{ route('transfers.index') }}"
+                            wire:navigate
+                            class="flex flex-col items-center justify-center min-h-12 rounded-xl px-1 py-1 text-xs font-medium transition-colors {{ request()->routeIs('transfers.*') ? 'text-rose-800 bg-rose-50/90 font-semibold' : 'text-slate-600 hover:text-slate-900' }}"
+                        >
+                            <x-ti-arrows-exchange class="size-5 {{ request()->routeIs('transfers.*') ? 'text-rose-600' : 'text-slate-500' }}" aria-hidden="true" />
+                            <span class="mt-0.5 truncate">Transfer</span>
+                        </a>
+
+                        <a
+                            href="{{ route('transactions.index') }}"
+                            wire:navigate
+                            class="flex flex-col items-center justify-center min-h-12 rounded-xl px-1 py-1 text-xs font-medium transition-colors {{ request()->routeIs('transactions.*') ? 'text-emerald-800 bg-emerald-50/90 font-semibold' : 'text-slate-600 hover:text-slate-900' }}"
+                        >
+                            <x-ti-list-details class="size-5 {{ request()->routeIs('transactions.*') ? 'text-emerald-600' : 'text-slate-500' }}" aria-hidden="true" />
+                            <span class="mt-0.5 truncate">Transaksi</span>
+                        </a>
+
+                        <a
+                            href="{{ route('reports.index') }}"
+                            wire:navigate
+                            class="flex flex-col items-center justify-center min-h-12 rounded-xl px-1 py-1 text-xs font-medium transition-colors {{ request()->routeIs('reports.*') ? 'text-emerald-800 bg-emerald-50/90 font-semibold' : 'text-slate-600 hover:text-slate-900' }}"
+                        >
+                            <x-ti-chart-bar class="size-5 {{ request()->routeIs('reports.*') ? 'text-emerald-600' : 'text-slate-500' }}" aria-hidden="true" />
+                            <span class="mt-0.5 truncate">Laporan</span>
+                        </a>
+                    </div>
+                </nav>
+            @endauth
         </div>
 
-        <script>
-            document.addEventListener('livewire:navigating', () => {
-                if ('speechSynthesis' in window) {
-                    window.speechSynthesis.cancel();
-                }
-            });
-            window.addEventListener('beforeunload', () => {
-                if ('speechSynthesis' in window) {
-                    window.speechSynthesis.cancel();
-                }
-            });
-        </script>
-
         @livewireScripts
-        @livewireMapScripts
         @stack('scripts')
-        <livewire:modal-preview />
-        <livewire:modal-riwayat-kehamilan />
     </div>
 </body>
 
