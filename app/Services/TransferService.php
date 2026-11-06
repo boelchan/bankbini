@@ -63,7 +63,6 @@ class TransferService
 
             $lockedWallets = Wallet::query()
                 ->withTrashed()
-                ->where('user_id', $userId)
                 ->whereIn('id', $orderedIds)
                 ->orderBy('id')
                 ->lockForUpdate()

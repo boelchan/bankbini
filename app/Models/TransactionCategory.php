@@ -57,15 +57,13 @@ class TransactionCategory extends Model
     }
 
     /**
-     * Scope kategori yang tersedia untuk pengguna tertentu (kategori bawaan + kustom pengguna).
+     * Scope seluruh kategori yang tersedia bersama untuk akun keluarga (Suami & Istri).
      *
      * @param Builder<TransactionCategory> $query
      * @return Builder<TransactionCategory>
      */
-    public function scopeAvailableFor(Builder $query, int $userId): Builder
+    public function scopeAvailableFor(Builder $query, ?int $userId = null): Builder
     {
-        return $query->where(function (Builder $q) use ($userId): void {
-            $q->whereNull('user_id')->orWhere('user_id', $userId);
-        });
+        return $query;
     }
 }

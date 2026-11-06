@@ -1,60 +1,38 @@
-# PRD: Bank BINI (Digital Wallet & Pocket Management)
+# Product Requirements Document (PRD): Bank BINI (Simplified Edition)
 
-## 1. Gambaran Umum Produk
-**Bank BINI** adalah aplikasi manajemen keuangan pribadi dan keluarga dengan konsep **Pocket Management** (Kantong Keuangan) seperti Bank Jago. Aplikasi ini dirancang dengan tampilan yang *cute*, hangat, modern, dan ramah digunakan sehari-hari oleh pengguna dan istri untuk mengatur pos keuangan rumah tangga, tabungan, belanja harian, serta rencana liburan secara akurat dan aman.
+## 1. Ringkasan Aplikasi
+**Bank BINI** adalah aplikasi manajemen kantong keuangan keluarga (*Pocket*) yang simpel, hangat, dan ramah digunakan bersama oleh **Suami dan Istri**.
+- **Kantong Bersama (Shared Household Pockets)**: Seluruh kantong (`wallets`), riwayat transaksi (`transactions`), pemindahan uang (`transfers`), dan kategori transaksi diakses secara bersama oleh seluruh akun keluarga (tidak terisolasi per `user_id`). Setiap transaksi tetap mencatat siapa anggota keluarga yang menginputnya (`Oleh: Suami / Istri`).
 
-## 2. Arsitektur & Teknologi
-- **Framework**: Laravel 13, Livewire 4 (Multi-File Component `⚡`), PHP 8.3+
-- **UI & Styling**: Tailwind CSS v4 & TallStackUI v4
-- **Ikon**: `secondnetwork/blade-tabler-icons` (`<x-ti-... />`)
-- **Database**: MySQL 5.7+ / MariaDB kompatibel
-- **Export**: `spatie/simple-excel` (Excel/CSV) & tampilan cetak PDF ramah browser
+## 2. Struktur Menu Utama (Sederhana & Fokus)
+Aplikasi menggunakan **2 menu utama** agar ringkas dan mudah digunakan sehari-hari:
+1. **Dashboard (`/dashboard`)**:
+   - Menampilkan ringkasan Total Saldo Seluruh Kantong, Pemasukan Bulan Ini, dan Pengeluaran Bulan Ini.
+   - Menampilkan **Kotak-Kotak Kantong** (*Pocket Grid*) dengan tampilan pastel kewanitaan yang manis dan border jahitan (`border-2 border-dashed` + `ring-4 ring-white/80 ring-inset`).
+   - Status kantong **tidak ditampilkan jika berstatus Aktif** (hanya tampil badge jika kantong sedang Dibekukan). Tidak menampilkan teks tipe kantong generik.
+   - Tombol aksi kantong menggunakan **tombol ikon bulat (`<x-button.circle>`)** yang ditempatkan rapi di samping/bawah nama kantong:
+     - **Ikon `+`**: Tambah uang ke kantong tersebut, baik dari **Pemasukan Baru (Langsung)** maupun **Ambil / Pindah dari Kantong Lain**.
+     - **Ikon `-`**: Catat pengeluaran langsung dari kantong tersebut.
+     - **Ikon `...`**: Membuka halaman rincian & pengaturan kantong (`/pockets/{wallet}`).
+   - Di bawah **Saldo Kantong**, menampilkan **3 transaksi terakhir** pada kantong tersebut dan dapat di-*expand* hingga **100 transaksi terakhir** langsung di dalam kartu kantong.
+   - Pada urutan paling akhir daftar kotak kantong terdapat **Kotak Kosong (`+ Tambah Kantong`)** untuk membuat kantong baru dengan cepat.
+2. **Transaksi (`/transactions`)**:
+   - Menampilkan riwayat lengkap seluruh uang masuk, uang keluar, dan pindah uang antar kantong.
+   - Dilengkapi tombol cepat **+ Pemasukan**, **- Pengeluaran**, dan **⇄ Pindah Uang**.
+   - Dilengkapi filter sederhana berdasarkan jenis transaksi, kantong, tanggal, dan pencarian keterangan (tanpa menampilkan kode TRX).
 
-## 3. Desain Database Modular (MySQL 5.7 Compatible)
-1. **`users`**: Data pengguna (id, name, email, password, status, avatar_color, timestamps).
-2. **`wallets`** (Kantong / Pocket):
-   - `id`, `user_id`, `name`, `description`, `icon`, `color`, `initial_balance` (`decimal(18,2)`), `balance` (`decimal(18,2)`), `status` (`active`, `frozen`, `deleted`), `is_primary` (`boolean`), `deleted_at` (SoftDeletes), `created_at`, `updated_at`.
-3. **`transaction_categories`**:
-   - `id`, `user_id` (nullable untuk kategori bawaan sistem), `name`, `type` (`income`, `expense`), `icon`, `color`, `created_at`, `updated_at`.
-4. **`transfers`**:
-   - `id`, `transfer_code` (unik), `idempotency_key` (unik, nullable), `user_id`, `source_wallet_id`, `source_wallet_name` (snapshot), `destination_wallet_id`, `destination_wallet_name` (snapshot), `amount` (`decimal(18,2)`), `description`, `transaction_date`, `created_at`, `updated_at`.
-5. **`transactions`** (Immutable Ledger):
-   - `id`, `transaction_code` (unik), `idempotency_key` (unik, nullable), `user_id`, `wallet_id`, `wallet_name_snapshot`, `counterpart_wallet_id` (nullable), `counterpart_wallet_name_snapshot` (nullable), `transfer_reference` (nullable, mengacu ke `transfers.transfer_code`), `type` (`income`, `expense`, `transfer_in`, `transfer_out`), `category_id` (nullable), `category_name_snapshot` (nullable), `amount` (`decimal(18,2)`), `balance_before` (`decimal(18,2)`), `balance_after` (`decimal(18,2)`), `description`, `notes` (nullable), `transaction_date`, `created_at`, `updated_at`.
-6. **`wallet_activity_logs`**:
-   - `id`, `wallet_id`, `wallet_name_snapshot`, `user_id`, `activity`, `description`, `metadata` (`text`), `created_at`.
+## 3. Halaman Detail Kantong (`/pockets/{wallet}`)
+Diakses melalui tombol **Detail** pada kotak kantong di Dashboard:
+- Menampilkan informasi kantong, status (`Aktif` / `Dibekukan`), total uang masuk, total uang keluar, dan saldo saat ini.
+- Menyediakan 3 tombol transaksi utama untuk kantong tersebut:
+  1. **+ Tambah Uang**: Pilih sumber uang dari **Pemasukan Baru (Langsung)** atau **Ambil dari Kantong Lain**.
+  2. **- Pengeluaran**: Catat pengeluaran dari kantong ini.
+  3. **⇄ Pindah Uang**: Pindahkan saldo dari kantong ini ke kantong aktif lain.
+- Menyediakan tombol pengelolaan kantong: **Ubah Kantong**, **Bekukan / Aktifkan**, dan **Hapus Kantong** (wajib memindahkan sisa saldo ke kantong lain bila saldo > Rp0).
+- Menampilkan tabel **Histori Masuk & Keluar Kantong** beserta saldo sebelum dan sesudah transaksi tanpa kode TRX.
 
-## 4. Alur & Fitur Utama
-### 4.1 Dashboard
-- **Ringkasan Saldo**: Total seluruh saldo (kantong aktif + dibekukan), total pemasukan bulan ini, total pengeluaran bulan ini, dan jumlah kantong aktif.
-- **Tombol Aksi Cepat**: `+ Pemasukan`, `- Pengeluaran`, `⇄ Transfer Antar Kantong`, dan `+ Kantong Baru`.
-- **Daftar Kantong (Pocket Cards)**: Menampilkan nama, ikon, warna pastel kustom, saldo saat ini, status (`Aktif` / `Dibekukan`), serta tombol detail.
-- **Grafik Pemasukan vs Pengeluaran**: Grafik arus kas 6 bulan terakhir (tanpa menghitung transfer internal).
-- **Transaksi Terbaru**: 8 transaksi terakhir beserta tombol Lihat Semua Transaksi.
-
-### 4.2 Manajemen Kantong (Pocket)
-- **Tambah Kantong**: Nama, ikon, warna pastel, deskripsi, dan saldo awal (opsional; jika > 0 otomatis mencatat transaksi saldo awal).
-- **Ubah Kantong**: Mengubah nama, ikon, warna, dan deskripsi tanpa mengubah snapshot histori transaksi masa lalu.
-- **Bekukan / Aktifkan Kantong**: Kantong yang dibekukan (`frozen`) tidak dapat menerima pemasukan, pengeluaran, maupun menjadi pengirim/penerima transfer, tetapi saldonya tetap dihitung dalam Total Saldo dan riwayatnya tetap dapat dilihat.
-- **Hapus Kantong (Penutupan Aman)**:
-  - Wajib melalui konfirmasi.
-  - Jika saldo kantong > 0, pengguna wajib memilih kantong aktif tujuan untuk memindahkan seluruh sisa saldo secara otomatis melalui proses transfer penutupan sebelum kantong ditutup/dihapus (`soft delete` + status `deleted`).
-  - Seluruh riwayat transaksi lama dan snapshot nama kantong tetap tersimpan utuh di database dan tampil pada histori global maupun kantong pasangan transfer.
-
-### 4.3 Transaksi Pemasukan & Pengeluaran
-- **Pemasukan (`income`)**: Memilih kantong aktif tujuan, nominal (> 0), kategori pemasukan (Gaji, Bonus, Bisnis, Investasi, Hadiah, Uang Belanja Suami, Lainnya), tanggal transaksi, keterangan, dan catatan tambahan.
-- **Pengeluaran (`expense`)**: Memilih kantong aktif sumber, nominal (> 0 dan <= saldo kantong), kategori pengeluaran (Makanan, Transportasi, Belanja, Tagihan, Kesehatan, Hiburan, Pendidikan, Rumah Tangga, Skincare & Cantik, Lainnya), tanggal transaksi, keterangan, dan catatan tambahan.
-
-### 4.4 Transfer Antar Kantong
-- Memindahkan dana dari kantong pengirim ke kantong penerima dalam satu `DB::transaction` dengan penguncian baris `lockForUpdate()`.
-- Menghasilkan 1 record `transfers` dan 2 record `transactions` (`transfer_out` pada pengirim dan `transfer_in` pada penerima) yang terhubung melalui `transfer_reference`.
-- Total saldo keseluruhan tetap konsisten (tidak berubah).
-
-### 4.5 Riwayat Transaksi (Immutable Ledger)
-- Filter lengkap berdasarkan rentang tanggal, kantong (termasuk kantong yang telah dihapus), kategori, jenis transaksi (`income`, `expense`, `transfer_in`, `transfer_out`), dan pencarian keterangan/kode transaksi.
-- Menampilkan modal detail transaksi lengkap dengan `balance_before`, `balance_after`, kode referensi transfer, dan snapshot kantong.
-
-### 4.6 Laporan Keuangan & Export
-- Ringkasan total pemasukan, total pengeluaran, selisih bersih (*net cashflow*), dan rasio tabungan pada rentang tanggal terpilih.
-- Transfer internal antar kantong dikecualikan dari perhitungan pemasukan/pengeluaran agregat.
-- Grafik arus kas bulanan, grafik komposisi pengeluaran per kategori, dan tabel rekapitulasi mutasi per kantong.
-- Fitur Export ke **Excel (.xlsx/.csv)** dan **Cetak / Simpan PDF**.
+## 4. Integritas Keuangan & Database
+- Seluruh perubahan saldo diproses melalui backend service (`WalletService`, `TransactionService`, `TransferService`) di dalam `DB::transaction` dengan penguncian baris `SELECT ... FOR UPDATE` (`lockForUpdate()`).
+- Saldo kantong tidak boleh negatif dan nominal transaksi wajib positif (`> 0`).
+- Kantong yang dibekukan tidak dapat menerima atau mengeluarkan uang, namun saldonya tetap dihitung dalam Total Saldo.
+- Kantong yang dihapus menggunakan *Soft Delete* setelah saldonya menjadi `Rp0`, dan riwayat transaksinya tetap tersimpan permanen.

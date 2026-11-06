@@ -185,12 +185,11 @@ new #[Title('Pengaturan & Profil')] class extends Component
     }
 
     /**
-     * Menghapus kategori transaksi kustom milik pengguna.
+     * Menghapus kategori transaksi kustom keluarga.
      */
     public function deleteCategory(int $categoryId): void
     {
         $cat = TransactionCategory::query()
-            ->where('user_id', Auth::id())
             ->where('is_default', false)
             ->find($categoryId);
 

@@ -55,7 +55,6 @@ class TransactionService
 
             $wallet = Wallet::query()
                 ->withTrashed()
-                ->where('user_id', $userId)
                 ->lockForUpdate()
                 ->findOrFail($walletId);
 
@@ -64,7 +63,6 @@ class TransactionService
             $category = null;
             if (!empty($data['category_id'])) {
                 $category = TransactionCategory::query()
-                    ->availableFor($userId)
                     ->where('type', CategoryTypeEnum::INCOME->value)
                     ->findOrFail((int) $data['category_id']);
             }
@@ -140,7 +138,6 @@ class TransactionService
 
             $wallet = Wallet::query()
                 ->withTrashed()
-                ->where('user_id', $userId)
                 ->lockForUpdate()
                 ->findOrFail($walletId);
 
@@ -161,7 +158,6 @@ class TransactionService
             $category = null;
             if (!empty($data['category_id'])) {
                 $category = TransactionCategory::query()
-                    ->availableFor($userId)
                     ->where('type', CategoryTypeEnum::EXPENSE->value)
                     ->findOrFail((int) $data['category_id']);
             }

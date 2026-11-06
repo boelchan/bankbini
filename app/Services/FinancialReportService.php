@@ -32,7 +32,6 @@ class FinancialReportService
         $endOfMonth = $now->copy()->endOfMonth();
 
         $wallets = Wallet::query()
-            ->where('user_id', $userId)
             ->visible()
             ->get(['id', 'balance', 'status']);
 
@@ -41,13 +40,11 @@ class FinancialReportService
         $frozenCount = $wallets->where('status', WalletStatusEnum::FROZEN)->count();
 
         $monthlyIncome = round((float) Transaction::query()
-            ->where('user_id', $userId)
             ->where('type', TransactionTypeEnum::INCOME->value)
             ->whereBetween('transaction_date', [$startOfMonth, $endOfMonth])
             ->sum('amount'), 2);
 
         $monthlyExpense = round((float) Transaction::query()
-            ->where('user_id', $userId)
             ->where('type', TransactionTypeEnum::EXPENSE->value)
             ->whereBetween('transaction_date', [$startOfMonth, $endOfMonth])
             ->sum('amount'), 2);
@@ -77,7 +74,6 @@ class FinancialReportService
         $start = $end->copy()->subMonths($months - 1)->startOfMonth();
 
         $transactions = Transaction::query()
-            ->where('user_id', $userId)
             ->whereIn('type', [TransactionTypeEnum::INCOME->value, TransactionTypeEnum::EXPENSE->value])
             ->whereBetween('transaction_date', [$start, $end])
             ->get(['type', 'amount', 'transaction_date']);
@@ -209,7 +205,6 @@ class FinancialReportService
 
         $transactions = Transaction::query()
             ->with(['wallet', 'category'])
-            ->where('user_id', $userId)
             ->whereBetween('transaction_date', [$start, $end])
             ->orderBy('transaction_date', 'desc')
             ->get();
@@ -268,7 +263,6 @@ class FinancialReportService
         // Rekap per kantong (seluruh kantong aktif/dibekukan + kantong dihapus yang punya transaksi pada periode ini)
         $allWallets = Wallet::query()
             ->withTrashed()
-            ->where('user_id', $userId)
             ->orderByRaw("CASE WHEN status = 'active' THEN 0 WHEN status = 'frozen' THEN 1 ELSE 2 END")
             ->orderBy('id')
             ->get();

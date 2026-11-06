@@ -56,7 +56,6 @@ class WalletService
                 : WalletColorEnum::ROSE->value;
 
             $hasPrimary = Wallet::query()
-                ->where('user_id', $userId)
                 ->visible()
                 ->where('is_primary', true)
                 ->exists();
@@ -131,10 +130,9 @@ class WalletService
             $data = $extraData;
         }
 
-        return DB::transaction(function () use ($userId, $walletId, $data): Wallet {
+        return DB::transaction(function () use ($walletId, $data): Wallet {
             $wallet = Wallet::query()
                 ->withTrashed()
-                ->where('user_id', $userId)
                 ->lockForUpdate()
                 ->findOrFail($walletId);
 
@@ -181,13 +179,11 @@ class WalletService
      */
     public function freezeWallet(int|Wallet $userOrWallet, ?int $walletId = null): Wallet
     {
-        $userId = $userOrWallet instanceof Wallet ? (int) $userOrWallet->user_id : $userOrWallet;
         $walletId = $userOrWallet instanceof Wallet ? (int) $userOrWallet->id : (int) $walletId;
 
-        return DB::transaction(function () use ($userId, $walletId): Wallet {
+        return DB::transaction(function () use ($walletId): Wallet {
             $wallet = Wallet::query()
                 ->withTrashed()
-                ->where('user_id', $userId)
                 ->lockForUpdate()
                 ->findOrFail($walletId);
 
@@ -218,13 +214,11 @@ class WalletService
      */
     public function unfreezeWallet(int|Wallet $userOrWallet, ?int $walletId = null): Wallet
     {
-        $userId = $userOrWallet instanceof Wallet ? (int) $userOrWallet->user_id : $userOrWallet;
         $walletId = $userOrWallet instanceof Wallet ? (int) $userOrWallet->id : (int) $walletId;
 
-        return DB::transaction(function () use ($userId, $walletId): Wallet {
+        return DB::transaction(function () use ($walletId): Wallet {
             $wallet = Wallet::query()
                 ->withTrashed()
-                ->where('user_id', $userId)
                 ->lockForUpdate()
                 ->findOrFail($walletId);
 
@@ -263,7 +257,6 @@ class WalletService
         return DB::transaction(function () use ($userId, $walletId, $destinationWalletId, $idempotencyKey): Wallet {
             $wallet = Wallet::query()
                 ->withTrashed()
-                ->where('user_id', $userId)
                 ->lockForUpdate()
                 ->findOrFail($walletId);
 
@@ -328,12 +321,11 @@ class WalletService
     }
 
     /**
-     * Menghitung total saldo seluruh kantong aktif dan kantong yang dibekukan milik pengguna.
+     * Menghitung total saldo seluruh kantong aktif dan kantong yang dibekukan bersama.
      */
-    public function getTotalBalance(int $userId): float
+    public function getTotalBalance(?int $userId = null): float
     {
         $sum = Wallet::query()
-            ->where('user_id', $userId)
             ->visible()
             ->sum('balance');
 

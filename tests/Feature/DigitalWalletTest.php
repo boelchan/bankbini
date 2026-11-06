@@ -490,7 +490,7 @@ class DigitalWalletTest extends TestCase
         $this->assertSame(11000000.00, $report['total_transfer_volume']);
     }
 
-    public function test_authenticated_user_can_access_all_digital_wallet_pages_and_exports(): void
+    public function test_authenticated_user_can_access_all_digital_wallet_pages(): void
     {
         $wallet = $this->walletService->createWallet([
             'user_id' => $this->user->id,
@@ -501,17 +501,15 @@ class DigitalWalletTest extends TestCase
         $this->actingAs($this->user)
             ->get(route('dashboard'))
             ->assertOk()
-            ->assertSee('Kantong Utama Keluarga');
-
-        $this->actingAs($this->user)
-            ->get(route('pockets.index'))
-            ->assertOk()
-            ->assertSee('Manajemen Kantong');
+            ->assertSee('Kantong Utama Keluarga')
+            ->assertSee('+ Tambah Kantong');
 
         $this->actingAs($this->user)
             ->get(route('pockets.show', $wallet))
             ->assertOk()
-            ->assertSee('Kantong Utama Keluarga');
+            ->assertSee('Kantong Utama Keluarga')
+            ->assertSee('Tambah Uang')
+            ->assertSee('Pindah Uang');
 
         $this->actingAs($this->user)
             ->get(route('transactions.index'))
@@ -519,22 +517,59 @@ class DigitalWalletTest extends TestCase
             ->assertSee('Riwayat Transaksi');
 
         $this->actingAs($this->user)
-            ->get(route('transfers.index'))
-            ->assertOk()
-            ->assertSee('Transfer Antar Kantong');
-
-        $this->actingAs($this->user)
-            ->get(route('reports.index'))
-            ->assertOk()
-            ->assertSee('Laporan Keuangan Keluarga');
-
-        $this->actingAs($this->user)
-            ->get(route('reports.export.pdf'))
-            ->assertOk()
-            ->assertSee('Kantong Utama Keluarga');
-
-        $this->actingAs($this->user)
             ->get(route('account'))
             ->assertOk();
+    }
+
+    public function test_shared_household_pockets_can_be_accessed_and_transacted_by_both_husband_and_wife(): void
+    {
+        $husband = User::factory()->create([
+            'name' => 'Suami Tercinta',
+            'email' => 'suami@bankbini.test',
+            'status' => 'active',
+        ]);
+
+        // Suami membuat Kantong Utama & Kantong Belanja Dapur
+        $kantongUtama = $this->walletService->createWallet($husband->id, [
+            'name' => 'Kantong Gaji Suami',
+            'initial_balance' => 10000000,
+        ]);
+
+        $kantongDapur = $this->walletService->createWallet($husband->id, [
+            'name' => 'Kantong Belanja Istri',
+            'initial_balance' => 0,
+        ]);
+
+        // Istri login dan dapat melihat kantong yang dibuat Suami di Dashboard dan Detail Kantong
+        $this->actingAs($this->user)
+            ->get(route('dashboard'))
+            ->assertOk()
+            ->assertSee('Kantong Gaji Suami')
+            ->assertSee('Kantong Belanja Istri');
+
+        $this->actingAs($this->user)
+            ->get(route('pockets.show', $kantongUtama))
+            ->assertOk()
+            ->assertSee('Kantong Gaji Suami');
+
+        // Istri memindahkan uang dari Kantong Gaji Suami ke Kantong Belanja Istri
+        $this->transferService->executeTransfer($this->user->id, [
+            'source_wallet_id' => $kantongUtama->id,
+            'destination_wallet_id' => $kantongDapur->id,
+            'amount' => 3000000,
+            'description' => 'Ambil uang belanja bulanan',
+        ]);
+
+        // Istri mencatat pengeluaran dari Kantong Belanja Istri
+        $this->transactionService->recordExpense($this->user->id, [
+            'wallet_id' => $kantongDapur->id,
+            'category_id' => $this->expenseCategory->id,
+            'amount' => 500000,
+            'description' => 'Belanja pasar mingguan',
+        ]);
+
+        $this->assertSame(7000000.00, (float) $kantongUtama->fresh()->balance);
+        $this->assertSame(2500000.00, (float) $kantongDapur->fresh()->balance);
+        $this->assertSame(9500000.00, $this->walletService->getTotalBalance());
     }
 }

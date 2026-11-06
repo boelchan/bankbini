@@ -33,19 +33,36 @@ enum WalletColorEnum: string
     }
 
     /**
-     * Mengambil kelas permukaan kartu pastel dengan border jelas.
+     * Mengambil kelas permukaan kartu pastel dengan border jahitan manis (cute feminine).
      */
     public function cardClasses(): string
     {
         return match ($this) {
-            self::ROSE => 'bg-rose-50/90 border-rose-200 hover:border-rose-300',
-            self::PINK => 'bg-pink-50/90 border-pink-200 hover:border-pink-300',
-            self::EMERALD => 'bg-emerald-50/90 border-emerald-200 hover:border-emerald-300',
-            self::SKY => 'bg-sky-50/90 border-sky-200 hover:border-sky-300',
-            self::AMBER => 'bg-amber-50/90 border-amber-200 hover:border-amber-300',
-            self::VIOLET => 'bg-violet-50/90 border-violet-200 hover:border-violet-300',
-            self::TEAL => 'bg-teal-50/90 border-teal-200 hover:border-teal-300',
-            self::ORANGE => 'bg-orange-50/90 border-orange-200 hover:border-orange-300',
+            self::ROSE => 'rounded-2xl bg-rose-50/90 border-2 border-dashed border-rose-300 ring-4 ring-white/80 ring-inset hover:border-rose-400 transition-colors',
+            self::PINK => 'rounded-2xl bg-pink-50/90 border-2 border-dashed border-pink-300 ring-4 ring-white/80 ring-inset hover:border-pink-400 transition-colors',
+            self::EMERALD => 'rounded-2xl bg-emerald-50/90 border-2 border-dashed border-emerald-300 ring-4 ring-white/80 ring-inset hover:border-emerald-400 transition-colors',
+            self::SKY => 'rounded-2xl bg-sky-50/90 border-2 border-dashed border-sky-300 ring-4 ring-white/80 ring-inset hover:border-sky-400 transition-colors',
+            self::AMBER => 'rounded-2xl bg-amber-50/90 border-2 border-dashed border-amber-300 ring-4 ring-white/80 ring-inset hover:border-amber-400 transition-colors',
+            self::VIOLET => 'rounded-2xl bg-violet-50/90 border-2 border-dashed border-violet-300 ring-4 ring-white/80 ring-inset hover:border-violet-400 transition-colors',
+            self::TEAL => 'rounded-2xl bg-teal-50/90 border-2 border-dashed border-teal-300 ring-4 ring-white/80 ring-inset hover:border-teal-400 transition-colors',
+            self::ORANGE => 'rounded-2xl bg-orange-50/90 border-2 border-dashed border-orange-300 ring-4 ring-white/80 ring-inset hover:border-orange-400 transition-colors',
+        };
+    }
+
+    /**
+     * Mengambil kelas kotak saldo dan daftar transaksi di dalam kartu kantong.
+     */
+    public function innerBoxClasses(): string
+    {
+        return match ($this) {
+            self::ROSE => 'border-rose-200/90 bg-white/95',
+            self::PINK => 'border-pink-200/90 bg-white/95',
+            self::EMERALD => 'border-emerald-200/90 bg-white/95',
+            self::SKY => 'border-sky-200/90 bg-white/95',
+            self::AMBER => 'border-amber-200/90 bg-white/95',
+            self::VIOLET => 'border-violet-200/90 bg-white/95',
+            self::TEAL => 'border-teal-200/90 bg-white/95',
+            self::ORANGE => 'border-orange-200/90 bg-white/95',
         };
     }
 
