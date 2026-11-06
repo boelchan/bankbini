@@ -10,13 +10,13 @@ enum IncomeSourceEnum: string
     case FROM_POCKET = 'from_pocket';
 
     /**
-     * Mengambil label sumber tambah uang dalam Bahasa Indonesia.
+     * Mengambil label sumber pemasukan uang dalam Bahasa Indonesia.
      */
     public function label(): string
     {
         return match ($this) {
-            self::DIRECT => 'Pemasukan Baru (Langsung dari Luar)',
-            self::FROM_POCKET => 'Ambil / Pindah dari Kantong Lain',
+            self::DIRECT => 'Pemasukan Baru',
+            self::FROM_POCKET => 'Ambil dari Kantong Lain',
         };
     }
 

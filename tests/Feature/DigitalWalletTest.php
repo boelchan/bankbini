@@ -210,8 +210,8 @@ class DigitalWalletTest extends TestCase
 
         $this->assertNotNull($outTx);
         $this->assertNotNull($inTx);
-        $this->assertSame('Transfer keluar ke Kantong Tabungan', $outTx->description);
-        $this->assertSame('Transfer masuk dari Kantong Utama', $inTx->description);
+        $this->assertSame('Pindah ke Kantong Tabungan', $outTx->description);
+        $this->assertSame('Terima dari Kantong Utama', $inTx->description);
     }
 
     public function test_failed_transfer_to_same_wallet_or_non_positive_amount_is_rejected(): void
@@ -377,13 +377,13 @@ class DigitalWalletTest extends TestCase
         $this->assertContains($utama->id, $visibleIds);
         $this->assertNotContains($liburan->id, $visibleIds);
 
-        // Histori pada Kantong Utama tetap menampilkan "Transfer masuk dari Kantong Liburan"
+        // Histori pada Kantong Utama tetap menampilkan "Terima dari Kantong Liburan"
         $incomingTx = Transaction::where('wallet_id', $utama->id)
             ->where('type', TransactionTypeEnum::TRANSFER_IN->value)
             ->first();
 
         $this->assertNotNull($incomingTx);
-        $this->assertSame('Transfer masuk dari Kantong Liburan', $incomingTx->description);
+        $this->assertSame('Terima dari Kantong Liburan', $incomingTx->description);
         $this->assertSame('Kantong Liburan', $incomingTx->counterpart_wallet_name_snapshot);
         $this->assertSame(2000000.00, (float) $incomingTx->amount);
 
@@ -403,10 +403,6 @@ class DigitalWalletTest extends TestCase
         } catch (DomainException $e) {
             $this->assertStringContainsString('sudah dihapus', $e->getMessage());
         }
-
-        // Data transaksi bersifat immutable (tidak dapat dihapus)
-        $this->expectException(LogicException::class);
-        $incomingTx->delete();
     }
 
     public function test_balance_consistency_across_multiple_pockets_and_report_excludes_internal_transfers(): void
@@ -571,5 +567,116 @@ class DigitalWalletTest extends TestCase
         $this->assertSame(7000000.00, (float) $kantongUtama->fresh()->balance);
         $this->assertSame(2500000.00, (float) $kantongDapur->fresh()->balance);
         $this->assertSame(9500000.00, $this->walletService->getTotalBalance());
+    }
+
+    public function test_dashboard_unified_transaction_modal_supports_expense_income_and_pocket_transfers(): void
+    {
+        $kantongUtama = $this->walletService->createWallet($this->user->id, [
+            'name' => 'Kantong Utama',
+            'initial_balance' => 5000000,
+        ]);
+
+        $kantongDapur = $this->walletService->createWallet($this->user->id, [
+            'name' => 'Kantong Dapur',
+            'initial_balance' => 1000000,
+        ]);
+
+        // 1. Pindah ke Kantong Lain dari mode Pengeluaran
+        \Livewire\Livewire::actingAs($this->user)
+            ->test('pages::dashboard')
+            ->call('openTransactionModal', $kantongUtama->id, 'expense')
+            ->set('expense_source_type', \App\Enums\ExpenseSourceEnum::TO_POCKET->value)
+            ->set('income_source_wallet_id', $kantongDapur->id)
+            ->set('income_amount', '500000')
+            ->set('income_description', 'Isi uang dapur')
+            ->call('saveTransaction')
+            ->assertHasNoErrors()
+            ->assertSet('transactionModal', false);
+
+        $this->assertSame(4500000.00, (float) $kantongUtama->fresh()->balance);
+        $this->assertSame(1500000.00, (float) $kantongDapur->fresh()->balance);
+
+        $lastOutTx = Transaction::where('wallet_id', $kantongUtama->id)
+            ->where('type', TransactionTypeEnum::TRANSFER_OUT)
+            ->latest('id')
+            ->first();
+        $this->assertNotNull($lastOutTx);
+        $this->assertSame('Pindah ke Kantong Dapur', $lastOutTx->description);
+
+        // 2. Pengeluaran Baru dari Kantong Dapur
+        \Livewire\Livewire::actingAs($this->user)
+            ->test('pages::dashboard')
+            ->call('openTransactionModal', $kantongDapur->id, 'expense')
+            ->set('expense_source_type', \App\Enums\ExpenseSourceEnum::DIRECT->value)
+            ->set('expense_category_id', $this->expenseCategory->id)
+            ->set('income_amount', '200000')
+            ->set('income_description', 'Belanja sayur dan ayam')
+            ->call('saveTransaction')
+            ->assertHasNoErrors()
+            ->assertSet('transactionModal', false);
+
+        $this->assertSame(1300000.00, (float) $kantongDapur->fresh()->balance);
+
+        // 3. Pemasukan Baru ke Kantong Utama
+        \Livewire\Livewire::actingAs($this->user)
+            ->test('pages::dashboard')
+            ->call('openTransactionModal', $kantongUtama->id, 'income')
+            ->set('income_source_type', \App\Enums\IncomeSourceEnum::DIRECT->value)
+            ->set('income_category_id', $this->incomeCategory->id)
+            ->set('income_amount', '1000000')
+            ->set('income_description', 'Bonus proyek')
+            ->call('saveTransaction')
+            ->assertHasNoErrors()
+            ->assertSet('transactionModal', false);
+
+        $this->assertSame(5500000.00, (float) $kantongUtama->fresh()->balance);
+
+        // 4. Ambil dari Kantong Lain pada mode Pemasukan di Kantong Dapur
+        \Livewire\Livewire::actingAs($this->user)
+            ->test('pages::dashboard')
+            ->call('openTransactionModal', $kantongDapur->id, 'income')
+            ->set('income_source_type', \App\Enums\IncomeSourceEnum::FROM_POCKET->value)
+            ->set('income_source_wallet_id', $kantongUtama->id)
+            ->set('income_amount', '300000')
+            ->call('saveTransaction')
+            ->assertHasNoErrors()
+            ->assertSet('transactionModal', false);
+
+        $this->assertSame(5200000.00, (float) $kantongUtama->fresh()->balance);
+        $this->assertSame(1600000.00, (float) $kantongDapur->fresh()->balance);
+
+        // 5. Hapus transaksi "Terima dari Kantong Utama" pada Kantong Dapur -> harus menghapus KEDUANYA (Terima dari & Pindah ke)
+        $terimaTx = Transaction::where('wallet_id', $kantongDapur->id)
+            ->where('type', TransactionTypeEnum::TRANSFER_IN)
+            ->latest('id')
+            ->first();
+        $this->assertNotNull($terimaTx);
+        $this->assertSame('Terima dari Kantong Utama', $terimaTx->description);
+        $transferRef1 = $terimaTx->transfer_reference;
+
+        \Livewire\Livewire::actingAs($this->user)
+            ->test('pages::dashboard')
+            ->call('deleteTransaction', $terimaTx->id);
+
+        $this->assertSame(0, Transaction::where('transfer_reference', $transferRef1)->count());
+        $this->assertSame(5500000.00, (float) $kantongUtama->fresh()->balance);
+        $this->assertSame(1300000.00, (float) $kantongDapur->fresh()->balance);
+
+        // 6. Hapus transaksi "Pindah ke Kantong Dapur" pada Kantong Utama -> harus menghapus KEDUANYA (Pindah ke & Terima dari)
+        $pindahTx = Transaction::where('wallet_id', $kantongUtama->id)
+            ->where('type', TransactionTypeEnum::TRANSFER_OUT)
+            ->latest('id')
+            ->first();
+        $this->assertNotNull($pindahTx);
+        $this->assertSame('Pindah ke Kantong Dapur', $pindahTx->description);
+        $transferRef2 = $pindahTx->transfer_reference;
+
+        \Livewire\Livewire::actingAs($this->user)
+            ->test('pages::dashboard')
+            ->call('deleteTransaction', $pindahTx->id);
+
+        $this->assertSame(0, Transaction::where('transfer_reference', $transferRef2)->count());
+        $this->assertSame(6000000.00, (float) $kantongUtama->fresh()->balance);
+        $this->assertSame(800000.00, (float) $kantongDapur->fresh()->balance);
     }
 }

@@ -101,12 +101,9 @@
             </div>
 
             <div class="flex flex-col sm:flex-row sm:items-center gap-4 lg:gap-6 border-t lg:border-t-0 pt-4 lg:pt-0 border-slate-200/80">
-                <div>
-                    <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">Saldo Kantong</p>
                     <p class="text-2xl font-bold text-slate-900 tabular-nums mt-0.5">
                         {{ $wallet->formattedBalance() }}
                     </p>
-                </div>
 
                 @if ($wallet->isActive())
                     <div class="flex flex-wrap items-center gap-2">
@@ -165,16 +162,21 @@
                             <th class="py-3 pl-5 pr-3">Tanggal & Keterangan</th>
                             <th class="px-3 py-3">Jenis</th>
                             <th class="px-3 py-3 text-right">Nominal</th>
-                            <th class="py-3 pl-3 pr-5 text-right">Saldo Kantong</th>
+                            <th class="px-3 py-3 text-right">Saldo Kantong</th>
+                            <th class="py-3 pl-3 pr-5 text-right">Aksi</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-200/70 text-sm">
                         @foreach ($this->transactions as $tx)
                             <tr class="hover:bg-slate-50/80 transition-colors">
                                 <td class="py-3 pl-5 pr-3">
-                                    <div class="font-semibold text-slate-900">{{ $tx->description }}</div>
+                                    <div class="font-semibold text-slate-900">{{ $tx->displayDescription() }}</div>
                                     <div class="mt-0.5 flex flex-wrap items-center gap-2 text-xs text-slate-500">
                                         <span>{{ $tx->transaction_date?->translatedFormat('d M Y, H:i') }}</span>
+                                        @if ($tx->notes)
+                                            <span>•</span>
+                                            <span class="font-medium text-slate-700">{{ $tx->notes }}</span>
+                                        @endif
                                         @if ($tx->category)
                                             <span>•</span>
                                             <span class="font-medium text-slate-700">{{ $tx->category->name }}</span>
@@ -182,7 +184,7 @@
                                         @if ($tx->counterpart_wallet_name_snapshot)
                                             <span>•</span>
                                             <span class="text-slate-600">
-                                                {{ $tx->type === \App\Enums\TransactionTypeEnum::TRANSFER_IN ? 'Dari: ' : 'Ke: ' }}
+                                                {{ $tx->type === \App\Enums\TransactionTypeEnum::TRANSFER_IN ? 'Terima dari: ' : 'Pindah ke: ' }}
                                                 {{ $tx->resolvedCounterpartWalletName() }}
                                             </span>
                                         @endif
@@ -198,9 +200,23 @@
                                 <td class="px-3 py-3 text-right font-bold tabular-nums {{ $tx->type->isPositive() ? 'text-emerald-700' : 'text-rose-700' }}">
                                     {{ $tx->formattedSignedAmount() }}
                                 </td>
-                                <td class="py-3 pl-3 pr-5 text-right">
+                                <td class="px-3 py-3 text-right">
                                     <div class="text-xs font-semibold text-slate-900 tabular-nums">{{ $tx->formattedBalanceAfter() }}</div>
                                     <div class="text-xs text-slate-500 tabular-nums">Awal: {{ $tx->formattedBalanceBefore() }}</div>
+                                </td>
+                                <td class="py-3 pl-3 pr-5 text-right">
+                                    @if ($loop->first && $this->transactions->currentPage() === 1)
+                                        <x-button.circle
+                                            color="red"
+                                            flat
+                                            sm
+                                            wire:click="askDeleteTransaction({{ $tx->id }})"
+                                            title="Hapus Transaksi Terakhir"
+                                            aria-label="Hapus transaksi terakhir {{ $tx->displayDescription() }}"
+                                        >
+                                            <x-ti-trash class="size-4" />
+                                        </x-button.circle>
+                                    @endif
                                 </td>
                             </tr>
                         @endforeach
@@ -217,63 +233,62 @@
     {{-- Modal Tambah Uang (Dari Luar / Langsung ATAU Ambil dari Kantong Lain) --}}
     <x-modal wire="incomeModal" title="Tambah Uang ke {{ $wallet->name }}" size="lg">
         <form wire:submit="saveIncome" class="space-y-4">
-            <x-select.styled
-                label="Sumber Uang *"
+            <x-radio.group
                 wire:model.live="income_source_type"
+                inline
+                color="emerald"
                 :options="\App\Enums\IncomeSourceEnum::choices()"
             />
 
-            <div
-                wire:key="pocket-show-income-from-pocket-wrap-{{ $wallet->id }}"
-                x-show="$wire.income_source_type === '{{ \App\Enums\IncomeSourceEnum::FROM_POCKET->value }}'"
-                x-cloak
-            >
-                <x-select.styled
-                    label="Ambil dari Kantong *"
-                    placeholder="Pilih kantong asal"
-                    wire:model.live="income_source_wallet_id"
-                    :options="$this->otherActiveWalletOptions"
-                    :hint="empty($this->otherActiveWalletOptions) ? 'Belum ada kantong aktif lain yang dapat dipilih.' : null"
-                    searchable
-                />
-            </div>
-
-            <div
-                wire:key="pocket-show-income-direct-category-wrap-{{ $wallet->id }}"
-                x-show="$wire.income_source_type !== '{{ \App\Enums\IncomeSourceEnum::FROM_POCKET->value }}'"
-                x-cloak
-            >
-                <x-select.styled
-                    label="Kategori Pemasukan *"
-                    placeholder="Pilih kategori"
-                    wire:model.live="income_category_id"
-                    :options="$this->incomeCategoryOptions"
-                    searchable
-                />
-            </div>
+            @if ($income_source_type === \App\Enums\IncomeSourceEnum::FROM_POCKET->value)
+                <div wire:key="pocket-show-income-from-pocket-wrap-{{ $wallet->id }}">
+                    @if (empty($this->otherActiveWalletOptions))
+                        <div class="rounded-xl bg-amber-50 p-3 text-xs text-amber-800 border border-amber-200">
+                            Belum ada kantong aktif lain yang dapat dipilih.
+                        </div>
+                    @else
+                        <x-radio.group
+                            id="pocket-show-income-pocket-wallet"
+                            wire:model.live="income_source_wallet_id"
+                            card
+                            :columns="2"
+                            color="emerald"
+                            :options="$this->otherActiveWalletOptions"
+                        />
+                    @endif
+                </div>
+            @else
+                <div wire:key="pocket-show-income-direct-category-wrap-{{ $wallet->id }}">
+                    <x-radio.group
+                        id="pocket-show-income-category"
+                        wire:model.live="income_category_id"
+                        card
+                        :columns="3"
+                        color="emerald"
+                        :options="$this->incomeCategoryOptions"
+                    />
+                </div>
+            @endif
 
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <x-currency
-                    label="Nominal (Rp) *"
                     wire:model="income_amount"
                     locale="id-ID"
                     symbol="Rp"
                     :decimals="0"
                     :precision="0"
-                    placeholder="0"
+                    placeholder="Nominal (Rp)"
                 />
 
                 <x-input
                     type="datetime-local"
-                    label="Tanggal & Waktu *"
                     wire:model="income_date"
                 />
             </div>
 
             <x-input
-                label="{{ $income_source_type === \App\Enums\IncomeSourceEnum::FROM_POCKET->value ? 'Keterangan Pindah Uang (Opsional)' : 'Keterangan Pemasukan *' }}"
                 wire:model="income_description"
-                placeholder="{{ $income_source_type === \App\Enums\IncomeSourceEnum::FROM_POCKET->value ? 'Contoh: Tambah saldo dari kantong lain' : 'Contoh: Gaji bulanan, Bonus' }}"
+                placeholder="{{ $income_source_type !== \App\Enums\IncomeSourceEnum::DIRECT->value ? 'Keterangan pindah uang (opsional)' : 'Keterangan pemasukan (contoh: Gaji bulanan, Bonus)' }}"
             />
 
             <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-200">
@@ -286,37 +301,34 @@
     {{-- Modal Catat Pengeluaran --}}
     <x-modal wire="expenseModal" title="Catat Pengeluaran dari {{ $wallet->name }}" size="lg">
         <form wire:submit="saveExpense" class="space-y-4">
+            <x-radio.group
+                wire:model.live="expense_category_id"
+                card
+                :columns="3"
+                color="rose"
+                :options="$this->expenseCategoryOptions"
+            />
+
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <x-select.styled
-                    label="Kategori Pengeluaran *"
-                    placeholder="Pilih kategori"
-                    wire:model="expense_category_id"
-                    :options="$this->expenseCategoryOptions"
-                    searchable
+                <x-currency
+                    wire:model="expense_amount"
+                    locale="id-ID"
+                    symbol="Rp"
+                    :decimals="0"
+                    :precision="0"
+                    hint="Saldo tersedia: {{ $wallet->formattedBalance() }}"
+                    placeholder="Nominal (Rp)"
                 />
 
                 <x-input
                     type="datetime-local"
-                    label="Tanggal & Waktu *"
                     wire:model="expense_date"
                 />
             </div>
 
-            <x-currency
-                label="Nominal Pengeluaran (Rp) *"
-                wire:model="expense_amount"
-                locale="id-ID"
-                symbol="Rp"
-                :decimals="0"
-                :precision="0"
-                hint="Saldo tersedia: {{ $wallet->formattedBalance() }}"
-                placeholder="0"
-            />
-
             <x-input
-                label="Keterangan Pengeluaran *"
                 wire:model="expense_description"
-                placeholder="Contoh: Belanja kebutuhan dapur"
+                placeholder="Keterangan pengeluaran (contoh: Belanja kebutuhan dapur)"
             />
 
             <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-200">
@@ -329,37 +341,40 @@
     {{-- Modal Pindah Uang dari Kantong Ini ke Kantong Lain --}}
     <x-modal wire="transferModal" title="Pindah Uang dari {{ $wallet->name }}" size="lg">
         <form wire:submit="saveTransfer" class="space-y-4">
-            <x-select.styled
-                label="Pindahkan ke Kantong *"
-                placeholder="Pilih kantong tujuan"
-                wire:model="transfer_destination_wallet_id"
-                :options="$this->otherActiveWalletOptions"
-                searchable
-            />
+            @if (empty($this->otherActiveWalletOptions))
+                <div class="rounded-xl bg-amber-50 p-3 text-xs text-amber-800 border border-amber-200">
+                    Belum ada kantong aktif lain yang dapat dipilih sebagai tujuan.
+                </div>
+            @else
+                <x-radio.group
+                    wire:model.live="transfer_destination_wallet_id"
+                    card
+                    :columns="2"
+                    color="emerald"
+                    :options="$this->otherActiveWalletOptions"
+                />
+            @endif
 
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <x-currency
-                    label="Nominal Pindah Uang (Rp) *"
                     wire:model="transfer_amount"
                     locale="id-ID"
                     symbol="Rp"
                     :decimals="0"
                     :precision="0"
                     hint="Saldo tersedia: {{ $wallet->formattedBalance() }}"
-                    placeholder="0"
+                    placeholder="Nominal (Rp)"
                 />
 
                 <x-input
                     type="datetime-local"
-                    label="Tanggal & Waktu *"
                     wire:model="transfer_date"
                 />
             </div>
 
             <x-input
-                label="Keterangan (Opsional)"
                 wire:model="transfer_description"
-                placeholder="Contoh: Sisihkan ke kantong tabungan"
+                placeholder="Keterangan pindah uang (opsional)"
             />
 
             <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-200">

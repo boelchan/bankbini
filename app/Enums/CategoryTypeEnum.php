@@ -6,8 +6,8 @@ namespace App\Enums;
 
 enum CategoryTypeEnum: string
 {
-    case INCOME = 'income';
     case EXPENSE = 'expense';
+    case INCOME = 'income';
 
     /**
      * Mengambil label tipe kategori dalam Bahasa Indonesia.

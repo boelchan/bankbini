@@ -128,8 +128,8 @@ class TransferService
                 'transaction_date' => $transactionDate,
             ]);
 
-            $outDescription = sprintf('Transfer keluar ke %s', $destinationWallet->name);
-            $inDescription = sprintf('Transfer masuk dari %s', $sourceWallet->name);
+            $outDescription = sprintf('Pindah ke %s', $destinationWallet->name);
+            $inDescription = sprintf('Terima dari %s', $sourceWallet->name);
 
             Transaction::create([
                 'transaction_code' => $this->transactionService->generateTransactionCode(),

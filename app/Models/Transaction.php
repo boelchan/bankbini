@@ -9,7 +9,6 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use LogicException;
 
 #[Table(name: 'transactions', key: 'id')]
 #[Fillable([
@@ -33,16 +32,6 @@ use LogicException;
 ])]
 class Transaction extends Model
 {
-    /**
-     * Menjaga sifat immutable ledger: transaksi yang sudah tercatat tidak boleh dihapus.
-     */
-    protected static function booted(): void
-    {
-        static::deleting(function (): void {
-            throw new LogicException('Data histori transaksi bersifat permanen (immutable) dan tidak dapat dihapus.');
-        });
-    }
-
     /**
      * Konfigurasi konversi tipe data atribut transaksi.
      *
@@ -163,9 +152,34 @@ class Transaction extends Model
     public function displayCategoryName(): string
     {
         if (in_array($this->type, [TransactionTypeEnum::TRANSFER_IN, TransactionTypeEnum::TRANSFER_OUT], true)) {
-            return 'Transfer Antar Kantong';
+            return 'Pindah Antar Kantong';
         }
 
         return $this->category_name_snapshot ?: ($this->category?->name ?? 'Umum');
+    }
+
+    /**
+     * Mengambil deskripsi transaksi dengan format label Pindah ke / Terima dari yang konsisten.
+     */
+    public function displayDescription(): string
+    {
+        $desc = (string) $this->description;
+
+        if ($this->type === TransactionTypeEnum::TRANSFER_OUT) {
+            if (str_starts_with($desc, 'Transfer keluar ke ')) {
+                return 'Pindah ke ' . substr($desc, strlen('Transfer keluar ke '));
+            }
+            if (str_starts_with($desc, 'Pindah ke kantong ')) {
+                return 'Pindah ke ' . substr($desc, strlen('Pindah ke kantong '));
+            }
+        }
+
+        if ($this->type === TransactionTypeEnum::TRANSFER_IN) {
+            if (str_starts_with($desc, 'Transfer masuk dari ')) {
+                return 'Terima dari ' . substr($desc, strlen('Transfer masuk dari '));
+            }
+        }
+
+        return $desc;
     }
 }

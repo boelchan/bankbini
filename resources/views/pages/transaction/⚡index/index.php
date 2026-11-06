@@ -325,7 +325,7 @@ class extends Component
                 'income_date' => ['required', 'date'],
                 'income_description' => ['nullable', 'string', 'max:190'],
             ], [
-                'income_wallet_id.required' => 'Pilih kantong tujuan.',
+                'income_wallet_id.required' => 'Pilih kantong penerima uang.',
                 'income_source_wallet_id.required' => 'Pilih kantong asal.',
                 'income_source_wallet_id.different' => 'Kantong asal harus berbeda dengan kantong tujuan.',
                 'income_amount.required' => 'Nominal wajib diisi.',
@@ -344,7 +344,7 @@ class extends Component
 
                 $this->incomeModal = false;
                 unset($this->transactions, $this->activeWalletOptions, $this->otherActiveWalletOptions);
-                $this->toast()->success('Pindah Uang Berhasil', 'Dana berhasil dipindahkan antar kantong.')->send();
+                $this->toast()->success('Uang Berhasil Diambil', 'Dana berhasil dipindahkan antar kantong.')->send();
             } catch (\DomainException|ValidationException $e) {
                 $msg = $e instanceof ValidationException
                     ? (collect($e->errors())->flatten()->first() ?? 'Gagal memindahkan uang.')
@@ -492,6 +492,47 @@ class extends Component
                 ? (collect($e->errors())->flatten()->first() ?? 'Gagal memindahkan uang.')
                 : $e->getMessage();
             $this->addError('transfer_amount', $msg);
+        }
+    }
+
+    /**
+     * Menampilkan dialog konfirmasi sebelum menghapus transaksi.
+     */
+    public function askDeleteTransaction(int $transactionId): void
+    {
+        $tx = Transaction::find($transactionId);
+        if ($tx === null) {
+            return;
+        }
+
+        $isTransfer = in_array(
+            $tx->type,
+            [TransactionTypeEnum::TRANSFER_IN, TransactionTypeEnum::TRANSFER_OUT],
+            true
+        ) || !empty($tx->transfer_reference);
+
+        $description = $isTransfer
+            ? 'Transaksi pindah/terima uang ini beserta pasangannya di kantong terkait akan dihapus keduanya, dan saldo kedua kantong dikembalikan.'
+            : 'Transaksi ini akan dihapus dan saldo kantong akan dikembalikan seperti semula.';
+
+        $this->dialog()
+            ->question('Hapus Transaksi?', $description)
+            ->confirm('Ya, Hapus', 'deleteTransaction', $transactionId)
+            ->cancel('Batal')
+            ->send();
+    }
+
+    /**
+     * Menghapus transaksi dan mengembalikan saldo kantong (termasuk menghapus pasangan pindah/terima antar kantong).
+     */
+    public function deleteTransaction(int $transactionId, TransactionService $transactionService): void
+    {
+        try {
+            $transactionService->deleteTransaction($transactionId);
+            unset($this->transactions, $this->activeWalletOptions, $this->otherActiveWalletOptions);
+            $this->toast()->success('Transaksi Dihapus', 'Transaksi berhasil dihapus dan saldo kantong telah diperbarui.')->send();
+        } catch (\DomainException $e) {
+            $this->toast()->error('Gagal Menghapus', $e->getMessage())->send();
         }
     }
 };

@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Enums\CategoryTypeEnum;
+use App\Enums\ExpenseSourceEnum;
 use App\Enums\IncomeSourceEnum;
 use App\Enums\TransactionTypeEnum;
 use App\Enums\WalletColorEnum;
@@ -31,8 +32,7 @@ class extends Component
     use Interactions;
 
     /* State Modal & Expand Transaksi Kantong */
-    public bool $incomeModal = false;
-    public bool $expenseModal = false;
+    public bool $transactionModal = false;
     public bool $pocketModal = false;
 
     /**
@@ -42,21 +42,17 @@ class extends Component
      */
     public array $expandedWallets = [];
 
-    /* Form Tambah Uang / Pemasukan (Bisa Langsung atau Ambil dari Kantong Lain) */
+    /* Form Transaksi Terpadu (Pengeluaran / Pemasukan) */
+    public string $transaction_mode = 'expense';
     public ?int $income_wallet_id = null;
+    public string $expense_source_type = 'direct';
     public string $income_source_type = 'direct';
     public ?int $income_source_wallet_id = null;
     public ?int $income_category_id = null;
+    public ?int $expense_category_id = null;
     public string|int|float $income_amount = '';
     public string $income_date = '';
     public string $income_description = '';
-
-    /* Form Pengeluaran */
-    public ?int $expense_wallet_id = null;
-    public ?int $expense_category_id = null;
-    public string|int|float $expense_amount = '';
-    public string $expense_date = '';
-    public string $expense_description = '';
 
     /* Form Tambah Kantong Baru */
     public string $pocket_name = '';
@@ -70,9 +66,7 @@ class extends Component
      */
     public function mount(): void
     {
-        $now = now()->format('Y-m-d\TH:i');
-        $this->income_date = $now;
-        $this->expense_date = $now;
+        $this->income_date = now()->format('Y-m-d\TH:i');
     }
 
     /**
@@ -205,6 +199,17 @@ class extends Component
     }
 
     /**
+     * Mereset pilihan dan pesan error saat jenis transaksi (Pengeluaran / Pemasukan) diubah.
+     */
+    public function updatedTransactionMode(): void
+    {
+        $this->resetValidation();
+        $this->income_source_wallet_id = null;
+        $this->expense_category_id = null;
+        $this->income_category_id = null;
+    }
+
+    /**
      * Mereset pilihan dan pesan error saat jenis sumber uang diubah.
      */
     public function updatedIncomeSourceType(): void
@@ -212,6 +217,16 @@ class extends Component
         $this->resetValidation();
         $this->income_source_wallet_id = null;
         $this->income_category_id = null;
+    }
+
+    /**
+     * Mereset pilihan saat jenis pengeluaran (Pengeluaran Baru / Pindah ke Kantong Lain) diubah.
+     */
+    public function updatedExpenseSourceType(): void
+    {
+        $this->resetValidation();
+        $this->income_source_wallet_id = null;
+        $this->expense_category_id = null;
     }
 
     /**
@@ -253,27 +268,105 @@ class extends Component
     }
 
     /**
-     * Membuka modal pemasukan / tambah uang pada kantong tertentu.
+     * Membuka modal transaksi kantong terpadu (pilih Pengeluaran atau Pemasukan).
      */
-    public function openIncomeModal(int $walletId): void
+    public function openTransactionModal(int $walletId, string $mode = 'expense'): void
     {
         $this->resetValidation();
+        $this->transaction_mode = $mode;
         $this->income_wallet_id = $walletId;
+        $this->expense_source_type = ExpenseSourceEnum::DIRECT->value;
         $this->income_source_type = IncomeSourceEnum::DIRECT->value;
         $this->income_source_wallet_id = null;
         $this->income_category_id = null;
+        $this->expense_category_id = null;
         $this->income_amount = '';
         $this->income_description = '';
         $this->income_date = now()->format('Y-m-d\TH:i');
         unset($this->otherActiveWalletOptions);
-        $this->incomeModal = true;
+        $this->transactionModal = true;
     }
 
     /**
-     * Menyimpan tambah uang ke kantong (baik pemasukan langsung maupun pindahan dari kantong lain).
+     * Menyimpan transaksi dari form terpadu (Pengeluaran, Pemasukan, atau Pindah Kantong).
      */
-    public function saveIncome(TransactionService $transactionService, TransferService $transferService): void
+    public function saveTransaction(TransactionService $transactionService, TransferService $transferService): void
     {
+        if ($this->transaction_mode === CategoryTypeEnum::EXPENSE->value) {
+            if ($this->expense_source_type === ExpenseSourceEnum::TO_POCKET->value) {
+                $validated = $this->validate([
+                    'income_wallet_id' => ['required', 'integer'],
+                    'income_source_wallet_id' => ['required', 'integer', 'different:income_wallet_id'],
+                    'income_amount' => ['required', 'numeric', 'gt:0'],
+                    'income_date' => ['required', 'date'],
+                    'income_description' => ['nullable', 'string', 'max:190'],
+                ], [
+                    'income_source_wallet_id.required' => 'Pilih kantong tujuan tempat memindahkan uang.',
+                    'income_source_wallet_id.different' => 'Kantong tujuan harus berbeda dengan kantong asal.',
+                    'income_amount.required' => 'Nominal wajib diisi.',
+                    'income_amount.gt' => 'Nominal harus lebih besar dari Rp0.',
+                ]);
+
+                try {
+                    $transferService->executeTransfer((int) Auth::id(), [
+                        'source_wallet_id' => $validated['income_wallet_id'],
+                        'destination_wallet_id' => $validated['income_source_wallet_id'],
+                        'amount' => $validated['income_amount'],
+                        'transaction_date' => $validated['income_date'],
+                        'description' => $validated['income_description'],
+                        'idempotency_key' => 'dash-exp-trf-' . Str::uuid()->toString(),
+                    ]);
+
+                    $this->transactionModal = false;
+                    $this->refreshStats();
+                    $this->toast()->success('Uang Berhasil Dipindahkan', 'Saldo antar kantong telah diperbarui.')->send();
+                } catch (\DomainException|ValidationException $e) {
+                    $msg = $e instanceof ValidationException
+                        ? (collect($e->errors())->flatten()->first() ?? 'Gagal memindahkan uang.')
+                        : $e->getMessage();
+                    $this->addError('income_amount', $msg);
+                }
+
+                return;
+            }
+
+            $validated = $this->validate([
+                'income_wallet_id' => ['required', 'integer'],
+                'expense_category_id' => ['required', 'integer'],
+                'income_amount' => ['required', 'numeric', 'gt:0'],
+                'income_date' => ['required', 'date'],
+                'income_description' => ['required', 'string', 'max:190'],
+            ], [
+                'income_wallet_id.required' => 'Pilih kantong sumber pengeluaran.',
+                'expense_category_id.required' => 'Pilih kategori pengeluaran.',
+                'income_amount.required' => 'Nominal pengeluaran wajib diisi.',
+                'income_amount.gt' => 'Nominal harus lebih besar dari Rp0.',
+                'income_description.required' => 'Keterangan pengeluaran wajib diisi.',
+            ]);
+
+            try {
+                $transactionService->recordExpense((int) Auth::id(), [
+                    'wallet_id' => $validated['income_wallet_id'],
+                    'category_id' => $validated['expense_category_id'],
+                    'amount' => $validated['income_amount'],
+                    'transaction_date' => $validated['income_date'],
+                    'description' => $validated['income_description'],
+                    'idempotency_key' => 'dash-exp-' . Str::uuid()->toString(),
+                ]);
+
+                $this->transactionModal = false;
+                $this->refreshStats();
+                $this->toast()->success('Pengeluaran Tercatat', 'Saldo kantong telah diperbarui.')->send();
+            } catch (\DomainException|ValidationException $e) {
+                $msg = $e instanceof ValidationException
+                    ? (collect($e->errors())->flatten()->first() ?? 'Gagal mencatat pengeluaran.')
+                    : $e->getMessage();
+                $this->addError('income_amount', $msg);
+            }
+
+            return;
+        }
+
         if ($this->income_source_type === IncomeSourceEnum::FROM_POCKET->value) {
             $validated = $this->validate([
                 'income_wallet_id' => ['required', 'integer'],
@@ -283,7 +376,7 @@ class extends Component
                 'income_description' => ['nullable', 'string', 'max:190'],
             ], [
                 'income_source_wallet_id.required' => 'Pilih kantong asal tempat mengambil uang.',
-                'income_source_wallet_id.different' => 'Kantong asal harus berbeda dengan kantong tujuan.',
+                'income_source_wallet_id.different' => 'Kantong asal harus berbeda dengan kantong ini.',
                 'income_amount.required' => 'Nominal wajib diisi.',
                 'income_amount.gt' => 'Nominal harus lebih besar dari Rp0.',
             ]);
@@ -298,9 +391,9 @@ class extends Component
                     'idempotency_key' => 'dash-trf-' . Str::uuid()->toString(),
                 ]);
 
-                $this->incomeModal = false;
+                $this->transactionModal = false;
                 $this->refreshStats();
-                $this->toast()->success('Uang Berhasil Dipindahkan', 'Saldo kantong telah ditambahkan dari kantong lain.')->send();
+                $this->toast()->success('Uang Berhasil Diambil', 'Saldo antar kantong telah diperbarui.')->send();
             } catch (\DomainException|ValidationException $e) {
                 $msg = $e instanceof ValidationException
                     ? (collect($e->errors())->flatten()->first() ?? 'Gagal memindahkan uang.')
@@ -335,7 +428,7 @@ class extends Component
                 'idempotency_key' => 'dash-inc-' . Str::uuid()->toString(),
             ]);
 
-            $this->incomeModal = false;
+            $this->transactionModal = false;
             $this->refreshStats();
             $this->toast()->success('Pemasukan Disimpan', 'Saldo kantong berhasil ditambahkan.')->send();
         } catch (\DomainException|ValidationException $e) {
@@ -343,60 +436,6 @@ class extends Component
                 ? (collect($e->errors())->flatten()->first() ?? 'Gagal menyimpan pemasukan.')
                 : $e->getMessage();
             $this->addError('income_amount', $msg);
-        }
-    }
-
-    /**
-     * Membuka modal pengeluaran dari kantong tertentu.
-     */
-    public function openExpenseModal(int $walletId): void
-    {
-        $this->resetValidation();
-        $this->expense_wallet_id = $walletId;
-        $this->expense_category_id = null;
-        $this->expense_amount = '';
-        $this->expense_description = '';
-        $this->expense_date = now()->format('Y-m-d\TH:i');
-        $this->expenseModal = true;
-    }
-
-    /**
-     * Menyimpan pengeluaran dari kantong.
-     */
-    public function saveExpense(TransactionService $transactionService): void
-    {
-        $validated = $this->validate([
-            'expense_wallet_id' => ['required', 'integer'],
-            'expense_category_id' => ['required', 'integer'],
-            'expense_amount' => ['required', 'numeric', 'gt:0'],
-            'expense_date' => ['required', 'date'],
-            'expense_description' => ['required', 'string', 'max:190'],
-        ], [
-            'expense_wallet_id.required' => 'Pilih kantong sumber pengeluaran.',
-            'expense_category_id.required' => 'Pilih kategori pengeluaran.',
-            'expense_amount.required' => 'Nominal pengeluaran wajib diisi.',
-            'expense_amount.gt' => 'Nominal harus lebih besar dari Rp0.',
-            'expense_description.required' => 'Keterangan pengeluaran wajib diisi.',
-        ]);
-
-        try {
-            $transactionService->recordExpense((int) Auth::id(), [
-                'wallet_id' => $validated['expense_wallet_id'],
-                'category_id' => $validated['expense_category_id'],
-                'amount' => $validated['expense_amount'],
-                'transaction_date' => $validated['expense_date'],
-                'description' => $validated['expense_description'],
-                'idempotency_key' => 'dash-exp-' . Str::uuid()->toString(),
-            ]);
-
-            $this->expenseModal = false;
-            $this->refreshStats();
-            $this->toast()->success('Pengeluaran Tercatat', 'Saldo kantong telah diperbarui.')->send();
-        } catch (\DomainException|ValidationException $e) {
-            $msg = $e instanceof ValidationException
-                ? (collect($e->errors())->flatten()->first() ?? 'Gagal mencatat pengeluaran.')
-                : $e->getMessage();
-            $this->addError('expense_amount', $msg);
         }
     }
 
@@ -441,6 +480,47 @@ class extends Component
         $this->pocketModal = false;
         $this->refreshStats();
         $this->toast()->success('Kantong Baru Dibuat', 'Kantong keuangan berhasil ditambahkan.')->send();
+    }
+
+    /**
+     * Menampilkan dialog konfirmasi sebelum menghapus transaksi.
+     */
+    public function askDeleteTransaction(int $transactionId): void
+    {
+        $tx = Transaction::find($transactionId);
+        if ($tx === null) {
+            return;
+        }
+
+        $isTransfer = in_array(
+            $tx->type,
+            [TransactionTypeEnum::TRANSFER_IN, TransactionTypeEnum::TRANSFER_OUT],
+            true
+        ) || !empty($tx->transfer_reference);
+
+        $description = $isTransfer
+            ? 'Transaksi pindah/terima uang ini beserta pasangannya di kantong terkait akan dihapus keduanya, dan saldo kedua kantong dikembalikan.'
+            : 'Transaksi ini akan dihapus dan saldo kantong akan dikembalikan seperti semula.';
+
+        $this->dialog()
+            ->question('Hapus Transaksi?', $description)
+            ->confirm('Ya, Hapus', 'deleteTransaction', $transactionId)
+            ->cancel('Batal')
+            ->send();
+    }
+
+    /**
+     * Menghapus transaksi dan mengembalikan saldo kantong (termasuk menghapus pasangan pindah/terima antar kantong).
+     */
+    public function deleteTransaction(int $transactionId, TransactionService $transactionService): void
+    {
+        try {
+            $transactionService->deleteTransaction($transactionId);
+            $this->refreshStats();
+            $this->toast()->success('Transaksi Dihapus', 'Transaksi berhasil dihapus dan saldo kantong telah diperbarui.')->send();
+        } catch (\DomainException $e) {
+            $this->toast()->error('Gagal Menghapus', $e->getMessage())->send();
+        }
     }
 
     /**

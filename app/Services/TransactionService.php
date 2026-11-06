@@ -8,6 +8,7 @@ use App\Enums\CategoryTypeEnum;
 use App\Enums\TransactionTypeEnum;
 use App\Models\Transaction;
 use App\Models\TransactionCategory;
+use App\Models\Transfer;
 use App\Models\Wallet;
 use Carbon\Carbon;
 use DomainException;
@@ -190,6 +191,129 @@ class TransactionService
                     : null,
                 'transaction_date' => $transactionDate,
             ]);
+        });
+    }
+
+    /**
+     * Menghapus transaksi dan mengembalikan saldo kantong terkait secara atomik.
+     * Jika transaksi adalah pindah uang (Pindah ke / Terima dari), maka kedua transaksi pasangan
+     * pada kantong asal dan kantong tujuan akan dihapus sekaligus beserta pengembalian saldonya.
+     */
+    public function deleteTransaction(int $transactionId): void
+    {
+        DB::transaction(function () use ($transactionId): void {
+            $transaction = Transaction::query()
+                ->lockForUpdate()
+                ->findOrFail($transactionId);
+
+            $isTransfer = in_array(
+                $transaction->type,
+                [TransactionTypeEnum::TRANSFER_IN, TransactionTypeEnum::TRANSFER_OUT],
+                true
+            ) || !empty($transaction->transfer_reference);
+
+            if ($isTransfer) {
+                $transferRef = $transaction->transfer_reference;
+
+                $pairedTransactions = !empty($transferRef)
+                    ? Transaction::query()
+                        ->where('transfer_reference', $transferRef)
+                        ->lockForUpdate()
+                        ->get()
+                    : collect([$transaction]);
+
+                if ($pairedTransactions->isEmpty()) {
+                    $pairedTransactions = collect([$transaction]);
+                }
+
+                $walletIds = $pairedTransactions
+                    ->pluck('wallet_id')
+                    ->filter()
+                    ->unique()
+                    ->sort()
+                    ->values()
+                    ->all();
+
+                $wallets = Wallet::query()
+                    ->withTrashed()
+                    ->whereIn('id', $walletIds)
+                    ->lockForUpdate()
+                    ->get()
+                    ->keyBy('id');
+
+                foreach ($pairedTransactions as $tx) {
+                    $wallet = $wallets->get($tx->wallet_id);
+
+                    if ($wallet !== null) {
+                        $amount = round((float) $tx->amount, 2);
+                        $currentBalance = round((float) $wallet->balance, 2);
+
+                        if ($tx->type === TransactionTypeEnum::TRANSFER_OUT) {
+                            $newBalance = round($currentBalance + $amount, 2);
+                        } else {
+                            $newBalance = round($currentBalance - $amount, 2);
+
+                            if ($newBalance < 0) {
+                                throw new DomainException(
+                                    sprintf(
+                                        'Saldo pada %s (Rp%s) tidak mencukupi untuk membatalkan perpindahan uang sebesar Rp%s.',
+                                        $wallet->name,
+                                        number_format($currentBalance, 0, ',', '.'),
+                                        number_format($amount, 0, ',', '.')
+                                    )
+                                );
+                            }
+                        }
+
+                        $wallet->update([
+                            'balance' => number_format($newBalance, 2, '.', ''),
+                        ]);
+                    }
+
+                    $tx->delete();
+                }
+
+                if (!empty($transferRef)) {
+                    Transfer::query()
+                        ->where('transfer_code', $transferRef)
+                        ->delete();
+                }
+
+                return;
+            }
+
+            $wallet = Wallet::query()
+                ->withTrashed()
+                ->lockForUpdate()
+                ->find($transaction->wallet_id);
+
+            if ($wallet !== null) {
+                $amount = round((float) $transaction->amount, 2);
+                $currentBalance = round((float) $wallet->balance, 2);
+
+                if ($transaction->type === TransactionTypeEnum::EXPENSE) {
+                    $newBalance = round($currentBalance + $amount, 2);
+                } else {
+                    $newBalance = round($currentBalance - $amount, 2);
+
+                    if ($newBalance < 0) {
+                        throw new DomainException(
+                            sprintf(
+                                'Saldo pada %s (Rp%s) tidak mencukupi untuk menghapus transaksi pemasukan sebesar Rp%s.',
+                                $wallet->name,
+                                number_format($currentBalance, 0, ',', '.'),
+                                number_format($amount, 0, ',', '.')
+                            )
+                        );
+                    }
+                }
+
+                $wallet->update([
+                    'balance' => number_format($newBalance, 2, '.', ''),
+                ]);
+            }
+
+            $transaction->delete();
         });
     }
 

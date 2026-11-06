@@ -19,8 +19,8 @@ enum TransactionTypeEnum: string
         return match ($this) {
             self::INCOME => 'Pemasukan',
             self::EXPENSE => 'Pengeluaran',
-            self::TRANSFER_IN => 'Transfer Masuk',
-            self::TRANSFER_OUT => 'Transfer Keluar',
+            self::TRANSFER_IN => 'Terima dari Kantong',
+            self::TRANSFER_OUT => 'Pindah ke Kantong',
         };
     }
 
