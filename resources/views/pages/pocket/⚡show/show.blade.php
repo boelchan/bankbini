@@ -83,7 +83,7 @@
                 </div>
                 <div class="space-y-1">
                     <div class="flex items-center gap-2 flex-wrap">
-                        <h2 class="text-lg font-bold text-slate-900">{{ $wallet->name }}</h2>
+                        <h2 class="text-lg font-bold {{ $colorEnum->accentTextClasses() }}">{{ $wallet->name }}</h2>
                         @if (!$wallet->isActive())
                             <x-badge :text="$wallet->status->label()" :color="$wallet->status->color()" sm light />
                         @endif

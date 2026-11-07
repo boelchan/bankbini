@@ -8,7 +8,7 @@
 Aplikasi menggunakan **2 menu utama** agar ringkas dan mudah digunakan sehari-hari:
 1. **Dashboard (`/dashboard`)**:
    - Menampilkan ringkasan Total Saldo Seluruh Kantong, Pemasukan Bulan Ini, dan Pengeluaran Bulan Ini.
-   - Menampilkan **Kotak-Kotak Kantong** (*Pocket Grid*) dengan tampilan pastel kewanitaan yang manis dan border jahitan (`border-2 border-dashed` + `ring-4 ring-white/80 ring-inset`).
+   - Menampilkan **Kotak-Kotak Kantong** (*Pocket Grid*) dengan tampilan warna ceria yang manis, ramah anak & keluarga (*candy / playful pastels* seperti Permen Stroberi, Permen Karet, Madu Karamel, Permen Lemon, Melon Segar, Awan Biru, Lilac Gemas, dsb.) dengan kartu membulat `rounded-2xl`, badge ikon stiker manis (`bg-white shadow-2xs`), serta kontras teks yang nyaman (WCAG AA).
    - Status kantong **tidak ditampilkan jika berstatus Aktif** (hanya tampil badge jika kantong sedang Dibekukan). Tidak menampilkan teks tipe kantong generik.
    - Tombol aksi kantong menggunakan **tombol ikon bulat (`<x-button.circle>`)** yang ditempatkan rapi di samping nama kantong:
      - **Ikon `±` (`plus-minus`)**: Membuka **1 formulir transaksi terpadu** berbasis pilihan radio tanpa label (`<x-radio.group>`) dengan pilihan **Pengeluaran** (Pengeluaran Baru / Pindah ke Kantong Lain) atau **Pemasukan** (Pemasukan Baru / Ambil dari Kantong Lain) di bagian paling atas. Keterangan transaksi keluar antar kantong tercatat konsisten sebagai `"Pindah ke [Nama Kantong]"` dan transaksi masuk antar kantong tercatat sebagai `"Terima dari [Nama Kantong]"`.

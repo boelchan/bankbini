@@ -79,36 +79,42 @@
                 @endphp
                 <x-card class="{{ $colorEnum->cardClasses() }}">
                     <div class="flex flex-col gap-3">
-                        {{-- Bagian Atas: Nama Kantong, Saldo Utama, dan Tombol Aksi --}}
+                        {{-- Bagian Atas: Ikon Kantong, Nama Kantong, Saldo Utama, dan Tombol Aksi --}}
                         <div class="flex items-start justify-between gap-3">
-                            <div class="min-w-0 flex-1">
-                                <div class="flex items-center gap-1.5 flex-wrap">
-                                    <h3 class="text-sm font-semibold text-slate-700 truncate">
-                                        {{ $wallet->name }}
-                                    </h3>
-                                    @if (!$wallet->isActive())
-                                        <x-badge
-                                            :text="$wallet->status->label()"
-                                            :color="$wallet->status->color()"
-                                            xs
-                                            light
-                                        />
-                                    @endif
+                            <div class="flex items-start gap-2.5 min-w-0 flex-1">
+                                <div class="flex size-11 shrink-0 items-center justify-center rounded-2xl {{ $colorEnum->iconBadgeClasses() }}">
+                                    <x-wallet-icon :icon="$wallet->icon" class="size-6" />
                                 </div>
 
-                                <p class="mt-0.5 text-xl sm:text-2xl font-bold tracking-tight text-slate-900 tabular-nums">
-                                    {{ $wallet->formattedBalance() }}
-                                </p>
+                                <div class="min-w-0 flex-1">
+                                    <div class="flex items-center gap-1.5 flex-wrap">
+                                        <h3 class="text-sm font-bold {{ $colorEnum->accentTextClasses() }} truncate">
+                                            {{ $wallet->name }}
+                                        </h3>
+                                        @if (!$wallet->isActive())
+                                            <x-badge
+                                                :text="$wallet->status->label()"
+                                                :color="$wallet->status->color()"
+                                                xs
+                                                light
+                                            />
+                                        @endif
+                                    </div>
 
-                                @if ($wallet->description)
-                                    <p class="mt-0.5 text-xs text-slate-500 truncate">
-                                        {{ $wallet->description }}
+                                    <p class="mt-0.5 text-xl sm:text-2xl font-bold tracking-tight text-slate-900 tabular-nums">
+                                        {{ $wallet->formattedBalance() }}
                                     </p>
-                                @endif
+
+                                    @if ($wallet->description)
+                                        <p class="mt-0.5 text-xs text-slate-600 truncate">
+                                            {{ $wallet->description }}
+                                        </p>
+                                    @endif
+                                </div>
                             </div>
 
                             {{-- Tombol Ikon Aksi di Samping Kanan --}}
-                            <div class="flex items-center gap-1.5 shrink-0">
+                            <div class="flex items-center gap-1 shrink-0">
                                 @if ($wallet->isActive())
                                     <x-button.circle
                                         color="emerald"
@@ -117,19 +123,21 @@
                                         wire:click="openTransactionModal({{ $wallet->id }})"
                                         title="Catat Pengeluaran / Pemasukan"
                                         aria-label="Catat Transaksi {{ $wallet->name }}"
+                                        class="bg-white/85 hover:bg-white shadow-2xs"
                                     >
                                         <x-ti-pencil class="size-4 font-bold" />
                                     </x-button.circle>
                                 @endif
 
                                 <x-button.circle
-                                    color="blue"
+                                    color="slate"
                                     flat    
                                     sm
                                     href="{{ route('pockets.show', $wallet) }}"
                                     wire:navigate
                                     title="Detail & Pengaturan Kantong"
                                     aria-label="Detail Kantong {{ $wallet->name }}"
+                                    class="bg-white/85 hover:bg-white shadow-2xs"
                                 >
                                     <x-ti-dots class="size-4" />
                                 </x-button.circle>
@@ -189,7 +197,7 @@
                                         wire:click="toggleExpandTransactions({{ $wallet->id }})"
                                         title="{{ $isExpanded ? 'Tampilkan 3 transaksi terakhir' : 'Lihat lebih banyak transaksi' }}"
                                         aria-label="{{ $isExpanded ? 'Tampilkan 3 transaksi terakhir' : 'Lihat lebih banyak transaksi' }}"
-                                        class="flex w-full items-center justify-center border-t border-slate-100 bg-rose-50/40 py-1.5 text-rose-700 hover:bg-rose-100/60 transition-colors cursor-pointer"
+                                        class="flex w-full items-center justify-center border-t border-slate-100 {{ $colorEnum->expandButtonClasses() }} py-1.5 transition-colors cursor-pointer"
                                     >
                                         @if ($isExpanded)
                                             <x-ti-chevrons-up class="size-4 animate-pulse motion-reduce:animate-none" />
@@ -208,17 +216,17 @@
             <button
                 type="button"
                 wire:click="openPocketModal"
-                class="group flex min-h-52 flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed border-rose-300 bg-rose-50/40 ring-4 ring-white/70 ring-inset p-6 text-center transition-all hover:border-rose-400 hover:bg-rose-50/80 focus-visible:outline-2 focus-visible:outline-emerald-600 cursor-pointer"
+                class="group flex min-h-52 flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed border-rose-300 bg-rose-50/60 p-6 text-center transition-all hover:border-rose-400 hover:bg-rose-100/70 focus-visible:outline-2 focus-visible:outline-emerald-600 cursor-pointer shadow-2xs"
             >
-                <div class="flex size-12 items-center justify-center rounded-2xl bg-white text-rose-600 border border-rose-200 shadow-2xs group-hover:scale-105 transition-transform">
+                <div class="flex size-12 items-center justify-center rounded-2xl bg-white text-rose-600 border border-rose-200 shadow-xs group-hover:scale-110 transition-transform">
                     <x-ti-plus class="size-6" />
                 </div>
                 <div class="space-y-1">
-                    <p class="text-sm font-bold text-slate-900">
+                    <p class="text-sm font-bold text-rose-950">
                         + Tambah Kantong
                     </p>
-                    <p class="text-xs text-slate-500 max-w-xs">
-                        Buat kantong baru untuk belanja dapur, tabungan, atau liburan
+                    <p class="text-xs text-rose-900/80 max-w-xs">
+                        Buat kantong baru untuk belanja dapur, tabungan jajan, atau liburan
                     </p>
                 </div>
             </button>
