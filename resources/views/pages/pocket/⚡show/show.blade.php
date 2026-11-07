@@ -130,24 +130,86 @@
     {{-- Histori Masuk & Keluar Kantong (Tanpa Kode TRX) --}}
     <x-card paddingless>
         <x-slot:header>
-            <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between w-full">
+            <div class="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between w-full">
                 <div>
                     <h3 class="text-sm sm:text-base font-semibold text-slate-900">Histori Masuk & Keluar Kantong</h3>
                     <p class="text-xs text-slate-500">Catatan seluruh perubahan saldo pada kantong {{ $wallet->name }}</p>
                 </div>
-                <div class="flex flex-col sm:flex-row gap-2 sm:w-80">
-                    <x-input
-                        wire:model.live.debounce.300ms="search"
-                        placeholder="Cari keterangan..."
-                    />
-                    <x-select.styled
-                        placeholder="Semua Jenis"
-                        wire:model.live="typeFilter"
-                        :options="\App\Enums\TransactionTypeEnum::choices()"
-                    />
-                </div>
+                @if ($search !== '' || $flowFilter !== '' || $typeFilter !== '' || $monthFilter !== '' || $categoryFilter !== null)
+                    <button
+                        type="button"
+                        wire:click="resetFilters"
+                        class="inline-flex items-center gap-1.5 rounded-xl border border-rose-200 bg-rose-50 px-3 py-1.5 text-xs font-semibold text-rose-700 hover:bg-rose-100 transition-colors cursor-pointer self-start sm:self-auto"
+                    >
+                        <x-ti-refresh class="size-3.5" />
+                        <span>Reset Filter</span>
+                    </button>
+                @endif
             </div>
         </x-slot:header>
+
+        {{-- Toolbar Filter Transaksi Lengkap (Bulan, Pemasukan/Pengeluaran, Jenis & Kategori) --}}
+        <div class="border-b border-slate-200/80 bg-slate-50/50 p-4 space-y-3.5">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+                {{-- Quick Filter Aliran Dana --}}
+                <div class="flex flex-wrap items-center gap-1.5">
+                    <button
+                        type="button"
+                        wire:click="setFlowFilter('')"
+                        class="rounded-xl px-3 py-1.5 text-xs font-semibold transition-colors cursor-pointer {{ $flowFilter === '' ? 'bg-emerald-600 text-white shadow-2xs' : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-100' }}"
+                    >
+                        Semua Aliran
+                    </button>
+                    <button
+                        type="button"
+                        wire:click="setFlowFilter('income')"
+                        class="rounded-xl px-3 py-1.5 text-xs font-semibold transition-colors cursor-pointer {{ $flowFilter === 'income' ? 'bg-emerald-600 text-white shadow-2xs' : 'bg-emerald-50 text-emerald-800 border border-emerald-200 hover:bg-emerald-100' }}"
+                    >
+                        Pemasukan (+)
+                    </button>
+                    <button
+                        type="button"
+                        wire:click="setFlowFilter('expense')"
+                        class="rounded-xl px-3 py-1.5 text-xs font-semibold transition-colors cursor-pointer {{ $flowFilter === 'expense' ? 'bg-rose-600 text-white shadow-2xs' : 'bg-rose-50 text-rose-800 border border-rose-200 hover:bg-rose-100' }}"
+                    >
+                        Pengeluaran (-)
+                    </button>
+                    <button
+                        type="button"
+                        wire:click="setFlowFilter('transfer')"
+                        class="rounded-xl px-3 py-1.5 text-xs font-semibold transition-colors cursor-pointer {{ $flowFilter === 'transfer' ? 'bg-sky-600 text-white shadow-2xs' : 'bg-sky-50 text-sky-800 border border-sky-200 hover:bg-sky-100' }}"
+                    >
+                        Pindah Uang (⇄)
+                    </button>
+                </div>
+            </div>
+
+            {{-- Input Filter: Cari Keterangan, Bulan, Jenis Transaksi, Kategori --}}
+            <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                <x-input
+                    wire:model.live.debounce.300ms="search"
+                    placeholder="Cari keterangan..."
+                />
+
+                <x-select.styled
+                    placeholder="Semua Bulan"
+                    wire:model.live="monthFilter"
+                    :options="$this->monthOptions"
+                />
+
+                <x-select.styled
+                    placeholder="Semua Jenis"
+                    wire:model.live="typeFilter"
+                    :options="\App\Enums\TransactionTypeEnum::choices()"
+                />
+
+                <x-select.styled
+                    placeholder="Semua Kategori"
+                    wire:model.live="categoryFilter"
+                    :options="$this->categoryFilterOptions"
+                />
+            </div>
+        </div>
 
         @if ($this->transactions->isEmpty())
             <div class="p-8 text-center space-y-2">
@@ -159,52 +221,68 @@
                 <table class="w-full text-left border-collapse">
                     <thead>
                         <tr class="border-b border-slate-200 bg-slate-50/80 text-xs font-semibold uppercase tracking-wider text-slate-500">
-                            <th class="py-3 pl-5 pr-3">Tanggal & Keterangan</th>
-                            <th class="px-3 py-3">Jenis</th>
-                            <th class="px-3 py-3 text-right">Nominal</th>
-                            <th class="px-3 py-3 text-right">Saldo Kantong</th>
-                            <th class="py-3 pl-3 pr-5 text-right">Aksi</th>
+                            <th class="py-3.5 pl-5 pr-3">Tanggal & Waktu</th>
+                            <th class="px-3 py-3.5">Keterangan</th>
+                            <th class="px-3 py-3.5">Tipe & Jenis</th>
+                            <th class="px-3 py-3.5 text-right">Nominal</th>
+                            <th class="px-3 py-3.5 text-right">Saldo Kantong</th>
+                            <th class="py-3.5 pl-3 pr-5 text-right">Aksi</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-200/70 text-sm">
                         @foreach ($this->transactions as $tx)
                             <tr class="hover:bg-slate-50/80 transition-colors">
-                                <td class="py-3 pl-5 pr-3">
+                                <td class="py-3.5 pl-5 pr-3 whitespace-nowrap">
+                                    <div class="font-semibold text-slate-900 text-xs sm:text-sm">
+                                        {{ $tx->transaction_date?->translatedFormat('d M Y') }}
+                                    </div>
+                                    <div class="text-xs text-slate-500">
+                                        {{ $tx->transaction_date?->translatedFormat('H:i') }} WIB
+                                    </div>
+                                </td>
+
+                                <td class="px-3 py-3.5">
                                     <div class="font-semibold text-slate-900">{{ $tx->displayDescription() }}</div>
-                                    <div class="mt-0.5 flex flex-wrap items-center gap-2 text-xs text-slate-500">
-                                        <span>{{ $tx->transaction_date?->translatedFormat('d M Y, H:i') }}</span>
+                                    <div class="mt-0.5 flex flex-wrap items-center gap-1.5 text-xs text-slate-500">
                                         @if ($tx->notes)
-                                            <span>•</span>
-                                            <span class="font-medium text-slate-700">{{ $tx->notes }}</span>
-                                        @endif
-                                        @if ($tx->category)
-                                            <span>•</span>
-                                            <span class="font-medium text-slate-700">{{ $tx->category->name }}</span>
-                                        @endif
-                                        @if ($tx->counterpart_wallet_name_snapshot)
-                                            <span>•</span>
-                                            <span class="text-slate-600">
-                                                {{ $tx->type === \App\Enums\TransactionTypeEnum::TRANSFER_IN ? 'Terima dari: ' : 'Pindah ke: ' }}
-                                                {{ $tx->resolvedCounterpartWalletName() }}
-                                            </span>
+                                            <span>{{ $tx->notes }}</span>
                                         @endif
                                         @if ($tx->user)
-                                            <span>•</span>
+                                            @if ($tx->notes)
+                                                <span>•</span>
+                                            @endif
                                             <span>Oleh: {{ $tx->user->name }}</span>
                                         @endif
                                     </div>
                                 </td>
-                                <td class="px-3 py-3">
-                                    <x-badge :text="$tx->type->label()" :color="$tx->type->color()" sm light />
+
+                                <td class="px-3 py-3.5 whitespace-nowrap">
+                                    <div class="space-y-1">
+                                        <x-badge :text="$tx->type->label()" :color="$tx->type->color()" sm light />
+                                        @if ($tx->category)
+                                            <div class="text-xs font-medium text-slate-700 flex items-center gap-1">
+                                                <span class="size-1.5 rounded-full bg-slate-400 inline-block"></span>
+                                                <span>{{ $tx->category->name }}</span>
+                                            </div>
+                                        @elseif ($tx->counterpart_wallet_name_snapshot)
+                                            <div class="text-xs text-slate-500">
+                                                {{ $tx->type === \App\Enums\TransactionTypeEnum::TRANSFER_IN ? 'Dari: ' : 'Ke: ' }}
+                                                <span class="font-medium text-slate-700">{{ $tx->resolvedCounterpartWalletName() }}</span>
+                                            </div>
+                                        @endif
+                                    </div>
                                 </td>
-                                <td class="px-3 py-3 text-right font-bold tabular-nums {{ $tx->type->isPositive() ? 'text-emerald-700' : 'text-rose-700' }}">
+
+                                <td class="px-3 py-3.5 text-right font-bold tabular-nums whitespace-nowrap {{ $tx->type->isPositive() ? 'text-emerald-700' : 'text-rose-700' }}">
                                     {{ $tx->formattedSignedAmount() }}
                                 </td>
-                                <td class="px-3 py-3 text-right">
+
+                                <td class="px-3 py-3.5 text-right whitespace-nowrap">
                                     <div class="text-xs font-semibold text-slate-900 tabular-nums">{{ $tx->formattedBalanceAfter() }}</div>
-                                    <div class="text-xs text-slate-500 tabular-nums">Awal: {{ $tx->formattedBalanceBefore() }}</div>
+                                    <div class="text-xs text-slate-400 tabular-nums">Awal: {{ $tx->formattedBalanceBefore() }}</div>
                                 </td>
-                                <td class="py-3 pl-3 pr-5 text-right">
+
+                                <td class="py-3.5 pl-3 pr-5 text-right whitespace-nowrap">
                                     @if ($loop->first && $this->transactions->currentPage() === 1)
                                         <x-button.circle
                                             color="red"

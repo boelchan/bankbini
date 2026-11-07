@@ -34,6 +34,9 @@ class extends Component
     /* Filter Riwayat Transaksi Kantong */
     public string $search = '';
     public string $typeFilter = '';
+    public string $flowFilter = '';
+    public string $monthFilter = '';
+    public ?int $categoryFilter = null;
 
     /* Modal State */
     public bool $incomeModal = false;
@@ -100,6 +103,103 @@ class extends Component
     }
 
     /**
+     * Reset halaman paginasi saat filter aliran dana berubah.
+     */
+    public function updatedFlowFilter(): void
+    {
+        $this->resetPage();
+    }
+
+    /**
+     * Reset halaman paginasi saat filter bulan transaksi berubah.
+     */
+    public function updatedMonthFilter(): void
+    {
+        $this->resetPage();
+    }
+
+    /**
+     * Reset halaman paginasi saat filter kategori berubah.
+     */
+    public function updatedCategoryFilter(): void
+    {
+        $this->resetPage();
+    }
+
+    /**
+     * Mengatur filter cepat arah aliran dana (Semua / Pemasukan / Pengeluaran / Pindah Uang).
+     */
+    public function setFlowFilter(string $flow): void
+    {
+        $this->flowFilter = $flow;
+        $this->resetPage();
+    }
+
+    /**
+     * Mereset seluruh filter transaksi ke kondisi default.
+     */
+    public function resetFilters(): void
+    {
+        $this->search = '';
+        $this->typeFilter = '';
+        $this->flowFilter = '';
+        $this->monthFilter = '';
+        $this->categoryFilter = null;
+        $this->resetPage();
+    }
+
+    /**
+     * Mengambil daftar pilihan bulan dari riwayat transaksi kantong ini.
+     *
+     * @return array<int, array{label: string, value: string}>
+     */
+    #[Computed]
+    public function monthOptions(): array
+    {
+        $dates = Transaction::query()
+            ->where('wallet_id', $this->wallet->id)
+            ->whereNotNull('transaction_date')
+            ->selectRaw('DISTINCT DATE_FORMAT(transaction_date, "%Y-%m") as ym')
+            ->orderByDesc('ym')
+            ->pluck('ym')
+            ->filter()
+            ->values()
+            ->all();
+
+        $currentYm = now()->format('Y-m');
+        if (!in_array($currentYm, $dates, true)) {
+            array_unshift($dates, $currentYm);
+        }
+
+        return array_map(function (string $ym): array {
+            $carbon = \Carbon\Carbon::createFromFormat('Y-m', $ym);
+
+            return [
+                'label' => $carbon ? $carbon->translatedFormat('F Y') : $ym,
+                'value' => $ym,
+            ];
+        }, $dates);
+    }
+
+    /**
+     * Mengambil daftar pilihan kategori untuk filter transaksi.
+     *
+     * @return array<int, array{label: string, value: int}>
+     */
+    #[Computed]
+    public function categoryFilterOptions(): array
+    {
+        return TransactionCategory::query()
+            ->orderBy('name')
+            ->get()
+            ->map(fn (TransactionCategory $c): array => [
+                'label' => $c->name . ' (' . ($c->type === CategoryTypeEnum::INCOME ? 'Masuk' : 'Keluar') . ')',
+                'value' => $c->id,
+            ])
+            ->all();
+    }
+
+    /**
      * Menghitung ringkasan uang masuk dan keluar pada kantong ini.
      *
      * @return array<string, float>
@@ -135,10 +235,34 @@ class extends Component
             ->where('wallet_id', $this->wallet->id)
             ->when($this->search !== '', function ($query): void {
                 $term = '%' . trim($this->search) . '%';
-                $query->where('description', 'like', $term);
+                $query->where(function ($sub) use ($term): void {
+                    $sub->where('description', 'like', $term)
+                        ->orWhere('notes', 'like', $term)
+                        ->orWhere('counterpart_wallet_name_snapshot', 'like', $term);
+                });
+            })
+            ->when($this->flowFilter !== '', function ($query): void {
+                match ($this->flowFilter) {
+                    'income' => $query->whereIn('type', [TransactionTypeEnum::INCOME, TransactionTypeEnum::TRANSFER_IN]),
+                    'expense' => $query->whereIn('type', [TransactionTypeEnum::EXPENSE, TransactionTypeEnum::TRANSFER_OUT]),
+                    'transfer' => $query->whereIn('type', [TransactionTypeEnum::TRANSFER_IN, TransactionTypeEnum::TRANSFER_OUT]),
+                    default => null,
+                };
             })
             ->when($this->typeFilter !== '', function ($query): void {
                 $query->where('type', $this->typeFilter);
+            })
+            ->when($this->monthFilter !== '', function ($query): void {
+                try {
+                    $start = \Carbon\Carbon::createFromFormat('Y-m', $this->monthFilter)->startOfMonth();
+                    $end = (clone $start)->endOfMonth();
+                    $query->whereBetween('transaction_date', [$start, $end]);
+                } catch (\Throwable) {
+                    // Abaikan format yang tidak valid
+                }
+            })
+            ->when($this->categoryFilter !== null, function ($query): void {
+                $query->where('transaction_category_id', $this->categoryFilter);
             })
             ->orderByDesc('transaction_date')
             ->orderByDesc('id')

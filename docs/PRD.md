@@ -28,7 +28,7 @@ Diakses melalui tombol **Detail** pada kotak kantong di Dashboard:
   2. **- Pengeluaran**: Catat pengeluaran dari kantong ini.
   3. **⇄ Pindah Uang**: Pindahkan saldo dari kantong ini ke kantong aktif lain.
 - Menyediakan tombol pengelolaan kantong: **Ubah Kantong**, **Bekukan / Aktifkan**, dan **Hapus Kantong** (wajib memindahkan sisa saldo ke kantong lain bila saldo > Rp0).
-- Menampilkan tabel **Histori Masuk & Keluar Kantong** beserta saldo sebelum dan sesudah transaksi tanpa kode TRX.
+- Menampilkan tabel **Histori Masuk & Keluar Kantong** beserta saldo sebelum dan sesudah transaksi tanpa kode TRX, lengkap dengan filter bulan transaksi, filter cepat aliran dana (Semua / Pemasukan / Pengeluaran / Pindah Uang), filter jenis transaksi, filter kategori, pencarian keterangan, serta tombol reset filter.
 
 ## 4. Integritas Keuangan & Database
 - Seluruh perubahan saldo diproses melalui backend service (`WalletService`, `TransactionService`, `TransferService`) di dalam `DB::transaction` dengan penguncian baris `SELECT ... FOR UPDATE` (`lockForUpdate()`).

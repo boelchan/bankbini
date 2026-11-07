@@ -2,10 +2,6 @@
     {{-- Header Sapaan --}}
     <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
-            <div class="inline-flex items-center gap-1.5 rounded-full bg-rose-50 px-3 py-1 text-xs font-semibold text-rose-800 border border-rose-200 mb-1.5">
-                <x-ti-heart class="size-3.5 text-rose-600" />
-                <span>Kantong Keuangan Keluarga</span>
-            </div>
             <h1 class="text-lg font-bold text-slate-900 sm:text-xl">
                 Halo, {{ auth()->user()->name }}!
             </h1>
@@ -21,9 +17,6 @@
                     <p class="mt-1.5 text-2xl font-bold text-emerald-950 tabular-nums">
                         Rp{{ number_format((float) $this->summary['total_balance'], 0, ',', '.') }}
                     </p>
-                    <p class="mt-1 text-xs font-medium text-emerald-900">
-                        Dari {{ $this->summary['pocket_count'] }} kantong keuangan
-                    </p>
                 </div>
                 <div class="flex size-10 shrink-0 items-center justify-center rounded-xl bg-white/75 text-emerald-900 border border-emerald-400">
                     <x-ti-wallet class="size-5" />
@@ -38,9 +31,6 @@
                     <p class="mt-1.5 text-2xl font-bold text-sky-950 tabular-nums">
                         +Rp{{ number_format((float) $this->summary['monthly_income'], 0, ',', '.') }}
                     </p>
-                    <p class="mt-1 text-xs font-medium text-sky-900">
-                        {{ now()->translatedFormat('F Y') }}
-                    </p>
                 </div>
                 <div class="flex size-10 shrink-0 items-center justify-center rounded-xl bg-white/75 text-sky-900 border border-sky-400">
                     <x-ti-arrow-down-left class="size-5" />
@@ -54,9 +44,6 @@
                     <p class="text-xs font-semibold uppercase tracking-wider text-rose-950">Pengeluaran Bulan Ini</p>
                     <p class="mt-1.5 text-2xl font-bold text-rose-950 tabular-nums">
                         -Rp{{ number_format((float) $this->summary['monthly_expense'], 0, ',', '.') }}
-                    </p>
-                    <p class="mt-1 text-xs font-medium text-rose-900">
-                        {{ now()->translatedFormat('F Y') }}
                     </p>
                 </div>
                 <div class="flex size-10 shrink-0 items-center justify-center rounded-xl bg-white/75 text-rose-900 border border-rose-400">
@@ -79,38 +66,32 @@
                 @endphp
                 <x-card class="{{ $colorEnum->cardClasses() }}">
                     <div class="flex flex-col gap-3">
-                        {{-- Bagian Atas: Ikon Kantong, Nama Kantong, Saldo Utama, dan Tombol Aksi --}}
+                        {{-- Bagian Atas: Nama Kantong, Saldo Utama, dan Tombol Aksi --}}
                         <div class="flex items-start justify-between gap-3">
-                            <div class="flex items-start gap-2.5 min-w-0 flex-1">
-                                <div class="flex size-11 shrink-0 items-center justify-center rounded-2xl {{ $colorEnum->iconBadgeClasses() }}">
-                                    <x-wallet-icon :icon="$wallet->icon" class="size-6" />
-                                </div>
-
-                                <div class="min-w-0 flex-1">
-                                    <div class="flex items-center gap-1.5 flex-wrap">
-                                        <h3 class="text-sm font-bold {{ $colorEnum->accentTextClasses() }} truncate">
-                                            {{ $wallet->name }}
-                                        </h3>
-                                        @if (!$wallet->isActive())
-                                            <x-badge
-                                                :text="$wallet->status->label()"
-                                                :color="$wallet->status->color()"
-                                                xs
-                                                light
-                                            />
-                                        @endif
-                                    </div>
-
-                                    <p class="mt-0.5 text-xl sm:text-2xl font-bold tracking-tight text-slate-900 tabular-nums">
-                                        {{ $wallet->formattedBalance() }}
-                                    </p>
-
-                                    @if ($wallet->description)
-                                        <p class="mt-0.5 text-xs text-slate-600 truncate">
-                                            {{ $wallet->description }}
-                                        </p>
+                            <div class="min-w-0 flex-1">
+                                <div class="flex items-center gap-1.5 flex-wrap">
+                                    <h3 class="text-sm font-bold {{ $colorEnum->accentTextClasses() }} truncate">
+                                        {{ $wallet->name }}
+                                    </h3>
+                                    @if (!$wallet->isActive())
+                                        <x-badge
+                                            :text="$wallet->status->label()"
+                                            :color="$wallet->status->color()"
+                                            xs
+                                            light
+                                        />
                                     @endif
                                 </div>
+
+                                <p class="mt-0.5 text-xl sm:text-2xl font-bold tracking-tight text-slate-900 tabular-nums">
+                                    {{ $wallet->formattedBalance() }}
+                                </p>
+
+                                @if ($wallet->description)
+                                    <p class="mt-0.5 text-xs text-slate-600 truncate">
+                                        {{ $wallet->description }}
+                                    </p>
+                                @endif
                             </div>
 
                             {{-- Tombol Ikon Aksi di Samping Kanan --}}
@@ -161,12 +142,18 @@
                                                 <p class="font-medium text-slate-800 truncate">
                                                     {{ $tx->displayDescription() }}
                                                 </p>
-                                                <p class="text-slate-500 truncate">
-                                                    {{ $tx->transaction_date?->translatedFormat('d M, H:i') }}
-                                                    @if ($tx->notes)
-                                                        • {{ $tx->notes }}
-                                                    @elseif ($tx->category)
-                                                        • {{ $tx->category->name }}
+                                                <p class="text-slate-500 truncate flex items-center gap-1.5 flex-wrap">
+                                                    <span>{{ $tx->transaction_date?->translatedFormat('d M, H:i') }}</span>
+                                                    <span>•</span>
+                                                    <span class="font-medium {{ $tx->type->isPositive() ? 'text-emerald-700' : 'text-rose-700' }}">
+                                                        {{ $tx->type->label() }}
+                                                    </span>
+                                                    @if ($tx->category)
+                                                        <span>•</span>
+                                                        <span>{{ $tx->category->name }}</span>
+                                                    @elseif ($tx->notes)
+                                                        <span>•</span>
+                                                        <span>{{ $tx->notes }}</span>
                                                     @endif
                                                 </p>
                                             </div>
