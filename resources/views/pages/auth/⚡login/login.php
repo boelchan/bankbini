@@ -31,12 +31,12 @@ new class extends Component
     public bool $remember = false;
 
     /**
-     * Arahkan pengguna yang sudah login ke dashboard.
+     * Arahkan pengguna yang sudah login ke halaman Home.
      */
     public function mount(): void
     {
         if (Auth::check()) {
-            $this->redirectRoute('dashboard', navigate: true);
+            $this->redirectRoute('home', navigate: true);
         }
     }
 
@@ -115,7 +115,7 @@ new class extends Component
             session()->regenerate();
         }
 
-        $this->redirectIntended(default: route('dashboard', absolute: false), navigate: true);
+        $this->redirectIntended(default: route('home', absolute: false), navigate: true);
     }
 
     /**

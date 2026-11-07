@@ -3,17 +3,17 @@
 @endphp
 
 <div class="space-y-6">
-    {{-- Header & Navigasi Kembali ke Dashboard --}}
+    {{-- Header & Navigasi Kembali ke Daftar Kantong --}}
     <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
             <h1 class="text-lg font-bold text-slate-900 sm:text-xl">Detail Kantong: {{ $wallet->name }}</h1>
             <nav class="flex items-center gap-1.5 text-sm text-slate-500 mt-1">
-                <a href="{{ route('dashboard') }}" wire:navigate class="hover:text-emerald-600 transition-colors">
+                <a href="{{ route('home') }}" wire:navigate class="hover:text-emerald-600 transition-colors">
                     <x-ti-home class="size-4" />
                 </a>
                 <span>/</span>
-                <a href="{{ route('dashboard') }}" wire:navigate class="hover:text-emerald-600 transition-colors">
-                    Dashboard
+                <a href="{{ route('pockets.index') }}" wire:navigate class="hover:text-emerald-600 transition-colors">
+                    Kantong
                 </a>
                 <span>/</span>
                 <span class="text-slate-700 font-medium">{{ $wallet->name }}</span>
@@ -21,10 +21,17 @@
         </div>
 
         <div class="flex flex-wrap items-center gap-1.5 sm:gap-2">
-            <x-button color="slate" outline sm href="{{ route('dashboard') }}" wire:navigate class="rounded-xl">
+            <x-button color="slate" outline sm href="{{ route('pockets.index') }}" wire:navigate class="rounded-xl">
                 <x-ti-arrow-left class="size-4 mr-1" />
-                <span class="hidden xs:inline">Kembali ke </span>Dashboard
+                <span class="hidden xs:inline">Kembali ke </span>Kantong
             </x-button>
+
+            @if (!$wallet->is_primary && $wallet->isActive())
+                <x-button color="amber" flat sm wire:click="makePrimary" class="rounded-xl" title="Jadikan kantong utama yang tampil di Home">
+                    <x-ti-star class="size-4 mr-1 text-amber-500" />
+                    Jadikan Utama
+                </x-button>
+            @endif
 
             <x-button color="emerald" flat sm wire:click="openEditModal" class="rounded-xl">
                 <x-ti-edit class="size-4 mr-1" />
@@ -84,6 +91,12 @@
                 <div class="space-y-1">
                     <div class="flex items-center gap-2 flex-wrap">
                         <h2 class="text-lg font-bold {{ $colorEnum->accentTextClasses() }}">{{ $wallet->name }}</h2>
+                        @if ($wallet->is_primary)
+                            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-900 border border-amber-300 shadow-2xs">
+                                <x-ti-star-filled class="size-3 text-amber-500" />
+                                <span>Kantong Utama</span>
+                            </span>
+                        @endif
                         @if (!$wallet->isActive())
                             <x-badge :text="$wallet->status->label()" :color="$wallet->status->color()" sm light />
                         @endif

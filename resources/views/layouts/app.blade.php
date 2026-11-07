@@ -75,7 +75,7 @@
                 <div class="relative z-10 flex h-full flex-col min-h-0">
                     {{-- Header saat Sidebar Terbuka --}}
                     <div class="flex items-center justify-between pb-3 mb-3 border-b border-slate-200/80" x-show="sidebarOpen || window.innerWidth < 1024">
-                        <a href="{{ route('dashboard') }}" class="flex items-center gap-2.5 min-w-0 rounded-xl p-1.5 hover:bg-white/80 transition-colors" wire:navigate @click="closeMobile()">
+                        <a href="{{ route('home') }}" class="flex items-center gap-2.5 min-w-0 rounded-xl p-1.5 hover:bg-white/80 transition-colors" wire:navigate @click="closeMobile()">
                             <div class="flex size-9 shrink-0 items-center justify-center rounded-xl border border-rose-200 bg-rose-100 text-rose-700 shadow-2xs">
                                 <x-ti-wallet class="size-5" aria-hidden="true" />
                             </div>
@@ -111,7 +111,7 @@
                     {{-- Header saat Sidebar Diciutkan di Desktop --}}
                     <div class="hidden lg:flex flex-col items-center gap-2 pb-3 mb-3 border-b border-slate-200/80" x-show="!sidebarOpen" x-cloak>
                         <a
-                            href="{{ route('dashboard') }}"
+                            href="{{ route('home') }}"
                             class="flex size-9 shrink-0 items-center justify-center rounded-xl border border-rose-200 bg-rose-100 text-rose-700 hover:bg-rose-200/70 transition-colors"
                             wire:navigate
                             x-tooltip="Bank BINI"
@@ -136,21 +136,28 @@
                         </button>
                     </div>
 
-                    {{-- 2 Menu Utama: Dashboard & Transaksi --}}
+                    {{-- 3 Menu Utama: Home, Kantong, & Rekap --}}
                     <nav class="flex-1 overflow-y-auto space-y-1" aria-label="Menu Utama">
                         <ul class="flex flex-col gap-1.5 w-full ps-0">
                             <x-sidebar.item
-                                href="{{ route('dashboard') }}"
-                                icon="layout-dashboard"
-                                title="Dashboard"
-                                :active="request()->routeIs('dashboard') || request()->routeIs('pockets.*')"
+                                href="{{ route('home') }}"
+                                icon="home"
+                                title="Home"
+                                :active="request()->routeIs('home')"
                             />
 
                             <x-sidebar.item
-                                href="{{ route('transactions.index') }}"
-                                icon="list-details"
-                                title="Transaksi"
-                                :active="request()->routeIs('transactions.*')"
+                                href="{{ route('pockets.index') }}"
+                                icon="wallet"
+                                title="Kantong"
+                                :active="request()->routeIs('pockets.*')"
+                            />
+
+                            <x-sidebar.item
+                                href="{{ route('recap.index') }}"
+                                icon="report-analytics"
+                                title="Rekap"
+                                :active="request()->routeIs('recap.*') || request()->routeIs('transactions.*')"
                             />
                         </ul>
                     </nav>
@@ -245,7 +252,7 @@
                         >
                             <x-ti-menu-2 class="size-5" aria-hidden="true" />
                         </button>
-                        <a href="{{ route('dashboard') }}" class="flex items-center gap-2" wire:navigate>
+                        <a href="{{ route('home') }}" class="flex items-center gap-2" wire:navigate>
                             <div class="flex size-8 items-center justify-center rounded-xl bg-rose-100 text-rose-700 border border-rose-200">
                                 <x-ti-wallet class="size-4.5" aria-hidden="true" />
                             </div>
@@ -283,29 +290,38 @@
                 </footer>
             </main>
 
-            <!-- Bottom Navigation Khusus Mobile (2 Menu Utama: Dashboard & Transaksi) -->
+            <!-- Bottom Navigation Khusus Mobile (3 Menu Utama: Home, Kantong, & Rekap) -->
             @auth
                 <nav
                     aria-label="Navigasi Bawah Ponsel"
                     class="fixed bottom-0 inset-x-0 z-30 border-t border-slate-200 bg-white/95 backdrop-blur-md px-3 py-1.5 lg:hidden select-none shadow-sm"
                 >
-                    <div class="grid grid-cols-2 gap-2 max-w-sm mx-auto">
+                    <div class="grid grid-cols-3 gap-1.5 max-w-sm mx-auto">
                         <a
-                            href="{{ route('dashboard') }}"
+                            href="{{ route('home') }}"
                             wire:navigate
-                            class="flex items-center justify-center gap-2 min-h-11 rounded-xl px-3 py-2 text-xs font-semibold transition-colors {{ request()->routeIs('dashboard') || request()->routeIs('pockets.*') ? 'text-emerald-800 bg-emerald-50 border border-emerald-200' : 'text-slate-600 hover:text-slate-900' }}"
+                            class="flex flex-col items-center justify-center gap-1 min-h-12 rounded-xl px-2 py-1.5 text-xs font-semibold transition-colors {{ request()->routeIs('home') ? 'text-emerald-800 bg-emerald-50 border border-emerald-200' : 'text-slate-600 hover:text-slate-900' }}"
                         >
-                            <x-ti-layout-dashboard class="size-5 {{ request()->routeIs('dashboard') || request()->routeIs('pockets.*') ? 'text-emerald-600' : 'text-slate-500' }}" aria-hidden="true" />
-                            <span>Dashboard</span>
+                            <x-ti-home class="size-5 {{ request()->routeIs('home') ? 'text-emerald-600' : 'text-slate-500' }}" aria-hidden="true" />
+                            <span>Home</span>
                         </a>
 
                         <a
-                            href="{{ route('transactions.index') }}"
+                            href="{{ route('pockets.index') }}"
                             wire:navigate
-                            class="flex items-center justify-center gap-2 min-h-11 rounded-xl px-3 py-2 text-xs font-semibold transition-colors {{ request()->routeIs('transactions.*') ? 'text-emerald-800 bg-emerald-50 border border-emerald-200' : 'text-slate-600 hover:text-slate-900' }}"
+                            class="flex flex-col items-center justify-center gap-1 min-h-12 rounded-xl px-2 py-1.5 text-xs font-semibold transition-colors {{ request()->routeIs('pockets.*') ? 'text-emerald-800 bg-emerald-50 border border-emerald-200' : 'text-slate-600 hover:text-slate-900' }}"
                         >
-                            <x-ti-list-details class="size-5 {{ request()->routeIs('transactions.*') ? 'text-emerald-600' : 'text-slate-500' }}" aria-hidden="true" />
-                            <span>Transaksi</span>
+                            <x-ti-wallet class="size-5 {{ request()->routeIs('pockets.*') ? 'text-emerald-600' : 'text-slate-500' }}" aria-hidden="true" />
+                            <span>Kantong</span>
+                        </a>
+
+                        <a
+                            href="{{ route('recap.index') }}"
+                            wire:navigate
+                            class="flex flex-col items-center justify-center gap-1 min-h-12 rounded-xl px-2 py-1.5 text-xs font-semibold transition-colors {{ request()->routeIs('recap.*') || request()->routeIs('transactions.*') ? 'text-emerald-800 bg-emerald-50 border border-emerald-200' : 'text-slate-600 hover:text-slate-900' }}"
+                        >
+                            <x-ti-report-analytics class="size-5 {{ request()->routeIs('recap.*') || request()->routeIs('transactions.*') ? 'text-emerald-600' : 'text-slate-500' }}" aria-hidden="true" />
+                            <span>Rekap</span>
                         </a>
                     </div>
                 </nav>

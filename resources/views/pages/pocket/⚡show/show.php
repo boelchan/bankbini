@@ -593,7 +593,17 @@ class extends Component
     }
 
     /**
-     * Menutup dan menghapus kantong lalu mengarahkan ke Dashboard.
+     * Menjadikan kantong ini sebagai kantong utama keluarga.
+     */
+    public function makePrimary(WalletService $walletService): void
+    {
+        $walletService->setPrimaryWallet($this->wallet);
+        $this->refreshPocketState();
+        $this->toast()->success('Kantong Utama Diperbarui', sprintf('Kantong "%s" kini menjadi kantong utama keluarga.', $this->wallet->name))->send();
+    }
+
+    /**
+     * Menutup dan menghapus kantong lalu mengarahkan ke daftar Kantong.
      */
     public function confirmDeletePocket(WalletService $walletService): void
     {
@@ -606,7 +616,7 @@ class extends Component
 
             $this->deleteModal = false;
             $this->toast()->success('Kantong Dihapus', 'Kantong berhasil ditutup dan histori tetap tersimpan.')->send();
-            $this->redirectRoute('dashboard', navigate: true);
+            $this->redirectRoute('pockets.index', navigate: true);
         } catch (\DomainException|ValidationException $e) {
             $msg = $e instanceof ValidationException
                 ? (collect($e->errors())->flatten()->first() ?? 'Gagal menghapus kantong.')

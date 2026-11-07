@@ -6,7 +6,7 @@ use App\Http\Controllers\LogoutController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return to_route('login');
+    return auth()->check() ? to_route('home') : to_route('login');
 });
 
 /*
@@ -20,18 +20,25 @@ Route::post('/logout', LogoutController::class)->name('logout')->middleware('aut
 
 /*
 |--------------------------------------------------------------------------
-| Area Terautentikasi (Menu Utama: Dashboard & Transaksi)
+| Area Terautentikasi (3 Menu Utama: Home, Kantong, Rekap)
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth', 'active'])->group(function () {
-    /* 1. Menu Dashboard (Kotak-Kotak Kantong & Aksi Cepat) */
-    Route::livewire('/dashboard', 'pages::dashboard')->name('dashboard');
+    /* 1. Menu Home (Detail Kantong Utama) */
+    Route::livewire('/home', 'pages::home')->name('home');
 
-    /* Detail Kantong (Diakses dari Tombol Detail pada Kotak Kantong) */
+    /* 2. Menu Kantong (List Seluruh Kantong Keluarga) */
+    Route::livewire('/pockets', 'pages::pocket.index')->name('pockets.index');
+
+    /* Detail Kantong Tertentu (Diakses dari tombol titik tiga pada kartu kantong) */
     Route::livewire('/pockets/{wallet}', 'pages::pocket.show')->name('pockets.show');
 
-    /* 2. Menu Transaksi (Riwayat & Pencatatan) */
-    Route::livewire('/transactions', 'pages::transaction.index')->name('transactions.index');
+    /* 3. Menu Rekap (Rekap Seluruh Mutasi Transaksi) */
+    Route::livewire('/recap', 'pages::recap.index')->name('recap.index');
+
+    /* Alias Redirect untuk Kompatibilitas URL Lama */
+    Route::get('/dashboard', fn () => redirect()->route('home'))->name('dashboard');
+    Route::get('/transactions', fn () => redirect()->route('recap.index'))->name('transactions.index');
 
     /* Profil & Akun */
     Route::livewire('/account', 'pages::account.index')->name('account');

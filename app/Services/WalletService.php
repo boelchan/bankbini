@@ -112,6 +112,77 @@ class WalletService
     }
 
     /**
+     * Mengambil kantong utama keluarga. Jika belum ada yang ditandai utama,
+     * otomatis menetapkan kantong pertama atau membuat kantong default.
+     */
+    public function getPrimaryWallet(?int $userId = null): Wallet
+    {
+        $primary = Wallet::query()
+            ->visible()
+            ->where('is_primary', true)
+            ->first();
+
+        if ($primary !== null) {
+            return $primary;
+        }
+
+        $fallback = Wallet::query()
+            ->visible()
+            ->oldest()
+            ->first();
+
+        if ($fallback !== null) {
+            $fallback->update(['is_primary' => true]);
+            return $fallback->fresh();
+        }
+
+        // Jika belum ada kantong sama sekali di sistem, buatkan 1 kantong utama default
+        return $this->createWallet([
+            'user_id' => $userId ?? 1,
+            'name' => 'Kantong Utama',
+            'description' => 'Kantong utama operasional dan kebutuhan harian keluarga',
+            'icon' => WalletIconEnum::WALLET->value,
+            'color' => WalletColorEnum::EMERALD->value,
+            'initial_balance' => 0,
+            'is_primary' => true,
+        ]);
+    }
+
+    /**
+     * Menetapkan kantong tertentu sebagai kantong utama dan mereset status utama kantong lainnya.
+     */
+    public function setPrimaryWallet(int|Wallet $wallet): Wallet
+    {
+        $walletId = $wallet instanceof Wallet ? (int) $wallet->id : (int) $wallet;
+
+        return DB::transaction(function () use ($walletId): Wallet {
+            $target = Wallet::query()
+                ->withTrashed()
+                ->lockForUpdate()
+                ->findOrFail($walletId);
+
+            if ($target->isRemoved()) {
+                throw new DomainException('Kantong yang sudah dihapus tidak dapat dijadikan kantong utama.');
+            }
+
+            Wallet::query()
+                ->where('id', '!=', $target->id)
+                ->where('is_primary', true)
+                ->update(['is_primary' => false]);
+
+            $target->update(['is_primary' => true]);
+
+            $this->logActivity(
+                $target,
+                'set_primary',
+                sprintf('Kantong "%s" ditetapkan sebagai kantong utama keluarga.', $target->name)
+            );
+
+            return $target->fresh();
+        });
+    }
+
+    /**
      * Memperbarui informasi nama, ikon, warna, dan deskripsi kantong tanpa mengubah histori transaksi lama.
      *
      * @param int|Wallet $userOrWallet

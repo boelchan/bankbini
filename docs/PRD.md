@@ -4,21 +4,30 @@
 **Bank BINI** adalah aplikasi manajemen kantong keuangan keluarga (*Pocket*) yang simpel, hangat, dan ramah digunakan bersama oleh **Suami dan Istri**.
 - **Kantong Bersama (Shared Household Pockets)**: Seluruh kantong (`wallets`), riwayat transaksi (`transactions`), pemindahan uang (`transfers`), dan kategori transaksi diakses secara bersama oleh seluruh akun keluarga (tidak terisolasi per `user_id`). Setiap transaksi tetap mencatat siapa anggota keluarga yang menginputnya (`Oleh: Suami / Istri`).
 
-## 2. Struktur Menu Utama (Sederhana & Fokus)
-Aplikasi menggunakan **2 menu utama** agar ringkas dan mudah digunakan sehari-hari:
-1. **Dashboard (`/dashboard`)**:
-   - Menampilkan ringkasan Total Saldo Seluruh Kantong, Pemasukan Bulan Ini, dan Pengeluaran Bulan Ini.
-   - Menampilkan **Kotak-Kotak Kantong** (*Pocket Grid*) dengan tampilan warna ceria yang manis, ramah anak & keluarga (*candy / playful pastels* seperti Permen Stroberi, Permen Karet, Madu Karamel, Permen Lemon, Melon Segar, Awan Biru, Lilac Gemas, dsb.) dengan kartu membulat `rounded-2xl`, badge ikon stiker manis (`bg-white shadow-2xs`), serta kontras teks yang nyaman (WCAG AA).
-   - Status kantong **tidak ditampilkan jika berstatus Aktif** (hanya tampil badge jika kantong sedang Dibekukan). Tidak menampilkan teks tipe kantong generik.
-   - Tombol aksi kantong menggunakan **tombol ikon bulat (`<x-button.circle>`)** yang ditempatkan rapi di samping nama kantong:
-     - **Ikon `±` (`plus-minus`)**: Membuka **1 formulir transaksi terpadu** berbasis pilihan radio tanpa label (`<x-radio.group>`) dengan pilihan **Pengeluaran** (Pengeluaran Baru / Pindah ke Kantong Lain) atau **Pemasukan** (Pemasukan Baru / Ambil dari Kantong Lain) di bagian paling atas. Keterangan transaksi keluar antar kantong tercatat konsisten sebagai `"Pindah ke [Nama Kantong]"` dan transaksi masuk antar kantong tercatat sebagai `"Terima dari [Nama Kantong]"`.
-     - **Ikon `...`**: Membuka halaman rincian & pengaturan kantong (`/pockets/{wallet}`).
-   - Di bawah **Saldo Kantong**, menampilkan **3 transaksi terakhir** pada kantong tersebut (dapat di-*expand* hingga **100 transaksi terakhir**) lengkap dengan tombol **Hapus Transaksi** (`<x-ti-trash />`). Jika yang dihapus adalah transaksi `Pindah ke ...` atau `Terima dari ...`, maka sistem otomatis menghapus **kedua** transaksi pasangannya sekaligus dan mengembalikan saldo kedua kantong.
-   - Pada urutan paling akhir daftar kotak kantong terdapat **Kotak Kosong (`+ Tambah Kantong`)** untuk membuat kantong baru dengan cepat.
-2. **Transaksi (`/transactions`)**:
-   - Menampilkan riwayat lengkap seluruh uang masuk, uang keluar, dan pindah uang antar kantong.
-   - Dilengkapi tombol cepat **+ Pemasukan**, **- Pengeluaran**, dan **⇄ Pindah Uang**.
-   - Dilengkapi filter sederhana berdasarkan jenis transaksi, kantong, tanggal, dan pencarian keterangan (tanpa menampilkan kode TRX).
+## 2. Struktur Menu Utama (3 Menu Utama: Home, Kantong, Rekap)
+Aplikasi menggunakan **3 menu utama** yang intuitif, ramah, dan terstruktur untuk kebutuhan harian keluarga:
+
+1. **Home (`/home`)**:
+   - Menampilkan **detail lengkap Kantong Utama** keluarga yang menjadi rekening operasional harian.
+   - Dilengkapi kartu saldo utama, statistik total uang masuk & keluar, tombol aksi cepat (**+ Tambah Uang**, **- Pengeluaran**, **⇄ Pindah Uang**), dan link cepat menuju daftar kantong lainnya.
+   - Menampilkan histori mutasi kantong utama lengkap dengan filter aliran dana (*quick swipe pills*), filter bulan, filter jenis, filter kategori, dan pencarian keterangan.
+   - Responsif ganda: kartu daftar mutasi mobile di smartphone (`sm:hidden`) dan tabel multi-kolom di desktop (`hidden sm:block`).
+
+2. **Kantong (`/pockets`)**:
+   - Menampilkan **daftar seluruh kantong-kantong keluarga** (*Pocket Grid*).
+   - Menampilkan ringkasan metrik saldo: Total Seluruh Saldo, Pemasukan Bulan Ini, dan Pengeluaran Bulan Ini.
+   - Kotak-kotak kantong dengan warna pastel manis (*playful candy colors*), status khusus **Kantong Utama** (`is_primary`), saldo kantong, dan 3 transaksi terakhir (bisa di-*expand* hingga 100 baris).
+   - Tombol pensil (*Catat Transaksi*) dan tombol titik tiga (*Detail Kantong*).
+   - Kotak kartu kosong `+ Tambah Kantong` di posisi terakhir untuk membuat pos anggaran baru.
+
+3. **Rekap (`/recap`)**:
+   - Menampilkan **rekapitulasi seluruh transaksi** dari semua kantong keluarga.
+   - Ringkasan metrik: Total Pemasukan, Total Pengeluaran, dan Arus Kas Bersih (*Net Cashflow*).
+   - Dilengkapi tombol pencatatan cepat (**+ Pemasukan**, **- Pengeluaran**, **⇄ Pindah Uang**).
+   - Filter lengkap: filter cepat jenis/aliran (Semua, Pemasukan, Pengeluaran, Pindah Uang), filter pencarian keterangan, filter spesifik kantong, dan rentang tanggal (dari - sampai).
+   - Tampilan transaksi responsif: kartu transaksi di ponsel dan data table 7 kolom di desktop.
+
+*(Catatan: Rute URL `/dashboard` dan `/transactions` tetap didukung melalui pengalihan/redirect otomatis ke `/home` dan `/recap` demi kompatibilitas).*
 
 ## 3. Halaman Detail Kantong (`/pockets/{wallet}`)
 Diakses melalui tombol **Detail** pada kotak kantong di Dashboard:

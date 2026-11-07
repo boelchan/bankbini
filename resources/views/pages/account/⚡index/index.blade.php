@@ -2,7 +2,7 @@
     <div>
         <h1 class="text-lg sm:text-xl font-bold text-slate-900">Pengaturan & Akun</h1>
         <nav class="flex items-center gap-1.5 text-sm text-slate-500 mt-1">
-            <a href="{{ route('dashboard') }}" class="hover:text-emerald-600 transition-colors" wire:navigate>
+            <a href="{{ route('home') }}" class="hover:text-emerald-600 transition-colors" wire:navigate>
                 <x-ti-home class="size-4" />
             </a>
             <span>/</span>

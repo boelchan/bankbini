@@ -87,17 +87,6 @@
                     </div>
                 </form>
 
-                <!-- Petunjuk Akun Siap Pakai -->
-                <div class="mt-5 p-3.5 rounded-xl bg-rose-50/70 border border-rose-200/80 text-xs text-slate-700 space-y-1.5">
-                    <div class="font-semibold text-rose-950 flex items-center gap-1.5">
-                        <x-ti-heart-handshake class="size-4 text-rose-600 shrink-0" />
-                        <span>Akun Keluarga Siap Pakai:</span>
-                    </div>
-                    <div class="grid grid-cols-1 gap-1 text-slate-700">
-                        <div>Email Utama: <code class="font-semibold text-slate-900">istri@bankbini.id</code> atau <code class="font-semibold text-slate-900">admin@app.com</code></div>
-                        <div>Kata Sandi: <code class="font-semibold text-slate-900">123</code></div>
-                    </div>
-                </div>
             </x-card>
 
             <p class="mt-5 text-center text-xs text-slate-500">
