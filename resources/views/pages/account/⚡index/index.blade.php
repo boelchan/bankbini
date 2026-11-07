@@ -29,45 +29,45 @@
                     </div>
                 </div>
 
-                <div class="mt-6 space-y-1">
+                <div class="mt-5 flex overflow-x-auto gap-1.5 pb-1 max-w-full lg:flex-col lg:space-y-1 lg:overflow-visible lg:pb-0">
                     <button
-                        class="flex w-full items-center gap-2.5 rounded-xl px-3.5 py-2.5 text-sm font-medium transition-colors cursor-pointer {{ $tab === 'summary' ? 'bg-emerald-600 text-white shadow-xs' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}"
+                        class="flex shrink-0 whitespace-nowrap items-center gap-2 rounded-xl px-3.5 py-2 text-xs sm:text-sm font-medium transition-colors cursor-pointer {{ $tab === 'summary' ? 'bg-emerald-600 text-white shadow-xs' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 bg-slate-50 lg:bg-transparent' }}"
                         wire:click="setTab('summary')"
                         type="button"
                     >
-                        <x-ti-user class="size-4.5" />
+                        <x-ti-user class="size-4" />
                         <span>Ringkasan Profil</span>
                     </button>
                     <button
-                        class="flex w-full items-center gap-2.5 rounded-xl px-3.5 py-2.5 text-sm font-medium transition-colors cursor-pointer {{ $tab === 'edit_name' ? 'bg-emerald-600 text-white shadow-xs' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}"
+                        class="flex shrink-0 whitespace-nowrap items-center gap-2 rounded-xl px-3.5 py-2 text-xs sm:text-sm font-medium transition-colors cursor-pointer {{ $tab === 'edit_name' ? 'bg-emerald-600 text-white shadow-xs' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 bg-slate-50 lg:bg-transparent' }}"
                         wire:click="setTab('edit_name')"
                         type="button"
                     >
-                        <x-ti-edit class="size-4.5" />
+                        <x-ti-edit class="size-4" />
                         <span>Ubah Profil</span>
                     </button>
                     <button
-                        class="flex w-full items-center gap-2.5 rounded-xl px-3.5 py-2.5 text-sm font-medium transition-colors cursor-pointer {{ $tab === 'categories' ? 'bg-emerald-600 text-white shadow-xs' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}"
+                        class="flex shrink-0 whitespace-nowrap items-center gap-2 rounded-xl px-3.5 py-2 text-xs sm:text-sm font-medium transition-colors cursor-pointer {{ $tab === 'categories' ? 'bg-emerald-600 text-white shadow-xs' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 bg-slate-50 lg:bg-transparent' }}"
                         wire:click="setTab('categories')"
                         type="button"
                     >
-                        <x-ti-category class="size-4.5" />
+                        <x-ti-category class="size-4" />
                         <span>Kategori Transaksi</span>
                     </button>
                     <button
-                        class="flex w-full items-center gap-2.5 rounded-xl px-3.5 py-2.5 text-sm font-medium transition-colors cursor-pointer {{ $tab === 'edit_email' ? 'bg-emerald-600 text-white shadow-xs' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}"
+                        class="flex shrink-0 whitespace-nowrap items-center gap-2 rounded-xl px-3.5 py-2 text-xs sm:text-sm font-medium transition-colors cursor-pointer {{ $tab === 'edit_email' ? 'bg-emerald-600 text-white shadow-xs' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 bg-slate-50 lg:bg-transparent' }}"
                         wire:click="setTab('edit_email')"
                         type="button"
                     >
-                        <x-ti-mail class="size-4.5" />
+                        <x-ti-mail class="size-4" />
                         <span>Ubah Email</span>
                     </button>
                     <button
-                        class="flex w-full items-center gap-2.5 rounded-xl px-3.5 py-2.5 text-sm font-medium transition-colors cursor-pointer {{ $tab === 'edit_password' ? 'bg-emerald-600 text-white shadow-xs' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}"
+                        class="flex shrink-0 whitespace-nowrap items-center gap-2 rounded-xl px-3.5 py-2 text-xs sm:text-sm font-medium transition-colors cursor-pointer {{ $tab === 'edit_password' ? 'bg-emerald-600 text-white shadow-xs' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 bg-slate-50 lg:bg-transparent' }}"
                         wire:click="setTab('edit_password')"
                         type="button"
                     >
-                        <x-ti-lock class="size-4.5" />
+                        <x-ti-lock class="size-4" />
                         <span>Kata Sandi</span>
                     </button>
                 </div>

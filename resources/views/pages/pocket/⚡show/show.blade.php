@@ -20,15 +20,15 @@
             </nav>
         </div>
 
-        <div class="flex flex-wrap items-center gap-2">
+        <div class="flex flex-wrap items-center gap-1.5 sm:gap-2">
             <x-button color="slate" outline sm href="{{ route('dashboard') }}" wire:navigate class="rounded-xl">
                 <x-ti-arrow-left class="size-4 mr-1" />
-                Kembali ke Dashboard
+                <span class="hidden xs:inline">Kembali ke </span>Dashboard
             </x-button>
 
             <x-button color="emerald" flat sm wire:click="openEditModal" class="rounded-xl">
                 <x-ti-edit class="size-4 mr-1" />
-                Ubah Kantong
+                Ubah
             </x-button>
 
             <x-button
@@ -149,35 +149,35 @@
         </x-slot:header>
 
         {{-- Toolbar Filter Transaksi Lengkap (Bulan, Pemasukan/Pengeluaran, Jenis & Kategori) --}}
-        <div class="border-b border-slate-200/80 bg-slate-50/50 p-4 space-y-3.5">
-            <div class="flex flex-wrap items-center justify-between gap-2">
-                {{-- Quick Filter Aliran Dana --}}
-                <div class="flex flex-wrap items-center gap-1.5">
+        <div class="border-b border-slate-200/80 bg-slate-50/50 p-3 sm:p-4 space-y-3">
+            <div class="flex items-center justify-between gap-2">
+                {{-- Quick Filter Aliran Dana (Scrollable di ponsel) --}}
+                <div class="flex items-center gap-1.5 overflow-x-auto pb-1 max-w-full">
                     <button
                         type="button"
                         wire:click="setFlowFilter('')"
-                        class="rounded-xl px-3 py-1.5 text-xs font-semibold transition-colors cursor-pointer {{ $flowFilter === '' ? 'bg-emerald-600 text-white shadow-2xs' : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-100' }}"
+                        class="shrink-0 rounded-xl px-3 py-1.5 text-xs font-semibold transition-colors cursor-pointer {{ $flowFilter === '' ? 'bg-emerald-600 text-white shadow-2xs' : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-100' }}"
                     >
                         Semua Aliran
                     </button>
                     <button
                         type="button"
                         wire:click="setFlowFilter('income')"
-                        class="rounded-xl px-3 py-1.5 text-xs font-semibold transition-colors cursor-pointer {{ $flowFilter === 'income' ? 'bg-emerald-600 text-white shadow-2xs' : 'bg-emerald-50 text-emerald-800 border border-emerald-200 hover:bg-emerald-100' }}"
+                        class="shrink-0 rounded-xl px-3 py-1.5 text-xs font-semibold transition-colors cursor-pointer {{ $flowFilter === 'income' ? 'bg-emerald-600 text-white shadow-2xs' : 'bg-emerald-50 text-emerald-800 border border-emerald-200 hover:bg-emerald-100' }}"
                     >
                         Pemasukan (+)
                     </button>
                     <button
                         type="button"
                         wire:click="setFlowFilter('expense')"
-                        class="rounded-xl px-3 py-1.5 text-xs font-semibold transition-colors cursor-pointer {{ $flowFilter === 'expense' ? 'bg-rose-600 text-white shadow-2xs' : 'bg-rose-50 text-rose-800 border border-rose-200 hover:bg-rose-100' }}"
+                        class="shrink-0 rounded-xl px-3 py-1.5 text-xs font-semibold transition-colors cursor-pointer {{ $flowFilter === 'expense' ? 'bg-rose-600 text-white shadow-2xs' : 'bg-rose-50 text-rose-800 border border-rose-200 hover:bg-rose-100' }}"
                     >
                         Pengeluaran (-)
                     </button>
                     <button
                         type="button"
                         wire:click="setFlowFilter('transfer')"
-                        class="rounded-xl px-3 py-1.5 text-xs font-semibold transition-colors cursor-pointer {{ $flowFilter === 'transfer' ? 'bg-sky-600 text-white shadow-2xs' : 'bg-sky-50 text-sky-800 border border-sky-200 hover:bg-sky-100' }}"
+                        class="shrink-0 rounded-xl px-3 py-1.5 text-xs font-semibold transition-colors cursor-pointer {{ $flowFilter === 'transfer' ? 'bg-sky-600 text-white shadow-2xs' : 'bg-sky-50 text-sky-800 border border-sky-200 hover:bg-sky-100' }}"
                     >
                         Pindah Uang (⇄)
                     </button>
@@ -185,7 +185,7 @@
             </div>
 
             {{-- Input Filter: Cari Keterangan, Bulan, Jenis Transaksi, Kategori --}}
-            <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <div class="grid grid-cols-1 gap-2.5 sm:gap-3 sm:grid-cols-2 lg:grid-cols-4">
                 <x-input
                     wire:model.live.debounce.300ms="search"
                     placeholder="Cari keterangan..."
@@ -217,7 +217,70 @@
                 <p class="text-xs text-slate-500">Gunakan tombol Tambah Uang, Pengeluaran, atau Pindah Uang di atas untuk mulai mencatat.</p>
             </div>
         @else
-            <div class="overflow-x-auto">
+            {{-- Tampilan Khusus Mobile / Ponsel: List Kartu Transaksi Responsif --}}
+            <div class="block sm:hidden divide-y divide-slate-100">
+                @foreach ($this->transactions as $tx)
+                    <div class="p-3.5 space-y-2 hover:bg-slate-50/60 transition-colors">
+                        <div class="flex items-start justify-between gap-2">
+                            <div class="min-w-0 flex-1">
+                                <p class="text-xs font-semibold text-slate-500">
+                                    {{ $tx->transaction_date?->translatedFormat('d M Y, H:i') }} WIB
+                                </p>
+                                <p class="mt-0.5 text-sm font-bold text-slate-900 leading-snug">
+                                    {{ $tx->displayDescription() }}
+                                </p>
+                            </div>
+                            <div class="text-right shrink-0">
+                                <span class="text-sm font-bold tabular-nums {{ $tx->type->isPositive() ? 'text-emerald-700' : 'text-rose-700' }}">
+                                    {{ $tx->formattedSignedAmount() }}
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="flex flex-wrap items-center justify-between gap-2 pt-0.5">
+                            <div class="flex flex-wrap items-center gap-1.5">
+                                <x-badge :text="$tx->type->label()" :color="$tx->type->color()" xs light />
+                                @if ($tx->category)
+                                    <span class="inline-flex items-center gap-1 text-xs font-medium text-slate-600 bg-slate-100 px-2 py-0.5 rounded-md">
+                                        <span class="size-1.5 rounded-full bg-slate-400"></span>
+                                        {{ $tx->category->name }}
+                                    </span>
+                                @elseif ($tx->counterpart_wallet_name_snapshot)
+                                    <span class="text-xs text-slate-500">
+                                        {{ $tx->type === \App\Enums\TransactionTypeEnum::TRANSFER_IN ? 'Dari: ' : 'Ke: ' }}
+                                        <strong class="text-slate-700">{{ $tx->resolvedCounterpartWalletName() }}</strong>
+                                    </span>
+                                @endif
+                            </div>
+
+                            <div class="flex items-center gap-2 text-xs">
+                                <span class="text-slate-500">Saldo: <strong class="text-slate-800 tabular-nums">{{ $tx->formattedBalanceAfter() }}</strong></span>
+                                @if ($loop->first && $this->transactions->currentPage() === 1)
+                                    <x-button.circle
+                                        color="red"
+                                        flat
+                                        xs
+                                        wire:click="askDeleteTransaction({{ $tx->id }})"
+                                        title="Hapus Transaksi Terakhir"
+                                        aria-label="Hapus transaksi terakhir {{ $tx->displayDescription() }}"
+                                    >
+                                        <x-ti-trash class="size-3.5" />
+                                    </x-button.circle>
+                                @endif
+                            </div>
+                        </div>
+
+                        @if ($tx->notes)
+                            <p class="text-xs text-slate-500 italic">
+                                "{{ $tx->notes }}"
+                            </p>
+                        @endif
+                    </div>
+                @endforeach
+            </div>
+
+            {{-- Tampilan Desktop & Tablet: Tabel Lengkap 6 Kolom --}}
+            <div class="hidden sm:block overflow-x-auto">
                 <table class="w-full text-left border-collapse">
                     <thead>
                         <tr class="border-b border-slate-200 bg-slate-50/80 text-xs font-semibold uppercase tracking-wider text-slate-500">
@@ -314,6 +377,7 @@
             <x-radio.group
                 wire:model.live="income_source_type"
                 inline
+                class="[&>div]:flex-wrap sm:[&>div]:flex-nowrap [&>div]:gap-2"
                 color="emerald"
                 :options="\App\Enums\IncomeSourceEnum::choices()"
             />

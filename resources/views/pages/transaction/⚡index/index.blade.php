@@ -34,32 +34,32 @@
     <x-card>
         <div class="space-y-4">
             <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 pb-3">
-                <div class="flex flex-wrap items-center gap-1.5">
+                <div class="flex items-center gap-1.5 overflow-x-auto pb-1 max-w-full">
                     <button
                         type="button"
                         wire:click="setQuickTypeFilter('')"
-                        class="rounded-xl px-3 py-1.5 text-xs font-semibold transition-colors {{ $typeFilter === '' ? 'bg-emerald-600 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200' }}"
+                        class="shrink-0 rounded-xl px-3 py-1.5 text-xs font-semibold transition-colors {{ $typeFilter === '' ? 'bg-emerald-600 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200' }}"
                     >
                         Semua
                     </button>
                     <button
                         type="button"
                         wire:click="setQuickTypeFilter('income')"
-                        class="rounded-xl px-3 py-1.5 text-xs font-semibold transition-colors {{ $typeFilter === 'income' ? 'bg-emerald-600 text-white' : 'bg-emerald-50 text-emerald-800 hover:bg-emerald-100' }}"
+                        class="shrink-0 rounded-xl px-3 py-1.5 text-xs font-semibold transition-colors {{ $typeFilter === 'income' ? 'bg-emerald-600 text-white' : 'bg-emerald-50 text-emerald-800 hover:bg-emerald-100' }}"
                     >
                         Pemasukan
                     </button>
                     <button
                         type="button"
                         wire:click="setQuickTypeFilter('expense')"
-                        class="rounded-xl px-3 py-1.5 text-xs font-semibold transition-colors {{ $typeFilter === 'expense' ? 'bg-rose-600 text-white' : 'bg-rose-50 text-rose-800 hover:bg-rose-100' }}"
+                        class="shrink-0 rounded-xl px-3 py-1.5 text-xs font-semibold transition-colors {{ $typeFilter === 'expense' ? 'bg-rose-600 text-white' : 'bg-rose-50 text-rose-800 hover:bg-rose-100' }}"
                     >
                         Pengeluaran
                     </button>
                     <button
                         type="button"
                         wire:click="setQuickTypeFilter('transfer')"
-                        class="rounded-xl px-3 py-1.5 text-xs font-semibold transition-colors {{ in_array($typeFilter, ['transfer', 'transfer_in', 'transfer_out'], true) ? 'bg-sky-600 text-white' : 'bg-sky-50 text-sky-800 hover:bg-sky-100' }}"
+                        class="shrink-0 rounded-xl px-3 py-1.5 text-xs font-semibold transition-colors {{ in_array($typeFilter, ['transfer', 'transfer_in', 'transfer_out'], true) ? 'bg-sky-600 text-white' : 'bg-sky-50 text-sky-800 hover:bg-sky-100' }}"
                     >
                         Pindah Uang
                     </button>
@@ -119,7 +119,77 @@
                 <p class="text-xs text-slate-500">Gunakan tombol Pemasukan, Pengeluaran, atau Pindah Uang di atas untuk mulai mencatat.</p>
             </div>
         @else
-            <div class="overflow-x-auto">
+            {{-- Tampilan Khusus Mobile / Ponsel: List Kartu Transaksi Responsif --}}
+            <div class="block sm:hidden divide-y divide-slate-100">
+                @foreach ($this->transactions as $tx)
+                    <div class="p-3.5 space-y-2 hover:bg-slate-50/60 transition-colors">
+                        <div class="flex items-start justify-between gap-2">
+                            <div class="min-w-0 flex-1">
+                                <div class="flex items-center gap-1.5 text-xs text-slate-500">
+                                    <span>{{ $tx->transaction_date?->translatedFormat('d M Y, H:i') }}</span>
+                                    <span>•</span>
+                                    <div class="inline-flex items-center gap-1">
+                                        @if ($tx->wallet)
+                                            <span class="size-2 rounded-full {{ $tx->wallet->colorEnum()->swatchClasses() }} inline-block shrink-0"></span>
+                                        @endif
+                                        <span class="font-medium text-slate-700 truncate max-w-[120px]">
+                                            {{ $tx->resolvedWalletName() }}
+                                        </span>
+                                    </div>
+                                </div>
+                                <p class="mt-0.5 text-sm font-bold text-slate-900 leading-snug">
+                                    {{ $tx->displayDescription() }}
+                                </p>
+                            </div>
+                            <div class="text-right shrink-0">
+                                <span class="text-sm font-bold tabular-nums {{ $tx->type->isPositive() ? 'text-emerald-700' : 'text-rose-700' }}">
+                                    {{ $tx->formattedSignedAmount() }}
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="flex flex-wrap items-center justify-between gap-2 pt-0.5">
+                            <div class="flex flex-wrap items-center gap-1.5">
+                                <x-badge :text="$tx->type->label()" :color="$tx->type->color()" xs light />
+                                @if ($tx->category)
+                                    <span class="inline-flex items-center gap-1 text-xs font-medium text-slate-600 bg-slate-100 px-2 py-0.5 rounded-md">
+                                        <span class="size-1.5 rounded-full bg-slate-400"></span>
+                                        {{ $tx->category->name }}
+                                    </span>
+                                @elseif ($tx->counterpart_wallet_name_snapshot)
+                                    <span class="text-xs text-slate-500">
+                                        {{ $tx->type === \App\Enums\TransactionTypeEnum::TRANSFER_IN ? 'Dari: ' : 'Ke: ' }}
+                                        <strong class="text-slate-700">{{ $tx->resolvedCounterpartWalletName() }}</strong>
+                                    </span>
+                                @endif
+                            </div>
+
+                            <div class="flex items-center gap-2 text-xs">
+                                <span class="text-slate-500">Saldo: <strong class="text-slate-800 tabular-nums">{{ $tx->formattedBalanceAfter() }}</strong></span>
+                                <x-button.circle
+                                    color="red"
+                                    flat
+                                    xs
+                                    wire:click="askDeleteTransaction({{ $tx->id }})"
+                                    title="Hapus Transaksi"
+                                    aria-label="Hapus transaksi {{ $tx->displayDescription() }}"
+                                >
+                                    <x-ti-trash class="size-3.5" />
+                                </x-button.circle>
+                            </div>
+                        </div>
+
+                        @if ($tx->notes)
+                            <p class="text-xs text-slate-500 italic">
+                                "{{ $tx->notes }}"
+                            </p>
+                        @endif
+                    </div>
+                @endforeach
+            </div>
+
+            {{-- Tampilan Desktop & Tablet: Tabel Lengkap 7 Kolom --}}
+            <div class="hidden sm:block overflow-x-auto">
                 <table class="w-full text-left border-collapse">
                     <thead>
                         <tr class="border-b border-slate-200 bg-slate-50/80 text-xs font-semibold uppercase tracking-wider text-slate-500">
@@ -232,6 +302,7 @@
             <x-radio.group
                 wire:model.live="income_source_type"
                 inline
+                class="[&>div]:flex-wrap sm:[&>div]:flex-nowrap [&>div]:gap-2"
                 color="emerald"
                 :options="\App\Enums\IncomeSourceEnum::choices()"
             />

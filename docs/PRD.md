@@ -35,3 +35,14 @@ Diakses melalui tombol **Detail** pada kotak kantong di Dashboard:
 - Saldo kantong tidak boleh negatif dan nominal transaksi wajib positif (`> 0`).
 - Kantong yang dibekukan tidak dapat menerima atau mengeluarkan uang, namun saldonya tetap dihitung dalam Total Saldo.
 - Kantong yang dihapus menggunakan *Soft Delete* setelah saldonya menjadi `Rp0`, dan riwayat transaksinya tetap tersimpan permanen.
+
+## 5. Pengoptimalan Tampilan Mobile First (Smartphone Utama)
+Karena aplikasi utamanya digunakan langsung dari smartphone (HP) oleh istri:
+- **Riwayat Transaksi Responsif**:
+  - Di layar ponsel (`sm:hidden`): Riwayat transaksi disajikan dalam bentuk daftar kartu transaksi vertikal yang padat, rapi, dan mudah dibaca tanpa perlu geser layar ke kanan (*no horizontal scroll fatigue*), menampilkan tanggal & waktu, nominal berwarna tebal (`+Rp...` / `-Rp...`), nama kantong dengan swatch warna, badge jenis/kategori, dan sisa saldo kantong.
+  - Di tablet dan desktop (`hidden sm:block`): Tetap menyajikan data table lengkap multi-kolom.
+- **Toolbar & Filter Ramah Sentuhan**:
+  - Tombol filter cepat (*quick pills*) pada riwayat transaksi dan detail kantong mendukung *horizontal swipe* yang mulus di ponsel tanpa memakan ruang vertikal.
+- **Ukuran Sentuh & Jarak Ergonomis**:
+  - Tombol-tombol aksi utama, pemilihan kategori radio 3 kolom, dan menu tab di profil dirancang dengan ukuran sentuh nyaman (touch target >= 40-44px) yang bersahabat untuk sentuhan jempol di smartphone.
+  - Kotak kartu kosong `+ Tambah Kantong` memiliki tinggi proporsional (`min-h-36 sm:min-h-52`) agar efisien dan tidak menghabiskan ruang vertikal layar HP.

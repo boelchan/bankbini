@@ -104,9 +104,9 @@
                                         wire:click="openTransactionModal({{ $wallet->id }})"
                                         title="Catat Pengeluaran / Pemasukan"
                                         aria-label="Catat Transaksi {{ $wallet->name }}"
-                                        class="bg-white/85 hover:bg-white shadow-2xs"
+                                        class="size-9 sm:size-8 bg-white/85 hover:bg-white shadow-2xs"
                                     >
-                                        <x-ti-pencil class="size-4 font-bold" />
+                                        <x-ti-pencil class="size-4.5 sm:size-4 font-bold" />
                                     </x-button.circle>
                                 @endif
 
@@ -118,9 +118,9 @@
                                     wire:navigate
                                     title="Detail & Pengaturan Kantong"
                                     aria-label="Detail Kantong {{ $wallet->name }}"
-                                    class="bg-white/85 hover:bg-white shadow-2xs"
+                                    class="size-9 sm:size-8 bg-white/85 hover:bg-white shadow-2xs"
                                 >
-                                    <x-ti-dots class="size-4" />
+                                    <x-ti-dots class="size-4.5 sm:size-4" />
                                 </x-button.circle>
                             </div>
                         </div>
@@ -197,12 +197,12 @@
             <button
                 type="button"
                 wire:click="openPocketModal"
-                class="group flex min-h-52 flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed border-rose-300 bg-rose-50/60 p-6 text-center transition-all hover:border-rose-400 hover:bg-rose-100/70 focus-visible:outline-2 focus-visible:outline-emerald-600 cursor-pointer shadow-2xs"
+                class="group flex min-h-36 sm:min-h-52 flex-col items-center justify-center gap-2.5 sm:gap-3 rounded-2xl border-2 border-dashed border-rose-300 bg-rose-50/60 p-4 sm:p-6 text-center transition-all hover:border-rose-400 hover:bg-rose-100/70 focus-visible:outline-2 focus-visible:outline-emerald-600 cursor-pointer shadow-2xs"
             >
-                <div class="flex size-12 items-center justify-center rounded-2xl bg-white text-rose-600 border border-rose-200 shadow-xs group-hover:scale-110 transition-transform">
-                    <x-ti-plus class="size-6" />
+                <div class="flex size-11 sm:size-12 items-center justify-center rounded-2xl bg-white text-rose-600 border border-rose-200 shadow-xs group-hover:scale-110 transition-transform">
+                    <x-ti-plus class="size-5 sm:size-6" />
                 </div>
-                <div class="space-y-1">
+                <div class="space-y-0.5 sm:space-y-1">
                     <p class="text-sm font-bold text-rose-950">
                         + Tambah Kantong
                     </p>
@@ -221,6 +221,7 @@
                 id="dash-tx-mode"
                 wire:model.live="transaction_mode"
                 inline
+                class="[&>div]:flex-wrap sm:[&>div]:flex-nowrap [&>div]:gap-2"
                 :color="$transaction_mode === \App\Enums\CategoryTypeEnum::EXPENSE->value ? 'rose' : 'emerald'"
                 :options="\App\Enums\CategoryTypeEnum::choices()"
             />
@@ -232,6 +233,7 @@
                         id="dash-expense-source-type"
                         wire:model.live="expense_source_type"
                         inline
+                        class="[&>div]:flex-wrap sm:[&>div]:flex-nowrap [&>div]:gap-2"
                         color="rose"
                         :options="\App\Enums\ExpenseSourceEnum::choices()"
                     />
@@ -274,6 +276,7 @@
                         id="dash-income-source-type"
                         wire:model.live="income_source_type"
                         inline
+                        class="[&>div]:flex-wrap sm:[&>div]:flex-nowrap [&>div]:gap-2"
                         color="emerald"
                         :options="\App\Enums\IncomeSourceEnum::choices()"
                     />
