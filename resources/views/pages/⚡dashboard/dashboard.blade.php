@@ -142,18 +142,12 @@
                                                 <p class="font-medium text-slate-800 truncate">
                                                     {{ $tx->displayDescription() }}
                                                 </p>
-                                                <p class="text-slate-500 truncate flex items-center gap-1.5 flex-wrap">
-                                                    <span>{{ $tx->transaction_date?->translatedFormat('d M, H:i') }}</span>
-                                                    <span>•</span>
-                                                    <span class="font-medium {{ $tx->type->isPositive() ? 'text-emerald-700' : 'text-rose-700' }}">
-                                                        {{ $tx->type->label() }}
-                                                    </span>
+                                                <p class="text-slate-500 truncate">
+                                                    {{ $tx->transaction_date?->translatedFormat('d M, H:i') }}
                                                     @if ($tx->category)
-                                                        <span>•</span>
-                                                        <span>{{ $tx->category->name }}</span>
+                                                        • {{ $tx->category->name }}
                                                     @elseif ($tx->notes)
-                                                        <span>•</span>
-                                                        <span>{{ $tx->notes }}</span>
+                                                        • {{ $tx->notes }}
                                                     @endif
                                                 </p>
                                             </div>
