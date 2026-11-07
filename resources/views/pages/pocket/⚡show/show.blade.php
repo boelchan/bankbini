@@ -266,6 +266,7 @@
                         :columns="3"
                         color="emerald"
                         :options="$this->incomeCategoryOptions"
+                        class="[&>div]:!grid-cols-3 [&>div]:gap-2 sm:[&>div]:gap-3 [&_label]:p-2.5 sm:[&_label]:p-3.5 [&_label]:rounded-xl"
                     />
                 </div>
             @endif
@@ -302,11 +303,13 @@
     <x-modal wire="expenseModal" title="Catat Pengeluaran dari {{ $wallet->name }}" size="lg">
         <form wire:submit="saveExpense" class="space-y-4">
             <x-radio.group
+                id="pocket-show-expense-category"
                 wire:model.live="expense_category_id"
                 card
                 :columns="3"
                 color="rose"
                 :options="$this->expenseCategoryOptions"
+                class="[&>div]:!grid-cols-3 [&>div]:gap-2 sm:[&>div]:gap-3 [&_label]:p-2.5 sm:[&_label]:p-3.5 [&_label]:rounded-xl"
             />
 
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">

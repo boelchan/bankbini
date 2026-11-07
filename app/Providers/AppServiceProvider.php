@@ -33,5 +33,9 @@ class AppServiceProvider extends ServiceProvider
         TallStackUi::customize()
             ->globals()
             ->colorful(toast: true, dialog: false);
+
+        TallStackUi::customize()
+            ->form('radio.group')
+            ->block('columns.3', 'grid-cols-3');
     }
 }

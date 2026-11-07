@@ -161,9 +161,14 @@
                                 </td>
 
                                 <td class="px-3 py-3.5">
-                                    <span class="font-semibold text-slate-900 text-xs">
-                                        {{ $tx->resolvedWalletName() }}
-                                    </span>
+                                    <div class="flex items-center gap-1.5">
+                                        @if ($tx->wallet)
+                                            <span class="size-2.5 rounded-full {{ $tx->wallet->colorEnum()->swatchClasses() }} inline-block shrink-0" aria-hidden="true"></span>
+                                        @endif
+                                        <span class="font-semibold text-slate-900 text-xs">
+                                            {{ $tx->resolvedWalletName() }}
+                                        </span>
+                                    </div>
                                     @if ($tx->counterpart_wallet_name_snapshot)
                                         <div class="text-xs text-slate-500 mt-0.5">
                                             {{ $tx->type === \App\Enums\TransactionTypeEnum::TRANSFER_IN ? 'Terima dari: ' : 'Pindah ke: ' }}
