@@ -56,12 +56,13 @@
     display: none !important;
 }
 
-/* Latar corak sapi pastel: motif identitas Bank BINI yang lembut, bukan hiasan acak. */
+/* Latar corak sapi pastel: bercak tidak beraturan dengan ukuran berbeda, dipasang pada lapisan tetap agar tidak bergerak saat halaman digulir. */
 .cow-print {
     background-color: #fff5f6;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400' viewBox='0 0 400 400'%3E%3Cg fill='%23fecdd3' fill-opacity='0.55'%3E%3Cpath d='M88 28c26-2 50 12 56 32 6 21-10 34-16 49-7 16 1 33-12 45-14 12-37 8-53-3-15-10-26-27-26-45 0-19 12-35 23-50 8-11 15-26 28-28Z'/%3E%3Cpath transform='translate(200 20) rotate(18) scale(0.7)' d='M88 28c26-2 50 12 56 32 6 21-10 34-16 49-7 16 1 33-12 45-14 12-37 8-53-3-15-10-26-27-26-45 0-19 12-35 23-50 8-11 15-26 28-28Z'/%3E%3Cpath transform='translate(30 180) rotate(-16) scale(0.85)' d='M88 28c26-2 50 12 56 32 6 21-10 34-16 49-7 16 1 33-12 45-14 12-37 8-53-3-15-10-26-27-26-45 0-19 12-35 23-50 8-11 15-26 28-28Z'/%3E%3Cpath transform='translate(240 220) rotate(25) scale(0.8)' d='M88 28c26-2 50 12 56 32 6 21-10 34-16 49-7 16 1 33-12 45-14 12-37 8-53-3-15-10-26-27-26-45 0-19 12-35 23-50 8-11 15-26 28-28Z'/%3E%3Cpath transform='translate(120 300) rotate(-5) scale(0.6)' d='M88 28c26-2 50 12 56 32 6 21-10 34-16 49-7 16 1 33-12 45-14 12-37 8-53-3-15-10-26-27-26-45 0-19 12-35 23-50 8-11 15-26 28-28Z'/%3E%3Cpath transform='translate(20 300) rotate(10) scale(0.45)' d='M88 28c26-2 50 12 56 32 6 21-10 34-16 49-7 16 1 33-12 45-14 12-37 8-53-3-15-10-26-27-26-45 0-19 12-35 23-50 8-11 15-26 28-28Z'/%3E%3C/g%3E%3C/svg%3E");
-    background-size: 400px 400px;
+    background-image: url('../images/cow-print.svg');
+    background-size: 640px 640px;
     background-repeat: repeat;
+    background-position: 0 0;
 }
 
 /* Dropdown floating (select, date, time) & tooltip di-teleport ke body */

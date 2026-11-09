@@ -1,12 +1,16 @@
 {
   "resources/css/app.css": {
-    "file": "assets/app-RGeJBKop.css",
+    "file": "assets/app-BAVOIyCO.css",
     "src": "resources/css/app.css",
     "isEntry": true,
     "name": "app",
     "names": [
       "app.css"
     ]
+  },
+  "resources/images/cow-print.svg": {
+    "file": "assets/cow-print-CAeHeNkf.svg",
+    "src": "resources/images/cow-print.svg"
   },
   "resources/js/app.js": {
     "file": "assets/app-Buj5iI_6.js",

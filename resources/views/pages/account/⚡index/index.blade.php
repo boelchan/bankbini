@@ -229,9 +229,23 @@
                                                 <x-button.circle color="slate" flat sm wire:click="openEditCategoryModal({{ $cat->id }})" title="Ubah kategori">
                                                     <x-ti-edit class="size-4 text-slate-600 hover:text-slate-900" />
                                                 </x-button.circle>
-                                                <x-button.circle color="red" flat sm wire:click="askDeleteCategory({{ $cat->id }})" title="Hapus kategori">
-                                                    <x-ti-trash class="size-4" />
-                                                </x-button.circle>
+                                                @if ($cat->transactions_count > 0)
+                                                    <x-button.circle
+                                                        color="slate"
+                                                        flat
+                                                        sm
+                                                        disabled
+                                                        class="cursor-not-allowed"
+                                                        title="Tidak bisa dihapus: sudah dipakai transaksi"
+                                                        aria-label="Kategori {{ $cat->name }} tidak bisa dihapus karena sudah dipakai transaksi"
+                                                    >
+                                                        <x-ti-trash class="size-4 text-slate-300" />
+                                                    </x-button.circle>
+                                                @else
+                                                    <x-button.circle color="red" flat sm wire:click="askDeleteCategory({{ $cat->id }})" title="Hapus kategori">
+                                                        <x-ti-trash class="size-4" />
+                                                    </x-button.circle>
+                                                @endif
                                             </div>
                                         </div>
                                     @endforeach
@@ -265,9 +279,23 @@
                                                 <x-button.circle color="slate" flat sm wire:click="openEditCategoryModal({{ $cat->id }})" title="Ubah kategori">
                                                     <x-ti-edit class="size-4 text-slate-600 hover:text-slate-900" />
                                                 </x-button.circle>
-                                                <x-button.circle color="red" flat sm wire:click="askDeleteCategory({{ $cat->id }})" title="Hapus kategori">
-                                                    <x-ti-trash class="size-4" />
-                                                </x-button.circle>
+                                                @if ($cat->transactions_count > 0)
+                                                    <x-button.circle
+                                                        color="slate"
+                                                        flat
+                                                        sm
+                                                        disabled
+                                                        class="cursor-not-allowed"
+                                                        title="Tidak bisa dihapus: sudah dipakai transaksi"
+                                                        aria-label="Kategori {{ $cat->name }} tidak bisa dihapus karena sudah dipakai transaksi"
+                                                    >
+                                                        <x-ti-trash class="size-4 text-slate-300" />
+                                                    </x-button.circle>
+                                                @else
+                                                    <x-button.circle color="red" flat sm wire:click="askDeleteCategory({{ $cat->id }})" title="Hapus kategori">
+                                                        <x-ti-trash class="size-4" />
+                                                    </x-button.circle>
+                                                @endif
                                             </div>
                                         </div>
                                     @endforeach

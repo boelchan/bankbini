@@ -5,7 +5,7 @@
 - **Kantong Bersama (Shared Household Pockets)**: Seluruh kantong (`wallets`), riwayat transaksi (`transactions`), pemindahan uang (`transfers`), dan kategori transaksi diakses secara bersama oleh seluruh akun keluarga (tidak terisolasi per `user_id`). Setiap transaksi tetap mencatat siapa anggota keluarga yang menginputnya (`Oleh: Suami / Istri`).
 
 ## 2. Struktur Menu Utama (3 Menu Utama: Home, Kantong, Rekap)
-Aplikasi menggunakan **3 menu utama** yang intuitif, ramah, dan terstruktur untuk kebutuhan harian keluarga:
+Aplikasi menggunakan **3 menu utama** yang intuitif, ramah, dan terstruktur untuk kebutuhan harian keluarga. Di ponsel, navigasi memakai **bottom navigation** berisi Home, Kantong, Rekap, dan tombol **Akun** (avatar inisial) yang membuka menu profil serta tombol keluar; tidak ada bilah header di bagian atas.
 
 1. **Home (`/home`)**:
    - Menampilkan **detail lengkap Kantong Utama** keluarga yang menjadi rekening operasional harian.
@@ -29,6 +29,7 @@ Aplikasi menggunakan **3 menu utama** yang intuitif, ramah, dan terstruktur untu
 
 4. **Pengaturan Akun & Kategori (`/account`)**:
    - Pengguna dapat menambah, **mengubah (edit)**, dan **menghapus kategori transaksi**, termasuk menentukan nama, jenis (*income/expense*), ikon, warna, dan **batas atas anggaran (budget limit)** untuk setiap kategori.
+   - **Penghapusan kategori berbasis pemakaian**: tombol hapus hanya aktif untuk kategori yang **belum pernah dipakai** pada transaksi. Kategori yang sudah dipakai menampilkan tombol hapus non-aktif beserta keterangan, dan permintaan hapus ditolak di sisi server agar riwayat transaksi tetap utuh.
 
 *(Catatan: Rute URL `/dashboard` dan `/transactions` tetap didukung melalui pengalihan/redirect otomatis ke `/home` dan `/recap` demi kompatibilitas).*
 
@@ -55,6 +56,10 @@ Karena aplikasi utamanya digunakan langsung dari smartphone (HP) oleh istri:
   - Di tablet dan desktop (`hidden sm:block`): Tetap menyajikan data table lengkap multi-kolom.
 - **Toolbar & Filter Ramah Sentuhan**:
   - Tombol filter cepat (*quick pills*) pada riwayat transaksi dan detail kantong mendukung *horizontal swipe* yang mulus di ponsel tanpa memakan ruang vertikal.
+- **Navigasi Ponsel Tanpa Header**:
+  - Tidak ada bilah header di atas layar; identitas brand dan profil pengguna berada di dalam sidebar.
+  - Bottom navigation berisi 4 item: Home, Kantong, Rekap, dan Menu. Item aktif memakai aksen pink tua, sedangkan tombol Menu membuka sidebar dan menandai dirinya aktif selama sidebar terbuka.
+  - Sidebar dapat ditutup lewat tombol X, mengetuk area gelap di luar panel, atau tombol Esc.
 - **Ukuran Sentuh & Jarak Ergonomis**:
   - Tombol-tombol aksi utama, pemilihan kategori radio 3 kolom, dan menu tab di profil dirancang dengan ukuran sentuh nyaman (touch target >= 40-44px) yang bersahabat untuk sentuhan jempol di smartphone.
-  - Kotak kartu kosong `+ Tambah Kantong` memiliki tinggi proporsional (`min-h-36 sm:min-h-52`) agar efisien dan tidak menghabiskan ruang vertikal layar HP.
+  - Pembuatan kantong baru hanya melalui tombol **Tambah Kantong Baru** di header halaman Kantong, tanpa kartu kosong tambahan di dalam daftar.

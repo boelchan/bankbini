@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="640" viewBox="0 0 640 640">
+    <defs>
+        <path id="spot-a" d="M12 46C4 24 24 6 46 8c16 1 28 14 42 18 18 5 36 0 46 14 10 14 4 34-12 44-14 8-30 2-44 8-18 8-38 14-52 2-12-10-8-32-14-48Z"/>
+        <path id="spot-b" d="M10 34C12 16 30 6 48 10c16 4 30 16 32 32 2 16-12 28-30 28S8 56 10 34Z"/>
+        <path id="spot-c" d="M6 26C8 12 24 4 40 8c14 3 22 16 36 20 14 4 28 2 30 14 2 14-14 22-30 20-16-2-26-12-40-12-14 0-32-8-30-24Z"/>
+        <filter id="soft" x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur stdDeviation="0.7"/>
+        </filter>
+    </defs>
+
+    <g fill="#fda4af" fill-opacity="0.34" filter="url(#soft)">
+        <use href="#spot-a" transform="translate(96 84) rotate(-12)"/>
+        <use href="#spot-b" transform="translate(430 46) rotate(18) scale(0.62)"/>
+        <use href="#spot-c" transform="translate(540 150) rotate(-8) scale(0.9)"/>
+        <use href="#spot-b" transform="translate(60 250) rotate(24) scale(0.72)"/>
+        <use href="#spot-a" transform="translate(270 210) rotate(-18) scale(1.15)"/>
+        <use href="#spot-c" transform="translate(500 330) rotate(10) scale(0.8)"/>
+        <use href="#spot-c" transform="translate(104 420) rotate(-4) scale(0.95)"/>
+        <use href="#spot-b" transform="translate(400 470) rotate(16) scale(0.55)"/>
+        <use href="#spot-a" transform="translate(548 520) rotate(-20) scale(0.8)"/>
+        <use href="#spot-b" transform="translate(200 570) rotate(8) scale(0.5)"/>
+        <use href="#spot-a" transform="translate(330 340) rotate(32) scale(0.42)"/>
+        <use href="#spot-c" transform="translate(470 600) rotate(-16) scale(0.6)"/>
+        <use href="#spot-c" transform="translate(40 520) rotate(-14) scale(0.65)"/>
+    </g>
+
+    <g fill="#fb7185" fill-opacity="0.16">
+        <circle cx="258" cy="150" r="7"/>
+        <circle cx="352" cy="96" r="4"/>
+        <circle cx="498" cy="252" r="6"/>
+        <circle cx="600" cy="90" r="5"/>
+        <circle cx="30" cy="150" r="5"/>
+        <circle cx="160" cy="350" r="8"/>
+        <circle cx="262" cy="470" r="5"/>
+        <circle cx="372" cy="420" r="4"/>
+        <circle cx="600" cy="452" r="6"/>
+        <circle cx="330" cy="540" r="4"/>
+        <circle cx="530" cy="612" r="5"/>
+        <circle cx="96" cy="608" r="6"/>
+        <circle cx="452" cy="268" r="4"/>
+        <circle cx="18" cy="392" r="4"/>
+    </g>
+</svg>

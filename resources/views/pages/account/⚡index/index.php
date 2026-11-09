@@ -159,6 +159,7 @@ new #[Title('Pengaturan & Profil')] class extends Component
     {
         return TransactionCategory::query()
             ->availableFor((int) Auth::id())
+            ->withCount('transactions')
             ->orderBy('type')
             ->orderBy('is_default', 'desc')
             ->orderBy('name')
@@ -254,8 +255,14 @@ new #[Title('Pengaturan & Profil')] class extends Component
             return;
         }
 
+        if ($cat->transactions()->exists()) {
+            $this->toast()->error('Tidak Bisa Dihapus', 'Kategori ini sudah dipakai pada transaksi sehingga tidak dapat dihapus.')->send();
+
+            return;
+        }
+
         $this->dialog()
-            ->question('Hapus Kategori Ini?', sprintf('Kategori "%s" akan dihapus. Riwayat transaksi masa lalu tetap aman tersimpan.', $cat->name))
+            ->question('Hapus Kategori Ini?', sprintf('Kategori "%s" belum pernah dipakai, jadi aman dihapus permanen.', $cat->name))
             ->confirm('Ya, Hapus', 'deleteCategory', $categoryId)
             ->cancel('Batal')
             ->send();
@@ -270,6 +277,11 @@ new #[Title('Pengaturan & Profil')] class extends Component
 
         if (!$cat) {
             $this->toast()->error('Gagal', 'Kategori tidak ditemukan.')->send();
+            return;
+        }
+
+        if ($cat->transactions()->exists()) {
+            $this->toast()->error('Tidak Bisa Dihapus', 'Kategori ini sudah dipakai pada transaksi sehingga tidak dapat dihapus.')->send();
             return;
         }
 
