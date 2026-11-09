@@ -11,7 +11,7 @@
         </div>
 
         <div class="flex items-center gap-2">
-            <x-button color="emerald" sm wire:click="openPocketModal" class="rounded-xl">
+            <x-button color="rose" sm wire:click="openPocketModal" class="rounded-xl">
                 <x-ti-plus class="size-4 mr-1" />
                 <span>Tambah Kantong Baru</span>
             </x-button>
@@ -109,7 +109,7 @@
                             <div class="flex items-center gap-1 shrink-0">
                                 @if ($wallet->isActive())
                                     <x-button.circle
-                                        color="emerald"
+                                        color="rose"
                                         sm
                                         flat
                                         wire:click="openTransactionModal({{ $wallet->id }})"
@@ -383,7 +383,7 @@
 
             <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-200">
                 <x-button color="slate" flat wire:click="$set('pocketModal', false)">Batal</x-button>
-                <x-button submit color="emerald" loading="savePocket">
+                <x-button submit color="rose" loading="savePocket">
                     <x-ti-plus class="size-4 mr-1" />
                     Buat Kantong
                 </x-button>

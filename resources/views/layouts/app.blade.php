@@ -24,12 +24,12 @@
     @stack('styles')
 </head>
 
-<body class="bg-slate-50 text-slate-900 antialiased font-sans">
+<body class="bg-rose-50 text-slate-900 antialiased font-sans">
     <x-toast />
     <x-dialog />
 
     <div
-        class="relative min-h-screen w-full bg-slate-50 flex flex-col lg:flex-row"
+        class="relative min-h-screen w-full cow-print flex flex-col lg:flex-row"
         x-data="{
             sidebarOpen: localStorage.getItem('sidebar_expanded') !== 'false',
             mobileSidebarOpen: false,
@@ -91,7 +91,7 @@
                         <button
                             type="button"
                             @click="closeMobile()"
-                            class="inline-flex size-8 shrink-0 items-center justify-center rounded-xl text-slate-600 hover:bg-slate-200/70 hover:text-slate-900 transition-colors focus-visible:outline-2 focus-visible:outline-emerald-600 lg:hidden"
+                            class="inline-flex size-8 shrink-0 items-center justify-center rounded-xl text-slate-600 hover:bg-slate-200/70 hover:text-slate-900 transition-colors focus-visible:outline-2 focus-visible:outline-rose-600 lg:hidden"
                             title="Tutup Menu"
                             aria-label="Tutup Menu"
                         >
@@ -100,7 +100,7 @@
                         <button
                             type="button"
                             @click="toggleSidebar()"
-                            class="hidden lg:inline-flex size-8 shrink-0 items-center justify-center rounded-xl text-slate-600 hover:bg-slate-200/70 hover:text-slate-900 transition-colors focus-visible:outline-2 focus-visible:outline-emerald-600"
+                            class="hidden lg:inline-flex size-8 shrink-0 items-center justify-center rounded-xl text-slate-600 hover:bg-slate-200/70 hover:text-slate-900 transition-colors focus-visible:outline-2 focus-visible:outline-rose-600"
                             title="Perkecil Sidebar"
                             aria-label="Perkecil Sidebar"
                         >
@@ -125,7 +125,7 @@
                         <button
                             type="button"
                             @click="toggleSidebar()"
-                            class="inline-flex size-8 items-center justify-center rounded-xl text-slate-600 hover:text-slate-900 hover:bg-slate-200/70 transition-colors focus-visible:outline-2 focus-visible:outline-emerald-600"
+                            class="inline-flex size-8 items-center justify-center rounded-xl text-slate-600 hover:text-slate-900 hover:bg-slate-200/70 transition-colors focus-visible:outline-2 focus-visible:outline-rose-600"
                             x-tooltip="Perbesar Sidebar"
                             data-position="right"
                             data-tooltip-delay="flash"
@@ -168,7 +168,7 @@
                             <button
                                 type="button"
                                 x-ref="userMenuTrigger"
-                                class="flex w-full items-center rounded-xl p-2 bg-white hover:bg-rose-50/40 border border-slate-200/90 shadow-2xs transition-all text-left focus-visible:outline-2 focus-visible:outline-emerald-600"
+                                class="flex w-full items-center rounded-xl p-2 bg-white hover:bg-rose-50/40 border border-slate-200/90 shadow-2xs transition-all text-left focus-visible:outline-2 focus-visible:outline-rose-600"
                                 :class="sidebarOpen ? 'justify-between' : 'lg:justify-center'"
                                 @click="sidebarUserMenuOpen = !sidebarUserMenuOpen"
                                 x-tooltip="{{ e(Auth::user()?->name) }}"
@@ -240,20 +240,20 @@
             <!-- Header Mobile -->
             @auth
                 <header
-                    class="sticky top-0 z-30 flex h-14 w-full shrink-0 items-center justify-between border-b border-slate-200/80 bg-white/95 px-3.5 sm:px-5 backdrop-blur-md lg:hidden select-none"
+                    class="sticky top-0 z-30 flex h-14 w-full shrink-0 items-center justify-between border-b border-rose-200/80 bg-rose-100/95 px-3.5 sm:px-5 backdrop-blur-md lg:hidden select-none"
                 >
                     <div class="flex items-center gap-2">
                         <button
                             type="button"
                             @click="toggleSidebar()"
-                            class="inline-flex size-11 items-center justify-center rounded-xl text-slate-700 hover:bg-slate-100 hover:text-slate-900 transition-colors focus-visible:outline-2 focus-visible:outline-emerald-600"
+                            class="inline-flex size-11 items-center justify-center rounded-xl text-slate-700 hover:bg-slate-100 hover:text-slate-900 transition-colors focus-visible:outline-2 focus-visible:outline-rose-600"
                             id="hamburger-btn"
                             aria-label="Buka Menu Navigasi"
                         >
                             <x-ti-menu-2 class="size-5" aria-hidden="true" />
                         </button>
                         <a href="{{ route('home') }}" class="flex items-center gap-2" wire:navigate>
-                            <div class="flex size-8 items-center justify-center rounded-xl bg-rose-100 text-rose-700 border border-rose-200">
+                            <div class="flex size-8 items-center justify-center rounded-xl bg-white text-rose-700 border border-rose-200">
                                 <x-ti-wallet class="size-4.5" aria-hidden="true" />
                             </div>
                             <span class="text-sm font-bold text-slate-900 tracking-tight flex items-center gap-1">
@@ -261,18 +261,6 @@
                                 <x-ti-heart class="size-3.5 text-rose-500" aria-hidden="true" />
                             </span>
                         </a>
-                    </div>
-
-                    <div class="flex items-center gap-2">
-                        <button
-                            type="button"
-                            onclick="document.getElementById('logout-form').submit();"
-                            class="inline-flex h-9 items-center gap-1 rounded-xl bg-rose-50 px-2.5 text-xs font-semibold text-rose-800 border border-rose-200 hover:bg-rose-100 transition-colors"
-                            title="Keluar"
-                        >
-                            <x-ti-logout class="size-3.5 text-rose-700" aria-hidden="true" />
-                            <span>Keluar</span>
-                        </button>
                     </div>
                 </header>
             @endauth
@@ -283,9 +271,9 @@
                     {{ $slot }}
                 </div>
 
-                <footer class="mt-auto border-t border-slate-200/80 bg-white/70 py-3.5 px-4 sm:px-6 lg:px-8 text-center text-xs text-slate-500 select-none">
+                <footer class="mt-auto border-t border-rose-200/80 bg-rose-100/90 py-3.5 px-4 sm:px-6 lg:px-8 text-center text-xs text-rose-800 select-none">
                     <p class="leading-relaxed">
-                        &copy; {{ date('Y') }} <strong class="text-slate-700">Bank BINI</strong> &bull; Kantong Keuangan Keluarga
+                        &copy; {{ date('Y') }} <strong class="text-rose-900">Bank BINI</strong> &bull; Kantong Keuangan Keluarga
                     </p>
                 </footer>
             </main>
@@ -300,27 +288,27 @@
                         <a
                             href="{{ route('home') }}"
                             wire:navigate
-                            class="flex flex-col items-center justify-center gap-1 min-h-12 rounded-xl px-2 py-1.5 text-xs font-semibold transition-colors {{ request()->routeIs('home') ? 'text-emerald-800 bg-emerald-50 border border-emerald-200' : 'text-slate-600 hover:text-slate-900' }}"
+                            class="flex flex-col items-center justify-center gap-1 min-h-12 rounded-xl px-2 py-1.5 text-xs font-semibold transition-colors {{ request()->routeIs('home') ? 'text-rose-800 bg-rose-100 border border-rose-300' : 'text-slate-600 hover:text-slate-900' }}"
                         >
-                            <x-ti-home class="size-5 {{ request()->routeIs('home') ? 'text-emerald-600' : 'text-slate-500' }}" aria-hidden="true" />
+                            <x-ti-home class="size-5 {{ request()->routeIs('home') ? 'text-rose-700' : 'text-slate-500' }}" aria-hidden="true" />
                             <span>Home</span>
                         </a>
 
                         <a
                             href="{{ route('pockets.index') }}"
                             wire:navigate
-                            class="flex flex-col items-center justify-center gap-1 min-h-12 rounded-xl px-2 py-1.5 text-xs font-semibold transition-colors {{ request()->routeIs('pockets.*') ? 'text-emerald-800 bg-emerald-50 border border-emerald-200' : 'text-slate-600 hover:text-slate-900' }}"
+                            class="flex flex-col items-center justify-center gap-1 min-h-12 rounded-xl px-2 py-1.5 text-xs font-semibold transition-colors {{ request()->routeIs('pockets.*') ? 'text-rose-800 bg-rose-100 border border-rose-300' : 'text-slate-600 hover:text-slate-900' }}"
                         >
-                            <x-ti-wallet class="size-5 {{ request()->routeIs('pockets.*') ? 'text-emerald-600' : 'text-slate-500' }}" aria-hidden="true" />
+                            <x-ti-wallet class="size-5 {{ request()->routeIs('pockets.*') ? 'text-rose-700' : 'text-slate-500' }}" aria-hidden="true" />
                             <span>Kantong</span>
                         </a>
 
                         <a
                             href="{{ route('recap.index') }}"
                             wire:navigate
-                            class="flex flex-col items-center justify-center gap-1 min-h-12 rounded-xl px-2 py-1.5 text-xs font-semibold transition-colors {{ request()->routeIs('recap.*') || request()->routeIs('transactions.*') ? 'text-emerald-800 bg-emerald-50 border border-emerald-200' : 'text-slate-600 hover:text-slate-900' }}"
+                            class="flex flex-col items-center justify-center gap-1 min-h-12 rounded-xl px-2 py-1.5 text-xs font-semibold transition-colors {{ request()->routeIs('recap.*') || request()->routeIs('transactions.*') ? 'text-rose-800 bg-rose-100 border border-rose-300' : 'text-slate-600 hover:text-slate-900' }}"
                         >
-                            <x-ti-report-analytics class="size-5 {{ request()->routeIs('recap.*') || request()->routeIs('transactions.*') ? 'text-emerald-600' : 'text-slate-500' }}" aria-hidden="true" />
+                            <x-ti-report-analytics class="size-5 {{ request()->routeIs('recap.*') || request()->routeIs('transactions.*') ? 'text-rose-700' : 'text-slate-500' }}" aria-hidden="true" />
                             <span>Rekap</span>
                         </a>
                     </div>

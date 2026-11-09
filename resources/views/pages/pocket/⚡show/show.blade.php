@@ -8,11 +8,11 @@
         <div>
             <h1 class="text-lg font-bold text-slate-900 sm:text-xl">Detail Kantong: {{ $wallet->name }}</h1>
             <nav class="flex items-center gap-1.5 text-sm text-slate-500 mt-1">
-                <a href="{{ route('home') }}" wire:navigate class="hover:text-emerald-600 transition-colors">
+                <a href="{{ route('home') }}" wire:navigate class="hover:text-rose-600 transition-colors">
                     <x-ti-home class="size-4" />
                 </a>
                 <span>/</span>
-                <a href="{{ route('pockets.index') }}" wire:navigate class="hover:text-emerald-600 transition-colors">
+                <a href="{{ route('pockets.index') }}" wire:navigate class="hover:text-rose-600 transition-colors">
                     Kantong
                 </a>
                 <span>/</span>
@@ -33,7 +33,7 @@
                 </x-button>
             @endif
 
-            <x-button color="emerald" flat sm wire:click="openEditModal" class="rounded-xl">
+            <x-button color="rose" flat sm wire:click="openEditModal" class="rounded-xl">
                 <x-ti-edit class="size-4 mr-1" />
                 Ubah
             </x-button>
@@ -151,28 +151,28 @@
                 <button
                     type="button"
                     wire:click="setFlowFilter('')"
-                    class="shrink-0 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors cursor-pointer {{ $flowFilter === '' ? 'bg-emerald-700 text-white' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-800' }}"
+                    class="shrink-0 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors cursor-pointer {{ $flowFilter === '' ? 'bg-rose-700 text-white' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-800' }}"
                 >
                     Semua
                 </button>
                 <button
                     type="button"
                     wire:click="setFlowFilter('income')"
-                    class="shrink-0 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors cursor-pointer {{ $flowFilter === 'income' ? 'bg-emerald-700 text-white' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-800' }}"
+                    class="shrink-0 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors cursor-pointer {{ $flowFilter === 'income' ? 'bg-rose-700 text-white' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-800' }}"
                 >
                     Masuk
                 </button>
                 <button
                     type="button"
                     wire:click="setFlowFilter('expense')"
-                    class="shrink-0 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors cursor-pointer {{ $flowFilter === 'expense' ? 'bg-emerald-700 text-white' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-800' }}"
+                    class="shrink-0 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors cursor-pointer {{ $flowFilter === 'expense' ? 'bg-rose-700 text-white' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-800' }}"
                 >
                     Keluar
                 </button>
                 <button
                     type="button"
                     wire:click="setFlowFilter('transfer')"
-                    class="shrink-0 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors cursor-pointer {{ $flowFilter === 'transfer' ? 'bg-emerald-700 text-white' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-800' }}"
+                    class="shrink-0 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors cursor-pointer {{ $flowFilter === 'transfer' ? 'bg-rose-700 text-white' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-800' }}"
                 >
                     Pindah
                 </button>
@@ -367,7 +367,7 @@
 
             <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-200">
                 <x-button color="slate" flat wire:click="$set('incomeModal', false)">Batal</x-button>
-                <x-button submit color="emerald" loading="saveIncome">Simpan</x-button>
+                <x-button submit color="rose" loading="saveIncome">Simpan</x-button>
             </div>
         </form>
     </x-modal>
@@ -426,7 +426,7 @@
                     wire:model.live="transfer_destination_wallet_id"
                     card
                     :columns="2"
-                    color="emerald"
+                    color="sky"
                     :options="$this->otherActiveWalletOptions"
                     class="[&_input]:sr-only"
                 />
@@ -456,7 +456,7 @@
 
             <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-200">
                 <x-button color="slate" flat wire:click="$set('transferModal', false)">Batal</x-button>
-                <x-button submit color="emerald" loading="saveTransfer">Pindahkan Sekarang</x-button>
+                <x-button submit color="rose" loading="saveTransfer">Pindahkan Sekarang</x-button>
             </div>
         </form>
     </x-modal>
@@ -484,7 +484,7 @@
 
             <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-200">
                 <x-button color="slate" flat wire:click="$set('editModal', false)">Batal</x-button>
-                <x-button submit color="emerald" loading="updatePocket">Simpan Perubahan</x-button>
+                <x-button submit color="rose" loading="updatePocket">Simpan Perubahan</x-button>
             </div>
         </form>
     </x-modal>

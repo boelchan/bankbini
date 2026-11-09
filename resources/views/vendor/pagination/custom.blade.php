@@ -1,6 +1,6 @@
 <nav class="flex flex-col items-center justify-between gap-2 sm:flex-row" role="navigation">
     @if ($paginator->total() > 10)
-        <select class="w-16 flex-none rounded-lg border bg-white px-2 py-1 text-sm focus:border-emerald-500 focus:ring-emerald-500" wire:model.live="perPage">
+        <select class="w-16 flex-none rounded-lg border bg-white px-2 py-1 text-sm focus:border-rose-500 focus:ring-rose-500" wire:model.live="perPage">
             <option value="10">10</option>
             <option value="25">25</option>
             <option value="50">50</option>
@@ -37,7 +37,7 @@
             {{-- Previous Page --}}
             @if ($paginator->onFirstPage())
             @else
-                <button class="inline-flex h-8 w-8 items-center justify-center rounded-full text-emerald-600 hover:bg-emerald-50 transition-colors" type="button" wire:click="previousPage">
+                <button class="inline-flex h-8 w-8 items-center justify-center rounded-full text-rose-600 hover:bg-rose-50 transition-colors" type="button" wire:click="previousPage">
                     <x-ti-chevron-left class="size-5" />
                 </button>
             @endif
@@ -51,9 +51,9 @@
                 @if (is_array($element))
                     @foreach ($element as $page => $url)
                         @if ($page == $paginator->currentPage())
-                            <button class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-emerald-600 text-sm font-bold text-white" type="button">{{ $page }}</button>
+                            <button class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-rose-600 text-sm font-bold text-white" type="button">{{ $page }}</button>
                         @else
-                            <button class="inline-flex h-8 w-8 items-center justify-center rounded-full text-sm font-medium text-emerald-600 hover:bg-emerald-50 transition-colors" type="button"
+                            <button class="inline-flex h-8 w-8 items-center justify-center rounded-full text-sm font-medium text-rose-600 hover:bg-rose-50 transition-colors" type="button"
                                 wire:click="gotoPage({{ $page }})"
                             >{{ $page }}</button>
                         @endif
@@ -63,7 +63,7 @@
 
             {{-- Next Page --}}
             @if ($paginator->hasMorePages())
-                <button class="inline-flex h-8 w-8 items-center justify-center rounded-full text-emerald-600 hover:bg-emerald-50 transition-colors" type="button" wire:click="nextPage">
+                <button class="inline-flex h-8 w-8 items-center justify-center rounded-full text-rose-600 hover:bg-rose-50 transition-colors" type="button" wire:click="nextPage">
                     <x-ti-chevron-right class="size-5" />
                 </button>
             @else

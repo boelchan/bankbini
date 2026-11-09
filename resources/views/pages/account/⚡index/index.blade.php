@@ -2,7 +2,7 @@
     <div>
         <h1 class="text-lg sm:text-xl font-bold text-slate-900">Pengaturan & Akun</h1>
         <nav class="flex items-center gap-1.5 text-sm text-slate-500 mt-1">
-            <a href="{{ route('home') }}" class="hover:text-emerald-600 transition-colors" wire:navigate>
+            <a href="{{ route('home') }}" class="hover:text-rose-600 transition-colors" wire:navigate>
                 <x-ti-home class="size-4" />
             </a>
             <span>/</span>
@@ -31,7 +31,7 @@
 
                 <div class="mt-5 flex overflow-x-auto gap-1.5 pb-1 max-w-full lg:flex-col lg:space-y-1 lg:overflow-visible lg:pb-0">
                     <button
-                        class="flex shrink-0 whitespace-nowrap items-center gap-2 rounded-xl px-3.5 py-2 text-xs sm:text-sm font-medium transition-colors cursor-pointer {{ $tab === 'summary' ? 'bg-emerald-600 text-white shadow-xs' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 bg-slate-50 lg:bg-transparent' }}"
+                        class="flex shrink-0 whitespace-nowrap items-center gap-2 rounded-xl px-3.5 py-2 text-xs sm:text-sm font-medium transition-colors cursor-pointer {{ $tab === 'summary' ? 'bg-rose-600 text-white shadow-xs' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 bg-slate-50 lg:bg-transparent' }}"
                         wire:click="setTab('summary')"
                         type="button"
                     >
@@ -39,7 +39,7 @@
                         <span>Ringkasan Profil</span>
                     </button>
                     <button
-                        class="flex shrink-0 whitespace-nowrap items-center gap-2 rounded-xl px-3.5 py-2 text-xs sm:text-sm font-medium transition-colors cursor-pointer {{ $tab === 'edit_name' ? 'bg-emerald-600 text-white shadow-xs' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 bg-slate-50 lg:bg-transparent' }}"
+                        class="flex shrink-0 whitespace-nowrap items-center gap-2 rounded-xl px-3.5 py-2 text-xs sm:text-sm font-medium transition-colors cursor-pointer {{ $tab === 'edit_name' ? 'bg-rose-600 text-white shadow-xs' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 bg-slate-50 lg:bg-transparent' }}"
                         wire:click="setTab('edit_name')"
                         type="button"
                     >
@@ -47,7 +47,7 @@
                         <span>Ubah Profil</span>
                     </button>
                     <button
-                        class="flex shrink-0 whitespace-nowrap items-center gap-2 rounded-xl px-3.5 py-2 text-xs sm:text-sm font-medium transition-colors cursor-pointer {{ $tab === 'categories' ? 'bg-emerald-600 text-white shadow-xs' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 bg-slate-50 lg:bg-transparent' }}"
+                        class="flex shrink-0 whitespace-nowrap items-center gap-2 rounded-xl px-3.5 py-2 text-xs sm:text-sm font-medium transition-colors cursor-pointer {{ $tab === 'categories' ? 'bg-rose-600 text-white shadow-xs' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 bg-slate-50 lg:bg-transparent' }}"
                         wire:click="setTab('categories')"
                         type="button"
                     >
@@ -55,7 +55,7 @@
                         <span>Kategori Transaksi</span>
                     </button>
                     <button
-                        class="flex shrink-0 whitespace-nowrap items-center gap-2 rounded-xl px-3.5 py-2 text-xs sm:text-sm font-medium transition-colors cursor-pointer {{ $tab === 'edit_email' ? 'bg-emerald-600 text-white shadow-xs' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 bg-slate-50 lg:bg-transparent' }}"
+                        class="flex shrink-0 whitespace-nowrap items-center gap-2 rounded-xl px-3.5 py-2 text-xs sm:text-sm font-medium transition-colors cursor-pointer {{ $tab === 'edit_email' ? 'bg-rose-600 text-white shadow-xs' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 bg-slate-50 lg:bg-transparent' }}"
                         wire:click="setTab('edit_email')"
                         type="button"
                     >
@@ -63,7 +63,7 @@
                         <span>Ubah Email</span>
                     </button>
                     <button
-                        class="flex shrink-0 whitespace-nowrap items-center gap-2 rounded-xl px-3.5 py-2 text-xs sm:text-sm font-medium transition-colors cursor-pointer {{ $tab === 'edit_password' ? 'bg-emerald-600 text-white shadow-xs' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 bg-slate-50 lg:bg-transparent' }}"
+                        class="flex shrink-0 whitespace-nowrap items-center gap-2 rounded-xl px-3.5 py-2 text-xs sm:text-sm font-medium transition-colors cursor-pointer {{ $tab === 'edit_password' ? 'bg-rose-600 text-white shadow-xs' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 bg-slate-50 lg:bg-transparent' }}"
                         wire:click="setTab('edit_password')"
                         type="button"
                     >
@@ -100,7 +100,7 @@
                                     <div class="text-xs font-medium text-slate-500">Peran di Keluarga</div>
                                     <div class="mt-1 text-sm font-bold text-slate-900">{{ auth()->user()->jabatan ?? 'Menteri Keuangan Keluarga' }}</div>
                                 </div>
-                                <div class="flex size-10 items-center justify-center rounded-xl bg-emerald-100 text-emerald-700">
+                                <div class="flex size-10 items-center justify-center rounded-xl bg-rose-100 text-rose-700">
                                     <x-ti-sparkles class="size-5" />
                                 </div>
                             </div>
@@ -141,7 +141,7 @@
                             <x-input wire:model="phone" label="Nomor WhatsApp / HP" placeholder="0812xxxxxxxx" />
 
                             <div class="flex items-center gap-3 pt-2">
-                                <x-button submit color="emerald" loading="updateName">
+                                <x-button submit color="rose" loading="updateName">
                                     <x-ti-check class="size-4 mr-1 inline" /> Simpan Profil
                                 </x-button>
                                 <x-button color="slate" flat type="button" wire:click="setTab('summary')">
@@ -195,7 +195,7 @@
                                 />
                             </div>
                             <div class="flex justify-end">
-                                <x-button submit color="emerald" sm loading="addCategory">
+                                <x-button submit color="rose" sm loading="addCategory">
                                     <x-ti-plus class="size-4 mr-1 inline" /> Tambah Kategori
                                 </x-button>
                             </div>
@@ -289,7 +289,7 @@
                             <x-password placeholder="Masukkan kata sandi saat ini" label="Konfirmasi Kata Sandi Saat Ini *" wire:model="password_for_email" />
 
                             <div class="flex items-center gap-3 pt-2">
-                                <x-button submit color="emerald" loading="updateEmail">
+                                <x-button submit color="rose" loading="updateEmail">
                                     <x-ti-check class="size-4 mr-1 inline" /> Simpan Email
                                 </x-button>
                                 <x-button color="slate" flat type="button" wire:click="setTab('summary')">
@@ -313,7 +313,7 @@
                             <x-password label="Konfirmasi Kata Sandi Baru *" wire:model="password_confirmation" />
 
                             <div class="flex items-center gap-3 pt-2">
-                                <x-button submit color="emerald" loading="updatePassword">
+                                <x-button submit color="rose" loading="updatePassword">
                                     <x-ti-lock class="size-4 mr-1 inline" /> Perbarui Kata Sandi
                                 </x-button>
                                 <x-button color="slate" flat type="button" wire:click="setTab('summary')">
@@ -374,7 +374,7 @@
 
             <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-200">
                 <x-button color="slate" flat wire:click="$set('editCategoryModal', false)">Batal</x-button>
-                <x-button submit color="emerald" loading="updateCategory">
+                <x-button submit color="rose" loading="updateCategory">
                     <x-ti-check class="size-4 mr-1" />
                     Simpan Perubahan
                 </x-button>

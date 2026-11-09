@@ -142,7 +142,7 @@ class WalletService
             'name' => 'Kantong Utama',
             'description' => 'Kantong utama operasional dan kebutuhan harian keluarga',
             'icon' => WalletIconEnum::WALLET->value,
-            'color' => WalletColorEnum::EMERALD->value,
+            'color' => WalletColorEnum::ROSE->value,
             'initial_balance' => 0,
             'is_primary' => true,
         ]);

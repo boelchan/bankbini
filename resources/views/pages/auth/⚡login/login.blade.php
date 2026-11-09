@@ -4,7 +4,7 @@
         .bankbini-login-bg {
             background-color: #fffbfa;
             background-image:
-                radial-gradient(ellipse 70% 50% at 50% 0%, rgba(244, 63, 94, 0.10) 0%, rgba(16, 185, 129, 0.08) 50%, transparent 80%);
+                radial-gradient(ellipse 70% 50% at 50% 0%, rgba(244, 63, 94, 0.10) 0%, rgba(251, 113, 133, 0.08) 50%, transparent 80%);
         }
     </style>
     @endpush
@@ -17,7 +17,7 @@
                     <x-ti-wallet class="size-8" />
                 </div>
 
-                <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold mb-2">
+                <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-50 border border-rose-200 text-rose-800 text-xs font-semibold mb-2">
                     <x-ti-heart class="size-3.5 text-rose-600" />
                     <span>Dompet Manis Keluarga</span>
                 </div>
@@ -70,14 +70,14 @@
                         <x-checkbox
                             label="Ingat sesi saya di perangkat ini"
                             wire:model="remember"
-                            color="emerald"
+                            color="rose"
                         />
                     </div>
 
                     <div class="pt-2">
                         <x-button
                             submit
-                            color="emerald"
+                            color="rose"
                             loading="authenticate"
                             class="w-full justify-center text-sm font-semibold py-2.5 rounded-xl cursor-pointer"
                         >

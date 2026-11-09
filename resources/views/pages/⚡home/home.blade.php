@@ -10,7 +10,7 @@
                 Halo, {{ auth()->user()->name }}!
             </h1>
             <p class="text-xs text-slate-500 mt-0.5">
-                Ini adalah <strong class="text-emerald-800 font-semibold">Kantong Utama</strong> operasional keluarga Anda.
+                Ini adalah <strong class="text-rose-800 font-semibold">Kantong Utama</strong> operasional keluarga Anda.
             </p>
         </div>
     </div>
@@ -38,8 +38,14 @@
                     {{ $wallet->formattedBalance() }}
                 </p>
                 <div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-600">
-                    <span class="font-semibold text-emerald-700 tabular-nums">+{{ number_format((float) $this->walletStats['total_in'], 0, ',', '.') }}</span>
-                    <span class="font-semibold text-rose-700 tabular-nums">-{{ number_format((float) $this->walletStats['total_out'], 0, ',', '.') }}</span>
+                    <span class="inline-flex items-center gap-1 font-semibold text-emerald-700 tabular-nums">
+                        <x-ti-arrow-down-left class="size-3.5 shrink-0" aria-hidden="true" />
+                        +{{ number_format((float) $this->walletStats['total_in'], 0, ',', '.') }}
+                    </span>
+                    <span class="inline-flex items-center gap-1 font-semibold text-rose-700 tabular-nums">
+                        <x-ti-arrow-up-right class="size-3.5 shrink-0" aria-hidden="true" />
+                        -{{ number_format((float) $this->walletStats['total_out'], 0, ',', '.') }}
+                    </span>
                 </div>
             </div>
 
@@ -72,28 +78,28 @@
                 <button
                     type="button"
                     wire:click="setFlowFilter('')"
-                    class="rounded-lg px-3 py-1 text-xs font-semibold transition-colors cursor-pointer {{ $flowFilter === '' ? 'bg-white text-emerald-700 shadow-2xs' : 'text-slate-600 hover:text-slate-900' }}"
+                    class="rounded-lg px-3 py-1 text-xs font-semibold transition-colors cursor-pointer {{ $flowFilter === '' ? 'bg-white text-rose-700 shadow-2xs' : 'text-slate-600 hover:text-slate-900' }}"
                 >
                     Semua
                 </button>
                 <button
                     type="button"
                     wire:click="setFlowFilter('income')"
-                    class="rounded-lg px-3 py-1 text-xs font-semibold transition-colors cursor-pointer {{ $flowFilter === 'income' ? 'bg-white text-emerald-700 shadow-2xs' : 'text-slate-600 hover:text-slate-900' }}"
+                    class="rounded-lg px-3 py-1 text-xs font-semibold transition-colors cursor-pointer {{ $flowFilter === 'income' ? 'bg-white text-rose-700 shadow-2xs' : 'text-slate-600 hover:text-slate-900' }}"
                 >
                     Masuk
                 </button>
                 <button
                     type="button"
                     wire:click="setFlowFilter('expense')"
-                    class="rounded-lg px-3 py-1 text-xs font-semibold transition-colors cursor-pointer {{ $flowFilter === 'expense' ? 'bg-white text-emerald-700 shadow-2xs' : 'text-slate-600 hover:text-slate-900' }}"
+                    class="rounded-lg px-3 py-1 text-xs font-semibold transition-colors cursor-pointer {{ $flowFilter === 'expense' ? 'bg-white text-rose-700 shadow-2xs' : 'text-slate-600 hover:text-slate-900' }}"
                 >
                     Keluar
                 </button>
                 <button
                     type="button"
                     wire:click="setFlowFilter('transfer')"
-                    class="rounded-lg px-3 py-1 text-xs font-semibold transition-colors cursor-pointer {{ $flowFilter === 'transfer' ? 'bg-white text-emerald-700 shadow-2xs' : 'text-slate-600 hover:text-slate-900' }}"
+                    class="rounded-lg px-3 py-1 text-xs font-semibold transition-colors cursor-pointer {{ $flowFilter === 'transfer' ? 'bg-white text-rose-700 shadow-2xs' : 'text-slate-600 hover:text-slate-900' }}"
                 >
                     Pindah
                 </button>
@@ -290,7 +296,7 @@
 
             <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-200">
                 <x-button color="slate" flat wire:click="$set('incomeModal', false)">Batal</x-button>
-                <x-button submit color="emerald" loading="saveIncome">Simpan</x-button>
+                <x-button submit color="rose" loading="saveIncome">Simpan</x-button>
             </div>
         </form>
     </x-modal>
@@ -349,7 +355,7 @@
                     wire:model.live="transfer_destination_wallet_id"
                     card
                     :columns="2"
-                    color="emerald"
+                    color="sky"
                     :options="$this->otherActiveWalletOptions"
                     class="[&_input]:sr-only"
                 />
@@ -379,7 +385,7 @@
 
             <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-200">
                 <x-button color="slate" flat wire:click="$set('transferModal', false)">Batal</x-button>
-                <x-button submit color="emerald" loading="saveTransfer">Kirim Uang</x-button>
+                <x-button submit color="rose" loading="saveTransfer">Kirim Uang</x-button>
             </div>
         </form>
     </x-modal>

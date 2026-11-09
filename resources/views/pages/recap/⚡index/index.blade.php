@@ -83,7 +83,7 @@
             <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between w-full">
                 <div>
                     <h2 class="text-sm sm:text-base font-semibold text-slate-900 flex items-center gap-1.5">
-                        <x-ti-chart-pie class="size-4.5 text-emerald-600" />
+                        <x-ti-chart-pie class="size-4.5 text-rose-600" />
                         <span>Rekap per Kategori</span>
                     </h2>
                     <p class="text-xs text-slate-500">Distribusi alokasi dana keluarga sesuai kategori transaksi</p>
@@ -211,7 +211,7 @@
                     </p>
                 </div>
 
-                <x-button color="emerald" sm wire:click="openAddKeywordModal" class="rounded-xl self-start sm:self-auto">
+                <x-button color="rose" sm wire:click="openAddKeywordModal" class="rounded-xl self-start sm:self-auto">
                     <x-ti-plus class="size-4 mr-1" />
                     <span>Tambah Kata Kunci</span>
                 </x-button>
@@ -227,7 +227,7 @@
                 <p class="text-xs text-slate-500 max-w-md mx-auto">
                     Tambahkan kata kunci belanja (contoh: <em>Beras</em>, <em>Skincare</em>, <em>Kopi</em>, <em>Bensin</em>, <em>Listrik</em>) beserta batas anggarannya untuk memantau pengeluaran pos tersebut secara otomatis.
                 </p>
-                <x-button color="emerald" sm wire:click="openAddKeywordModal" class="rounded-xl mt-2">
+                <x-button color="rose" sm wire:click="openAddKeywordModal" class="rounded-xl mt-2">
                     <x-ti-plus class="size-4 mr-1" />
                     Tambah Kata Kunci Pertama
                 </x-button>
@@ -317,7 +317,7 @@
 
             <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-200">
                 <x-button color="slate" flat wire:click="$set('keywordModal', false)">Batal</x-button>
-                <x-button submit color="emerald" loading="saveKeyword">
+                <x-button submit color="rose" loading="saveKeyword">
                     <x-ti-check class="size-4 mr-1" />
                     Simpan Kata Kunci
                 </x-button>
