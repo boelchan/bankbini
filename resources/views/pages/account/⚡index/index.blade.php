@@ -164,7 +164,7 @@
                                 <x-ti-plus class="size-4 text-rose-600" />
                                 <span>Tambah Kategori Baru</span>
                             </div>
-                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
                                 <x-input wire:model="cat_name" label="Nama Kategori *" placeholder="Contoh: Skincare & Salon" />
                                 <x-select.styled
                                     wire:model="cat_type"
@@ -184,6 +184,15 @@
                                     :options="\App\Enums\WalletColorEnum::choices()"
                                     select="label:label|value:value"
                                 />
+                                <x-currency
+                                    wire:model="cat_budget_limit"
+                                    label="Batas Atas"
+                                    locale="id-ID"
+                                    symbol=""
+                                    :decimals="0"
+                                    :precision="0"
+                                    placeholder="0 (Tanpa batas)"
+                                />
                             </div>
                             <div class="flex justify-end">
                                 <x-button submit color="emerald" sm loading="addCategory">
@@ -201,20 +210,29 @@
                                 </h4>
                                 <div class="divide-y divide-slate-100 rounded-xl border border-slate-200 bg-white">
                                     @foreach ($this->categories->where('type', \App\Enums\CategoryTypeEnum::INCOME) as $cat)
-                                        <div class="flex items-center justify-between px-3.5 py-2.5 text-sm">
-                                            <div class="flex items-center gap-2.5">
-                                                <span class="flex size-8 items-center justify-center rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                        <div class="flex items-center justify-between px-3.5 py-2.5 text-sm hover:bg-slate-50/60 transition-colors">
+                                            <div class="flex items-center gap-2.5 min-w-0 flex-1">
+                                                <span class="flex size-8 shrink-0 items-center justify-center rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200">
                                                     <x-dynamic-component :component="'ti-' . ($cat->icon ?: 'wallet')" class="size-4" />
                                                 </span>
-                                                <span class="font-medium text-slate-800">{{ $cat->name }}</span>
+                                                <div class="min-w-0">
+                                                    <span class="font-medium text-slate-800 truncate block">{{ $cat->name }}</span>
+                                                    @if ((float) $cat->budget_limit > 0)
+                                                        <span class="text-xs text-slate-500">Batas: {{ number_format((float) $cat->budget_limit, 0, ',', '.') }}</span>
+                                                    @endif
+                                                </div>
                                             </div>
-                                            @if ($cat->is_default)
-                                                <span class="text-xs text-slate-400">Bawaan</span>
-                                            @else
-                                                <x-button.circle color="red" flat sm wire:click="deleteCategory({{ $cat->id }})" title="Hapus kategori">
+                                            <div class="flex items-center gap-1 shrink-0">
+                                                @if ($cat->is_default)
+                                                    <span class="text-xs text-slate-400 mr-1">Bawaan</span>
+                                                @endif
+                                                <x-button.circle color="slate" flat sm wire:click="openEditCategoryModal({{ $cat->id }})" title="Ubah kategori">
+                                                    <x-ti-edit class="size-4 text-slate-600 hover:text-slate-900" />
+                                                </x-button.circle>
+                                                <x-button.circle color="red" flat sm wire:click="askDeleteCategory({{ $cat->id }})" title="Hapus kategori">
                                                     <x-ti-trash class="size-4" />
                                                 </x-button.circle>
-                                            @endif
+                                            </div>
                                         </div>
                                     @endforeach
                                 </div>
@@ -228,20 +246,29 @@
                                 </h4>
                                 <div class="divide-y divide-slate-100 rounded-xl border border-slate-200 bg-white">
                                     @foreach ($this->categories->where('type', \App\Enums\CategoryTypeEnum::EXPENSE) as $cat)
-                                        <div class="flex items-center justify-between px-3.5 py-2.5 text-sm">
-                                            <div class="flex items-center gap-2.5">
-                                                <span class="flex size-8 items-center justify-center rounded-lg bg-rose-50 text-rose-700 border border-rose-200">
+                                        <div class="flex items-center justify-between px-3.5 py-2.5 text-sm hover:bg-slate-50/60 transition-colors">
+                                            <div class="flex items-center gap-2.5 min-w-0 flex-1">
+                                                <span class="flex size-8 shrink-0 items-center justify-center rounded-lg bg-rose-50 text-rose-700 border border-rose-200">
                                                     <x-dynamic-component :component="'ti-' . ($cat->icon ?: 'shopping-bag')" class="size-4" />
                                                 </span>
-                                                <span class="font-medium text-slate-800">{{ $cat->name }}</span>
+                                                <div class="min-w-0">
+                                                    <span class="font-medium text-slate-800 truncate block">{{ $cat->name }}</span>
+                                                    @if ((float) $cat->budget_limit > 0)
+                                                        <span class="text-xs text-slate-500">Batas: {{ number_format((float) $cat->budget_limit, 0, ',', '.') }}</span>
+                                                    @endif
+                                                </div>
                                             </div>
-                                            @if ($cat->is_default)
-                                                <span class="text-xs text-slate-400">Bawaan</span>
-                                            @else
-                                                <x-button.circle color="red" flat sm wire:click="deleteCategory({{ $cat->id }})" title="Hapus kategori">
+                                            <div class="flex items-center gap-1 shrink-0">
+                                                @if ($cat->is_default)
+                                                    <span class="text-xs text-slate-400 mr-1">Bawaan</span>
+                                                @endif
+                                                <x-button.circle color="slate" flat sm wire:click="openEditCategoryModal({{ $cat->id }})" title="Ubah kategori">
+                                                    <x-ti-edit class="size-4 text-slate-600 hover:text-slate-900" />
+                                                </x-button.circle>
+                                                <x-button.circle color="red" flat sm wire:click="askDeleteCategory({{ $cat->id }})" title="Hapus kategori">
                                                     <x-ti-trash class="size-4" />
                                                 </x-button.circle>
-                                            @endif
+                                            </div>
                                         </div>
                                     @endforeach
                                 </div>
@@ -299,4 +326,59 @@
             </x-card>
         </div>
     </div>
+
+    {{-- Modal Ubah Kategori Transaksi --}}
+    <x-modal wire="editCategoryModal" title="Ubah Kategori Transaksi">
+        <form wire:submit="updateCategory" class="space-y-4">
+            <x-input
+                wire:model="edit_cat_name"
+                label="Nama Kategori *"
+                placeholder="Contoh: Belanja Bulanan"
+            />
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <x-select.styled
+                    wire:model="edit_cat_type"
+                    label="Jenis Transaksi *"
+                    :options="\App\Enums\CategoryTypeEnum::choices()"
+                    select="label:label|value:value"
+                />
+
+                <x-select.styled
+                    wire:model="edit_cat_icon"
+                    label="Ikon *"
+                    :options="\App\Enums\WalletIconEnum::choices()"
+                    select="label:label|value:value"
+                />
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <x-select.styled
+                    wire:model="edit_cat_color"
+                    label="Warna *"
+                    :options="\App\Enums\WalletColorEnum::choices()"
+                    select="label:label|value:value"
+                />
+
+                <x-currency
+                    wire:model="edit_cat_budget_limit"
+                    label="Batas Atas / Anggaran"
+                    locale="id-ID"
+                    symbol=""
+                    :decimals="0"
+                    :precision="0"
+                    placeholder="0 (Tanpa batas)"
+                    hint="Jika pengeluaran melebihi batas ini, kategori akan ditandai merah."
+                />
+            </div>
+
+            <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-200">
+                <x-button color="slate" flat wire:click="$set('editCategoryModal', false)">Batal</x-button>
+                <x-button submit color="emerald" loading="updateCategory">
+                    <x-ti-check class="size-4 mr-1" />
+                    Simpan Perubahan
+                </x-button>
+            </div>
+        </form>
+    </x-modal>
 </div>

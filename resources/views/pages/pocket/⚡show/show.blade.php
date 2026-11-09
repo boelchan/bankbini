@@ -83,16 +83,16 @@
 
     {{-- Kartu Utama Kantong & Tombol Aksi (Tambah Uang, Pengeluaran, Pindah Uang) --}}
     <x-card class="{{ $colorEnum->cardClasses() }}">
-        <div class="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
-            <div class="flex items-start gap-4">
-                <div class="flex size-14 shrink-0 items-center justify-center rounded-2xl {{ $colorEnum->iconBadgeClasses() }}">
-                    <x-wallet-icon :icon="$wallet->icon" class="size-7" />
+        <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+            <div class="flex items-start gap-3.5">
+                <div class="flex size-12 sm:size-14 shrink-0 items-center justify-center rounded-2xl {{ $colorEnum->iconBadgeClasses() }}">
+                    <x-wallet-icon :icon="$wallet->icon" class="size-6 sm:size-7" />
                 </div>
-                <div class="space-y-1">
-                    <div class="flex items-center gap-2 flex-wrap">
-                        <h2 class="text-lg font-bold {{ $colorEnum->accentTextClasses() }}">{{ $wallet->name }}</h2>
+                <div class="space-y-1 min-w-0 flex-1">
+                    <div class="flex items-center gap-1.5 flex-wrap">
+                        <h2 class="text-base sm:text-lg font-bold {{ $colorEnum->accentTextClasses() }}">{{ $wallet->name }}</h2>
                         @if ($wallet->is_primary)
-                            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-900 border border-amber-300 shadow-2xs">
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-900 border border-amber-300 shadow-2xs">
                                 <x-ti-star-filled class="size-3 text-amber-500" />
                                 <span>Kantong Utama</span>
                             </span>
@@ -102,37 +102,40 @@
                         @endif
                     </div>
                     @if ($wallet->description)
-                        <p class="text-sm text-slate-700">
+                        <p class="text-xs sm:text-sm text-slate-700">
                             {{ $wallet->description }}
                         </p>
                     @endif
-                    <div class="flex flex-wrap items-center gap-4 pt-1 text-xs text-slate-600">
-                        <span>Total Masuk: <strong class="text-emerald-700 tabular-nums">+Rp{{ number_format((float) $this->walletStats['total_in'], 0, ',', '.') }}</strong></span>
-                        <span>Total Keluar: <strong class="text-rose-700 tabular-nums">-Rp{{ number_format((float) $this->walletStats['total_out'], 0, ',', '.') }}</strong></span>
+                    <div class="flex flex-wrap items-center gap-x-4 gap-y-1 pt-1 text-xs text-slate-600">
+                        <span>Total Masuk: <strong class="text-emerald-700 tabular-nums">+{{ number_format((float) $this->walletStats['total_in'], 0, ',', '.') }}</strong></span>
+                        <span>Total Keluar: <strong class="text-rose-700 tabular-nums">-{{ number_format((float) $this->walletStats['total_out'], 0, ',', '.') }}</strong></span>
                     </div>
                 </div>
             </div>
 
-            <div class="flex flex-col sm:flex-row sm:items-center gap-4 lg:gap-6 border-t lg:border-t-0 pt-4 lg:pt-0 border-slate-200/80">
-                    <p class="text-2xl font-bold text-slate-900 tabular-nums mt-0.5">
+            <div class="flex flex-col gap-3 border-t lg:border-t-0 pt-3 lg:pt-0 border-slate-200/80">
+                <div>
+                    <span class="text-xs font-medium text-slate-500 block">Saldo Kantong</span>
+                    <p class="text-2xl sm:text-3xl font-extrabold text-slate-900 tabular-nums tracking-tight">
                         {{ $wallet->formattedBalance() }}
                     </p>
+                </div>
 
                 @if ($wallet->isActive())
-                    <div class="flex flex-wrap items-center gap-2">
-                        <x-button color="emerald" sm wire:click="openIncomeModal('direct')" class="rounded-xl">
-                            <x-ti-plus class="size-4 mr-1" />
-                            Tambah Uang
+                    <div class="grid grid-cols-3 gap-2 sm:flex sm:flex-wrap sm:items-center">
+                        <x-button color="emerald" sm wire:click="openIncomeModal('direct')" class="rounded-xl w-full sm:w-auto justify-center px-2 sm:px-3 text-xs">
+                            <x-ti-plus class="size-4 mr-1 shrink-0" />
+                            <span>Tambah Uang</span>
                         </x-button>
 
-                        <x-button color="rose" light sm wire:click="openExpenseModal" class="rounded-xl">
-                            <x-ti-minus class="size-4 mr-1" />
-                            Pengeluaran
+                        <x-button color="rose" light sm wire:click="openExpenseModal" class="rounded-xl w-full sm:w-auto justify-center px-2 sm:px-3 text-xs">
+                            <x-ti-minus class="size-4 mr-1 shrink-0" />
+                            <span>Pengeluaran</span>
                         </x-button>
 
-                        <x-button color="sky" light sm wire:click="openTransferModal" class="rounded-xl">
-                            <x-ti-arrows-exchange class="size-4 mr-1" />
-                            Pindah Uang
+                        <x-button color="sky" light sm wire:click="openTransferModal" class="rounded-xl w-full sm:w-auto justify-center px-2 sm:px-3 text-xs">
+                            <x-ti-arrows-exchange class="size-4 mr-1 shrink-0" />
+                            <span>Pindah Uang</span>
                         </x-button>
                     </div>
                 @endif
@@ -164,8 +167,8 @@
         {{-- Toolbar Filter Transaksi Lengkap (Bulan, Pemasukan/Pengeluaran, Jenis & Kategori) --}}
         <div class="border-b border-slate-200/80 bg-slate-50/50 p-3 sm:p-4 space-y-3">
             <div class="flex items-center justify-between gap-2">
-                {{-- Quick Filter Aliran Dana (Scrollable di ponsel) --}}
-                <div class="flex items-center gap-1.5 overflow-x-auto pb-1 max-w-full">
+                {{-- Quick Filter Aliran Dana (Flex-wrap agar mengalir ke bawah di ponsel tanpa terpotong) --}}
+                <div class="flex flex-wrap items-center gap-1.5 w-full">
                     <button
                         type="button"
                         wire:click="setFlowFilter('')"
@@ -230,152 +233,71 @@
                 <p class="text-xs text-slate-500">Gunakan tombol Tambah Uang, Pengeluaran, atau Pindah Uang di atas untuk mulai mencatat.</p>
             </div>
         @else
-            {{-- Tampilan Khusus Mobile / Ponsel: List Kartu Transaksi Responsif --}}
-            <div class="block sm:hidden divide-y divide-slate-100">
+            {{-- List Transaksi Kantong (Simple & Clear Bank-Style) --}}
+            <div class="divide-y divide-slate-100">
                 @foreach ($this->transactions as $tx)
-                    <div class="p-3.5 space-y-2 hover:bg-slate-50/60 transition-colors">
-                        <div class="flex items-start justify-between gap-2">
+                    <div class="p-3.5 sm:p-4 hover:bg-slate-50/70 transition-colors">
+                        <div class="flex items-center gap-3">
+                            {{-- Ikon Kategori / Aliran Dana --}}
+                            <div class="flex size-10 shrink-0 items-center justify-center rounded-xl {{ $tx->type->isPositive() ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200' }}">
+                                <x-transaction-icon :icon="$tx->category?->icon" :type="$tx->type" class="size-5" />
+                            </div>
+
+                            {{-- Info Keterangan & Metadata --}}
                             <div class="min-w-0 flex-1">
-                                <p class="text-xs font-semibold text-slate-500">
-                                    {{ $tx->transaction_date?->translatedFormat('d M Y, H:i') }} WIB
-                                </p>
-                                <p class="mt-0.5 text-sm font-bold text-slate-900 leading-snug">
-                                    {{ $tx->displayDescription() }}
-                                </p>
-                            </div>
-                            <div class="text-right shrink-0">
-                                <span class="text-sm font-bold tabular-nums {{ $tx->type->isPositive() ? 'text-emerald-700' : 'text-rose-700' }}">
-                                    {{ $tx->formattedSignedAmount() }}
-                                </span>
-                            </div>
-                        </div>
+                                <div class="flex items-center justify-between gap-2">
+                                    <h4 class="text-sm font-semibold text-slate-900 truncate" title="{{ $tx->displayDescription() }}">
+                                        {{ $tx->displayDescription() }}
+                                    </h4>
+                                    {{-- Nominal Transaksi --}}
+                                    <span class="text-sm sm:text-base font-bold tabular-nums shrink-0 {{ $tx->type->amountClass() }}">
+                                        {{ $tx->formattedSignedAmount() }}
+                                    </span>
+                                </div>
 
-                        <div class="flex flex-wrap items-center justify-between gap-2 pt-0.5">
-                            <div class="flex flex-wrap items-center gap-1.5">
-                                <x-badge :text="$tx->type->label()" :color="$tx->type->color()" xs light />
-                                @if ($tx->category)
-                                    <span class="inline-flex items-center gap-1 text-xs font-medium text-slate-600 bg-slate-100 px-2 py-0.5 rounded-md">
-                                        <span class="size-1.5 rounded-full bg-slate-400"></span>
-                                        {{ $tx->category->name }}
-                                    </span>
-                                @elseif ($tx->counterpart_wallet_name_snapshot)
-                                    <span class="text-xs text-slate-500">
-                                        {{ $tx->type === \App\Enums\TransactionTypeEnum::TRANSFER_IN ? 'Dari: ' : 'Ke: ' }}
-                                        <strong class="text-slate-700">{{ $tx->resolvedCounterpartWalletName() }}</strong>
-                                    </span>
+                                <div class="mt-0.5 flex items-center justify-between gap-2 text-xs text-slate-500">
+                                    {{-- Kiri: Tanggal & Kategori / Lawan Transfer --}}
+                                    <div class="flex items-center gap-1.5 truncate">
+                                        <span>{{ $tx->transaction_date?->translatedFormat('d M Y, H:i') }}</span>
+                                        <span>•</span>
+                                        @if ($tx->category)
+                                            <span class="truncate font-medium text-slate-700">{{ $tx->category->name }}</span>
+                                        @elseif ($tx->counterpart_wallet_name_snapshot)
+                                            <span class="truncate font-medium text-sky-800">
+                                                {{ $tx->type === \App\Enums\TransactionTypeEnum::TRANSFER_IN ? 'Dari: ' : 'Ke: ' }}{{ $tx->resolvedCounterpartWalletName() }}
+                                            </span>
+                                        @else
+                                            <span class="truncate">{{ $tx->type->label() }}</span>
+                                        @endif
+                                    </div>
+
+                                    {{-- Kanan: Saldo Sisa Sesudah Transaksi --}}
+                                    <div class="flex items-center gap-2 shrink-0">
+                                        <span class="hidden sm:inline text-slate-400">Sisa:</span>
+                                        <span class="font-medium text-slate-600 tabular-nums">{{ $tx->formattedBalanceAfter() }}</span>
+                                        @if ($loop->first && $this->transactions->currentPage() === 1)
+                                            <button
+                                                type="button"
+                                                wire:click="askDeleteTransaction({{ $tx->id }})"
+                                                class="text-slate-400 hover:text-rose-600 p-0.5 rounded transition-colors cursor-pointer"
+                                                title="Hapus Transaksi Terakhir"
+                                                aria-label="Hapus transaksi terakhir {{ $tx->displayDescription() }}"
+                                            >
+                                                <x-ti-trash class="size-3.5" />
+                                            </button>
+                                        @endif
+                                    </div>
+                                </div>
+
+                                @if ($tx->notes)
+                                    <p class="mt-1 text-xs text-slate-500 italic bg-slate-50/80 px-2 py-0.5 rounded border border-slate-100 line-clamp-1">
+                                        "{{ $tx->notes }}"
+                                    </p>
                                 @endif
                             </div>
-
-                            <div class="flex items-center gap-2 text-xs">
-                                <span class="text-slate-500">Saldo: <strong class="text-slate-800 tabular-nums">{{ $tx->formattedBalanceAfter() }}</strong></span>
-                                @if ($loop->first && $this->transactions->currentPage() === 1)
-                                    <x-button.circle
-                                        color="red"
-                                        flat
-                                        xs
-                                        wire:click="askDeleteTransaction({{ $tx->id }})"
-                                        title="Hapus Transaksi Terakhir"
-                                        aria-label="Hapus transaksi terakhir {{ $tx->displayDescription() }}"
-                                    >
-                                        <x-ti-trash class="size-3.5" />
-                                    </x-button.circle>
-                                @endif
-                            </div>
                         </div>
-
-                        @if ($tx->notes)
-                            <p class="text-xs text-slate-500 italic">
-                                "{{ $tx->notes }}"
-                            </p>
-                        @endif
                     </div>
                 @endforeach
-            </div>
-
-            {{-- Tampilan Desktop & Tablet: Tabel Lengkap 6 Kolom --}}
-            <div class="hidden sm:block overflow-x-auto">
-                <table class="w-full text-left border-collapse">
-                    <thead>
-                        <tr class="border-b border-slate-200 bg-slate-50/80 text-xs font-semibold uppercase tracking-wider text-slate-500">
-                            <th class="py-3.5 pl-5 pr-3">Tanggal & Waktu</th>
-                            <th class="px-3 py-3.5">Keterangan</th>
-                            <th class="px-3 py-3.5">Tipe & Jenis</th>
-                            <th class="px-3 py-3.5 text-right">Nominal</th>
-                            <th class="px-3 py-3.5 text-right">Saldo Kantong</th>
-                            <th class="py-3.5 pl-3 pr-5 text-right">Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-slate-200/70 text-sm">
-                        @foreach ($this->transactions as $tx)
-                            <tr class="hover:bg-slate-50/80 transition-colors">
-                                <td class="py-3.5 pl-5 pr-3 whitespace-nowrap">
-                                    <div class="font-semibold text-slate-900 text-xs sm:text-sm">
-                                        {{ $tx->transaction_date?->translatedFormat('d M Y') }}
-                                    </div>
-                                    <div class="text-xs text-slate-500">
-                                        {{ $tx->transaction_date?->translatedFormat('H:i') }} WIB
-                                    </div>
-                                </td>
-
-                                <td class="px-3 py-3.5">
-                                    <div class="font-semibold text-slate-900">{{ $tx->displayDescription() }}</div>
-                                    <div class="mt-0.5 flex flex-wrap items-center gap-1.5 text-xs text-slate-500">
-                                        @if ($tx->notes)
-                                            <span>{{ $tx->notes }}</span>
-                                        @endif
-                                        @if ($tx->user)
-                                            @if ($tx->notes)
-                                                <span>•</span>
-                                            @endif
-                                            <span>Oleh: {{ $tx->user->name }}</span>
-                                        @endif
-                                    </div>
-                                </td>
-
-                                <td class="px-3 py-3.5 whitespace-nowrap">
-                                    <div class="space-y-1">
-                                        <x-badge :text="$tx->type->label()" :color="$tx->type->color()" sm light />
-                                        @if ($tx->category)
-                                            <div class="text-xs font-medium text-slate-700 flex items-center gap-1">
-                                                <span class="size-1.5 rounded-full bg-slate-400 inline-block"></span>
-                                                <span>{{ $tx->category->name }}</span>
-                                            </div>
-                                        @elseif ($tx->counterpart_wallet_name_snapshot)
-                                            <div class="text-xs text-slate-500">
-                                                {{ $tx->type === \App\Enums\TransactionTypeEnum::TRANSFER_IN ? 'Dari: ' : 'Ke: ' }}
-                                                <span class="font-medium text-slate-700">{{ $tx->resolvedCounterpartWalletName() }}</span>
-                                            </div>
-                                        @endif
-                                    </div>
-                                </td>
-
-                                <td class="px-3 py-3.5 text-right font-bold tabular-nums whitespace-nowrap {{ $tx->type->isPositive() ? 'text-emerald-700' : 'text-rose-700' }}">
-                                    {{ $tx->formattedSignedAmount() }}
-                                </td>
-
-                                <td class="px-3 py-3.5 text-right whitespace-nowrap">
-                                    <div class="text-xs font-semibold text-slate-900 tabular-nums">{{ $tx->formattedBalanceAfter() }}</div>
-                                    <div class="text-xs text-slate-400 tabular-nums">Awal: {{ $tx->formattedBalanceBefore() }}</div>
-                                </td>
-
-                                <td class="py-3.5 pl-3 pr-5 text-right whitespace-nowrap">
-                                    @if ($loop->first && $this->transactions->currentPage() === 1)
-                                        <x-button.circle
-                                            color="red"
-                                            flat
-                                            sm
-                                            wire:click="askDeleteTransaction({{ $tx->id }})"
-                                            title="Hapus Transaksi Terakhir"
-                                            aria-label="Hapus transaksi terakhir {{ $tx->displayDescription() }}"
-                                        >
-                                            <x-ti-trash class="size-4" />
-                                        </x-button.circle>
-                                    @endif
-                                </td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
             </div>
 
             <div class="p-4 border-t border-slate-200">
@@ -430,10 +352,10 @@
                 <x-currency
                     wire:model="income_amount"
                     locale="id-ID"
-                    symbol="Rp"
+                    symbol=""
                     :decimals="0"
                     :precision="0"
-                    placeholder="Nominal (Rp)"
+                    placeholder="Nominal"
                 />
 
                 <x-input
@@ -471,11 +393,11 @@
                 <x-currency
                     wire:model="expense_amount"
                     locale="id-ID"
-                    symbol="Rp"
+                    symbol=""
                     :decimals="0"
                     :precision="0"
                     hint="Saldo tersedia: {{ $wallet->formattedBalance() }}"
-                    placeholder="Nominal (Rp)"
+                    placeholder="Nominal"
                 />
 
                 <x-input
@@ -517,11 +439,11 @@
                 <x-currency
                     wire:model="transfer_amount"
                     locale="id-ID"
-                    symbol="Rp"
+                    symbol=""
                     :decimals="0"
                     :precision="0"
                     hint="Saldo tersedia: {{ $wallet->formattedBalance() }}"
-                    placeholder="Nominal (Rp)"
+                    placeholder="Nominal"
                 />
 
                 <x-input
@@ -600,7 +522,7 @@
                 />
             @else
                 <p class="text-xs text-slate-600">
-                    Kantong ini memiliki saldo Rp0 dan siap dihapus. Riwayat transaksi lama tetap tersimpan di halaman Transaksi.
+                    Kantong ini memiliki saldo 0 dan siap dihapus. Riwayat transaksi lama tetap tersimpan di halaman Transaksi.
                 </p>
             @endif
 

@@ -318,6 +318,26 @@ class TransactionService
     }
 
     /**
+     * Alias untuk pencatatan transaksi pemasukan baru (kompatibilitas alur pembuatan transaksi).
+     *
+     * @param array<string, mixed> $data
+     */
+    public function createIncomeTransaction(array $data): Transaction
+    {
+        return $this->recordIncome($data);
+    }
+
+    /**
+     * Alias untuk pencatatan transaksi pengeluaran baru (kompatibilitas alur pembuatan transaksi).
+     *
+     * @param array<string, mixed> $data
+     */
+    public function createExpenseTransaction(array $data): Transaction
+    {
+        return $this->recordExpense($data);
+    }
+
+    /**
      * Memastikan kantong dalam keadaan aktif dan tidak dibekukan ataupun dihapus.
      */
     public function assertWalletCanTransact(Wallet $wallet, string $actionLabel): void

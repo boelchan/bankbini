@@ -134,9 +134,15 @@ class extends Component
      */
     public function openIncomeModal(string $sourceType = 'direct'): void
     {
+        $defaultIncomeCat = TransactionCategory::query()
+            ->where('type', CategoryTypeEnum::INCOME->value)
+            ->orderBy('is_default', 'desc')
+            ->orderBy('name')
+            ->first();
+
         $this->income_source_type = $sourceType;
         $this->income_source_wallet_id = null;
-        $this->income_category_id = null;
+        $this->income_category_id = $defaultIncomeCat?->id;
         $this->income_amount = '';
         $this->income_date = now()->format('Y-m-d\TH:i');
         $this->income_description = '';
@@ -223,7 +229,13 @@ class extends Component
      */
     public function openExpenseModal(): void
     {
-        $this->expense_category_id = null;
+        $defaultExpenseCat = TransactionCategory::query()
+            ->where('type', CategoryTypeEnum::EXPENSE->value)
+            ->orderBy('is_default', 'desc')
+            ->orderBy('name')
+            ->first();
+
+        $this->expense_category_id = $defaultExpenseCat?->id;
         $this->expense_amount = '';
         $this->expense_date = now()->format('Y-m-d\TH:i');
         $this->expense_description = '';

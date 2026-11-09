@@ -103,11 +103,11 @@ class Transfer extends Model
     }
 
     /**
-     * Memformat nominal transfer ke format Rupiah.
+     * Memformat nominal transfer.
      */
     public function formattedAmount(): string
     {
-        return 'Rp' . number_format((float) $this->amount, 0, ',', '.');
+        return number_format((float) $this->amount, 0, ',', '.');
     }
 
     /**

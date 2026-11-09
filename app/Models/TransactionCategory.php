@@ -20,6 +20,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
     'icon',
     'color',
     'is_default',
+    'budget_limit',
 ])]
 class TransactionCategory extends Model
 {
@@ -33,6 +34,7 @@ class TransactionCategory extends Model
         return [
             'type' => CategoryTypeEnum::class,
             'is_default' => 'boolean',
+            'budget_limit' => 'decimal:2',
         ];
     }
 

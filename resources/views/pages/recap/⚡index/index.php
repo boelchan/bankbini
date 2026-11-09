@@ -6,11 +6,13 @@ use App\Enums\CategoryTypeEnum;
 use App\Enums\IncomeSourceEnum;
 use App\Enums\TransactionTypeEnum;
 use App\Enums\WalletStatusEnum;
+use App\Models\RecapKeyword;
 use App\Models\Transaction;
 use App\Models\TransactionCategory;
 use App\Models\Wallet;
 use App\Services\TransactionService;
 use App\Services\TransferService;
+use Carbon\Carbon;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
@@ -39,16 +41,22 @@ class extends Component
     #[Url(as: 'type', except: '')]
     public string $typeFilter = '';
 
-    #[Url(as: 'from', except: '')]
-    public string $dateFrom = '';
+    #[Url(as: 'month', except: '')]
+    public string $monthFilter = '';
 
-    #[Url(as: 'to', except: '')]
-    public string $dateTo = '';
+    /* Tab Rekap Kategori: Pengeluaran atau Pemasukan */
+    public string $categoryRecapTab = 'expense';
 
     /* State Modal */
     public bool $incomeModal = false;
     public bool $expenseModal = false;
     public bool $transferModal = false;
+    public bool $keywordModal = false;
+
+    /* Form Kata Kunci Rekap */
+    public ?int $editingKeywordId = null;
+    public string $keyword_text = '';
+    public string|int|float $keyword_budget_limit = '';
 
     /* Form Pemasukan / Tambah Uang */
     public ?int $income_wallet_id = null;
@@ -82,6 +90,7 @@ class extends Component
         $this->income_date = $now;
         $this->expense_date = $now;
         $this->transfer_date = $now;
+        $this->monthFilter = now()->format('Y-m');
 
         $defaultWallet = Wallet::query()
             ->where('status', WalletStatusEnum::ACTIVE)
@@ -101,7 +110,7 @@ class extends Component
      */
     public function updated(string $property): void
     {
-        if (in_array($property, ['search', 'walletFilter', 'typeFilter', 'dateFrom', 'dateTo'], true)) {
+        if (in_array($property, ['search', 'walletFilter', 'typeFilter', 'monthFilter'], true)) {
             $this->resetPage();
         }
     }
@@ -123,13 +132,42 @@ class extends Component
         $this->search = '';
         $this->walletFilter = null;
         $this->typeFilter = '';
-        $this->dateFrom = '';
-        $this->dateTo = '';
+        $this->monthFilter = '';
         $this->resetPage();
     }
 
     /**
-     * Ringkasan statistik transaksi keluarga sesuai filter tanggal & kantong yang dipilih.
+     * Pilihan bulan yang tersedia dari riwayat transaksi.
+     *
+     * @return array<int, array{label: string, value: string}>
+     */
+    #[Computed]
+    public function monthOptions(): array
+    {
+        $months = Transaction::query()
+            ->whereNotNull('transaction_date')
+            ->selectRaw("DISTINCT DATE_FORMAT(transaction_date, '%Y-%m') as ym")
+            ->orderByDesc('ym')
+            ->pluck('ym')
+            ->filter()
+            ->values();
+
+        $currentYm = now()->format('Y-m');
+        if (!$months->contains($currentYm)) {
+            $months->prepend($currentYm);
+        }
+
+        return $months->map(function (string $ym) {
+            $date = Carbon::createFromFormat('Y-m', $ym);
+            return [
+                'label' => $date ? $date->translatedFormat('F Y') : $ym,
+                'value' => $ym,
+            ];
+        })->all();
+    }
+
+    /**
+     * Ringkasan statistik transaksi keluarga sesuai filter bulan & kantong yang dipilih.
      *
      * @return array{total_income: float, total_expense: float, net_cashflow: float, count: int}
      */
@@ -138,8 +176,7 @@ class extends Component
     {
         $query = Transaction::query()
             ->when($this->walletFilter !== null, fn ($q) => $q->where('wallet_id', $this->walletFilter))
-            ->when($this->dateFrom !== '', fn ($q) => $q->whereDate('transaction_date', '>=', $this->dateFrom))
-            ->when($this->dateTo !== '', fn ($q) => $q->whereDate('transaction_date', '<=', $this->dateTo));
+            ->when($this->monthFilter !== '', fn ($q) => $q->whereRaw("DATE_FORMAT(transaction_date, '%Y-%m') = ?", [$this->monthFilter]));
 
         $income = (float) (clone $query)
             ->where('type', TransactionTypeEnum::INCOME)
@@ -157,6 +194,195 @@ class extends Component
             'net_cashflow' => round($income - $expense, 2),
             'count' => $count,
         ];
+    }
+
+    /**
+     * Membuka modal tambah kata kunci baru.
+     */
+    public function openAddKeywordModal(): void
+    {
+        $this->editingKeywordId = null;
+        $this->keyword_text = '';
+        $this->keyword_budget_limit = '';
+        $this->keywordModal = true;
+    }
+
+    /**
+     * Membuka modal edit kata kunci.
+     */
+    public function openEditKeywordModal(int $id): void
+    {
+        $kw = RecapKeyword::findOrFail($id);
+        $this->editingKeywordId = $kw->id;
+        $this->keyword_text = $kw->keyword;
+        $this->keyword_budget_limit = (float) $kw->budget_limit > 0 ? (float) $kw->budget_limit : '';
+        $this->keywordModal = true;
+    }
+
+    /**
+     * Menyimpan kata kunci rekap ke database.
+     */
+    public function saveKeyword(): void
+    {
+        $this->validate([
+            'keyword_text' => ['required', 'string', 'max:100'],
+            'keyword_budget_limit' => ['nullable', 'numeric', 'gte:0'],
+        ], [
+            'keyword_text.required' => 'Kata kunci wajib diisi.',
+            'keyword_budget_limit.gte' => 'Batas atas tidak boleh negatif.',
+        ]);
+
+        RecapKeyword::updateOrCreate(
+            ['id' => $this->editingKeywordId],
+            [
+                'user_id' => (int) Auth::id(),
+                'keyword' => trim($this->keyword_text),
+                'budget_limit' => $this->keyword_budget_limit ? (float) $this->keyword_budget_limit : 0,
+            ]
+        );
+
+        $this->keywordModal = false;
+        unset($this->keywordRecap);
+        $this->toast()->success('Berhasil!', 'Kata kunci berhasil disimpan.');
+    }
+
+    /**
+     * Menghapus kata kunci dari database.
+     */
+    public function deleteKeyword(int $id): void
+    {
+        RecapKeyword::destroy($id);
+        unset($this->keywordRecap);
+        $this->toast()->success('Dihapus!', 'Kata kunci berhasil dihapus.');
+    }
+
+    /**
+     * Rekapitulasi pengeluaran berdasarkan kata kunci pencarian keterangan yang disimpan di DB.
+     *
+     * @return array<int, array{id: int, keyword: string, amount: float, formatted_amount: string, total_tx: int, limit: float, formatted_limit: string, is_over_limit: bool, over_amount: float, percentage: ?float}>
+     */
+    #[Computed]
+    public function keywordRecap(): array
+    {
+        $keywords = RecapKeyword::orderBy('keyword')->get();
+
+        return $keywords->map(function (RecapKeyword $kw): array {
+            $term = '%' . trim($kw->keyword) . '%';
+
+            $query = Transaction::query()
+                ->whereIn('type', [TransactionTypeEnum::EXPENSE, TransactionTypeEnum::TRANSFER_OUT])
+                ->when($this->walletFilter !== null, fn ($q) => $q->where('wallet_id', $this->walletFilter))
+                ->when($this->monthFilter !== '', fn ($q) => $q->whereRaw("DATE_FORMAT(transaction_date, '%Y-%m') = ?", [$this->monthFilter]))
+                ->where(function ($sub) use ($term): void {
+                    $sub->where('description', 'like', $term)
+                        ->orWhere('notes', 'like', $term);
+                });
+
+            $amount = (float) (clone $query)->sum('amount');
+            $totalTx = (int) (clone $query)->count();
+            $limit = (float) $kw->budget_limit;
+            $isOverLimit = $limit > 0 && $amount > $limit;
+            $overAmount = $isOverLimit ? $amount - $limit : 0.0;
+            $percentage = $limit > 0 ? round(($amount / $limit) * 100, 1) : null;
+
+            return [
+                'id' => $kw->id,
+                'keyword' => $kw->keyword,
+                'amount' => $amount,
+                'formatted_amount' => number_format($amount, 0, ',', '.'),
+                'total_tx' => $totalTx,
+                'limit' => $limit,
+                'formatted_limit' => $kw->formattedLimit(),
+                'is_over_limit' => $isOverLimit,
+                'over_amount' => $overAmount,
+                'percentage' => $percentage,
+            ];
+        })->all();
+    }
+
+    /**
+     * Rekapitulasi transaksi pengeluaran per kategori.
+     *
+     * @return array<int, array{name: string, icon: string, color: string, amount: float, formatted_amount: string, total_tx: int, percentage: float, limit: float, formatted_limit: string, is_over_limit: bool, over_amount: float, budget_percentage: ?float}>
+     */
+    #[Computed]
+    public function categoryExpenseRecap(): array
+    {
+        $query = Transaction::query()
+            ->where('type', TransactionTypeEnum::EXPENSE)
+            ->when($this->walletFilter !== null, fn ($q) => $q->where('wallet_id', $this->walletFilter))
+            ->when($this->monthFilter !== '', fn ($q) => $q->whereRaw("DATE_FORMAT(transaction_date, '%Y-%m') = ?", [$this->monthFilter]));
+
+        $totalExpense = (float) (clone $query)->sum('amount');
+
+        $rows = (clone $query)
+            ->with('category')
+            ->selectRaw('category_id, category_name_snapshot, SUM(amount) as total_amount, COUNT(id) as total_tx')
+            ->groupBy('category_id', 'category_name_snapshot')
+            ->orderByDesc('total_amount')
+            ->get();
+
+        return $rows->map(function ($row) use ($totalExpense) {
+            $amount = (float) $row->total_amount;
+            $percentage = $totalExpense > 0 ? round(($amount / $totalExpense) * 100, 1) : 0.0;
+            $limit = (float) ($row->category?->budget_limit ?? 0);
+            $isOverLimit = $limit > 0 && $amount > $limit;
+            $overAmount = $isOverLimit ? $amount - $limit : 0.0;
+            $budgetPercentage = $limit > 0 ? round(($amount / $limit) * 100, 1) : null;
+
+            return [
+                'name' => $row->category?->name ?? $row->category_name_snapshot ?? 'Lainnya',
+                'icon' => $row->category?->icon ?? 'shopping-bag',
+                'color' => $row->category?->color ?? 'rose',
+                'amount' => $amount,
+                'formatted_amount' => number_format($amount, 0, ',', '.'),
+                'total_tx' => (int) $row->total_tx,
+                'percentage' => $percentage,
+                'limit' => $limit,
+                'formatted_limit' => $limit > 0 ? number_format($limit, 0, ',', '.') : 'Tanpa Batas',
+                'is_over_limit' => $isOverLimit,
+                'over_amount' => $overAmount,
+                'budget_percentage' => $budgetPercentage,
+            ];
+        })->all();
+    }
+
+    /**
+     * Rekapitulasi transaksi pemasukan per kategori.
+     *
+     * @return array<int, array{name: string, icon: string, color: string, amount: float, formatted_amount: string, total_tx: int, percentage: float}>
+     */
+    #[Computed]
+    public function categoryIncomeRecap(): array
+    {
+        $query = Transaction::query()
+            ->where('type', TransactionTypeEnum::INCOME)
+            ->when($this->walletFilter !== null, fn ($q) => $q->where('wallet_id', $this->walletFilter))
+            ->when($this->monthFilter !== '', fn ($q) => $q->whereRaw("DATE_FORMAT(transaction_date, '%Y-%m') = ?", [$this->monthFilter]));
+
+        $totalIncome = (float) (clone $query)->sum('amount');
+
+        $rows = (clone $query)
+            ->with('category')
+            ->selectRaw('category_id, category_name_snapshot, SUM(amount) as total_amount, COUNT(id) as total_tx')
+            ->groupBy('category_id', 'category_name_snapshot')
+            ->orderByDesc('total_amount')
+            ->get();
+
+        return $rows->map(function ($row) use ($totalIncome) {
+            $amount = (float) $row->total_amount;
+            $percentage = $totalIncome > 0 ? round(($amount / $totalIncome) * 100, 1) : 0.0;
+
+            return [
+                'name' => $row->category?->name ?? $row->category_name_snapshot ?? 'Pemasukan Lainnya',
+                'icon' => $row->category?->icon ?? 'wallet',
+                'color' => $row->category?->color ?? 'emerald',
+                'amount' => $amount,
+                'formatted_amount' => number_format($amount, 0, ',', '.'),
+                'total_tx' => (int) $row->total_tx,
+                'percentage' => $percentage,
+            ];
+        })->all();
     }
 
     /**
@@ -178,6 +404,7 @@ class extends Component
                 $term = '%' . trim($this->search) . '%';
                 $query->where(function ($sub) use ($term): void {
                     $sub->where('description', 'like', $term)
+                        ->orWhere('notes', 'like', $term)
                         ->orWhere('wallet_name_snapshot', 'like', $term)
                         ->orWhere('counterpart_wallet_name_snapshot', 'like', $term);
                 });
@@ -192,11 +419,8 @@ class extends Component
                     $query->where('type', $this->typeFilter);
                 }
             })
-            ->when($this->dateFrom !== '', function ($query): void {
-                $query->whereDate('transaction_date', '>=', $this->dateFrom);
-            })
-            ->when($this->dateTo !== '', function ($query): void {
-                $query->whereDate('transaction_date', '<=', $this->dateTo);
+            ->when($this->monthFilter !== '', function ($query): void {
+                $query->whereRaw("DATE_FORMAT(transaction_date, '%Y-%m') = ?", [$this->monthFilter]);
             })
             ->orderByDesc('transaction_date')
             ->orderByDesc('id')
@@ -352,6 +576,8 @@ class extends Component
             $this->incomeModal = false;
             unset($this->transactions);
             unset($this->recapSummary);
+            unset($this->categoryExpenseRecap);
+            unset($this->categoryIncomeRecap);
             $this->toast()->success('Berhasil!', 'Pemasukan berhasil dicatat.');
         } catch (\Throwable $e) {
             throw ValidationException::withMessages([
@@ -365,7 +591,13 @@ class extends Component
      */
     public function openExpenseModal(): void
     {
-        $this->expense_category_id = null;
+        $defaultExpenseCat = TransactionCategory::query()
+            ->where('type', CategoryTypeEnum::EXPENSE->value)
+            ->orderBy('is_default', 'desc')
+            ->orderBy('name')
+            ->first();
+
+        $this->expense_category_id = $defaultExpenseCat?->id;
         $this->expense_amount = '';
         $this->expense_date = now()->format('Y-m-d\TH:i');
         $this->expense_description = '';
@@ -404,6 +636,8 @@ class extends Component
             $this->expenseModal = false;
             unset($this->transactions);
             unset($this->recapSummary);
+            unset($this->categoryExpenseRecap);
+            unset($this->categoryIncomeRecap);
             $this->toast()->success('Berhasil!', 'Pengeluaran berhasil dicatat.');
         } catch (\Throwable $e) {
             throw ValidationException::withMessages([
@@ -461,6 +695,8 @@ class extends Component
             $this->transferModal = false;
             unset($this->transactions);
             unset($this->recapSummary);
+            unset($this->categoryExpenseRecap);
+            unset($this->categoryIncomeRecap);
             $this->toast()->success('Berhasil!', 'Saldo berhasil dipindahkan antar kantong.');
         } catch (\Throwable $e) {
             throw ValidationException::withMessages([
@@ -492,6 +728,8 @@ class extends Component
 
             unset($this->transactions);
             unset($this->recapSummary);
+            unset($this->categoryExpenseRecap);
+            unset($this->categoryIncomeRecap);
             $this->toast()->success('Dihapus!', 'Transaksi berhasil dibatalkan.');
         } catch (\Throwable $e) {
             $this->toast()->error('Gagal!', $e->getMessage());

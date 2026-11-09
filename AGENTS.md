@@ -260,3 +260,12 @@ Only an explicit choice of antislop during or after selects a session mode. A re
 If the mode is unresolved, ask during/after and end the response; wait for the answer before any UI review, planning, or concept. For read-only tasks, put the active-mode notice only at the start of the final answer, never in progress messages. For editing tasks, announce before the first edit and omit it from the final answer.
 To update antislop later: `npx antislop-ai --update`, or run `npx antislop-ai` and pick Overwrite them.
 <!-- antislop:end -->
+
+<!-- karpathy-guidelines:start -->
+## Karpathy Guidelines (Coding & Engineering Guardrails)
+For code implementation, refactoring, and bug fixes, reference `.agents/skills/karpathy-guidelines/SKILL.md`:
+1. **Think Before Coding**: Explicit assumptions, surface tradeoffs, ask when unclear.
+2. **Simplicity First**: Minimum code that solves the problem. Nothing speculative or overengineered.
+3. **Surgical Changes**: Touch only what you must. No unprompted refactoring of adjacent code.
+4. **Goal-Driven Execution**: Define success criteria and verify with tests/checks.
+<!-- karpathy-guidelines:end -->

@@ -25,7 +25,7 @@
                 <div>
                     <p class="text-xs font-semibold uppercase tracking-wider text-emerald-950">Total Seluruh Saldo</p>
                     <p class="mt-1.5 text-2xl font-bold text-emerald-950 tabular-nums">
-                        Rp{{ number_format((float) $this->summary['total_balance'], 0, ',', '.') }}
+                        {{ number_format((float) $this->summary['total_balance'], 0, ',', '.') }}
                     </p>
                 </div>
                 <div class="flex size-10 shrink-0 items-center justify-center rounded-xl bg-white/75 text-emerald-900 border border-emerald-400">
@@ -39,7 +39,7 @@
                 <div>
                     <p class="text-xs font-semibold uppercase tracking-wider text-sky-950">Pemasukan Bulan Ini</p>
                     <p class="mt-1.5 text-2xl font-bold text-sky-950 tabular-nums">
-                        +Rp{{ number_format((float) $this->summary['monthly_income'], 0, ',', '.') }}
+                        +{{ number_format((float) $this->summary['monthly_income'], 0, ',', '.') }}
                     </p>
                 </div>
                 <div class="flex size-10 shrink-0 items-center justify-center rounded-xl bg-white/75 text-sky-900 border border-sky-400">
@@ -53,7 +53,7 @@
                 <div>
                     <p class="text-xs font-semibold uppercase tracking-wider text-rose-950">Pengeluaran Bulan Ini</p>
                     <p class="mt-1.5 text-2xl font-bold text-rose-950 tabular-nums">
-                        -Rp{{ number_format((float) $this->summary['monthly_expense'], 0, ',', '.') }}
+                        -{{ number_format((float) $this->summary['monthly_expense'], 0, ',', '.') }}
                     </p>
                 </div>
                 <div class="flex size-10 shrink-0 items-center justify-center rounded-xl bg-white/75 text-rose-900 border border-rose-400">
@@ -333,10 +333,10 @@
                 <x-currency
                     wire:model="income_amount"
                     locale="id-ID"
-                    symbol="Rp"
+                    symbol=""
                     :decimals="0"
                     :precision="0"
-                    placeholder="Nominal (Rp)"
+                    placeholder="Nominal"
                 />
 
                 <x-input
@@ -391,7 +391,7 @@
                 label="Saldo Awal (Opsional)"
                 wire:model="pocket_initial_balance"
                 locale="id-ID"
-                symbol="Rp"
+                symbol=""
                 :decimals="0"
                 :precision="0"
                 placeholder="0"

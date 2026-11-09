@@ -123,27 +123,27 @@ class Transaction extends Model
     }
 
     /**
-     * Memformat nominal transaksi beserta tanda + atau - dalam format Rupiah.
+     * Memformat nominal transaksi beserta tanda + atau -.
      */
     public function formattedSignedAmount(): string
     {
-        return $this->type->sign() . 'Rp' . number_format((float) $this->amount, 0, ',', '.');
+        return $this->type->sign() . number_format((float) $this->amount, 0, ',', '.');
     }
 
     /**
-     * Memformat saldo sebelum transaksi ke format Rupiah.
+     * Memformat saldo sebelum transaksi.
      */
     public function formattedBalanceBefore(): string
     {
-        return 'Rp' . number_format((float) $this->balance_before, 0, ',', '.');
+        return number_format((float) $this->balance_before, 0, ',', '.');
     }
 
     /**
-     * Memformat saldo sesudah transaksi ke format Rupiah.
+     * Memformat saldo sesudah transaksi.
      */
     public function formattedBalanceAfter(): string
     {
-        return 'Rp' . number_format((float) $this->balance_after, 0, ',', '.');
+        return number_format((float) $this->balance_after, 0, ',', '.');
     }
 
     /**

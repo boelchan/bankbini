@@ -495,22 +495,34 @@ class DigitalWalletTest extends TestCase
         ]);
 
         $this->actingAs($this->user)
-            ->get(route('dashboard'))
+            ->get(route('home'))
             ->assertOk()
-            ->assertSee('Kantong Utama Keluarga')
-            ->assertSee('+ Tambah Kantong');
+            ->assertSee('Kantong Utama');
+
+        $this->actingAs($this->user)
+            ->get(route('dashboard'))
+            ->assertRedirect(route('home'));
+
+        $this->actingAs($this->user)
+            ->get(route('pockets.index'))
+            ->assertOk()
+            ->assertSee('Kantong Keuangan Keluarga');
 
         $this->actingAs($this->user)
             ->get(route('pockets.show', $wallet))
             ->assertOk()
-            ->assertSee('Kantong Utama Keluarga')
+            ->assertSee('Kantong Utama')
             ->assertSee('Tambah Uang')
             ->assertSee('Pindah Uang');
 
         $this->actingAs($this->user)
             ->get(route('transactions.index'))
+            ->assertRedirect(route('recap.index'));
+
+        $this->actingAs($this->user)
+            ->get(route('recap.index'))
             ->assertOk()
-            ->assertSee('Riwayat Transaksi');
+            ->assertSee('Daftar Mutasi Transaksi');
 
         $this->actingAs($this->user)
             ->get(route('account'))

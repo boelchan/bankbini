@@ -24,8 +24,13 @@ Aplikasi menggunakan **3 menu utama** yang intuitif, ramah, dan terstruktur untu
    - Menampilkan **rekapitulasi seluruh transaksi** dari semua kantong keluarga.
    - Ringkasan metrik: Total Pemasukan, Total Pengeluaran, dan Arus Kas Bersih (*Net Cashflow*).
    - Dilengkapi tombol pencatatan cepat (**+ Pemasukan**, **- Pengeluaran**, **⇄ Pindah Uang**).
-   - Filter lengkap: filter cepat jenis/aliran (Semua, Pemasukan, Pengeluaran, Pindah Uang), filter pencarian keterangan, filter spesifik kantong, dan rentang tanggal (dari - sampai).
-   - Tampilan transaksi responsif: kartu transaksi di ponsel dan data table 7 kolom di desktop.
+   - **Filter Sederhana Berbasis Bulan**: Menggunakan filter bulan transaksi (*tanpa input tanggal yang membingungkan*), pencarian keterangan, dan filter spesifik kantong.
+   - **Rekap per Kategori & Batas Anggaran (Limit)**: Menyajikan distribusi alokasi pengeluaran dan pemasukan per kategori. Setiap kategori dapat ditetapkan batas atas anggaran (*budget limit*); bila pengeluaran melampaui batas tersebut, kartu kategori otomatis ditandai **merah peringatan**.
+   - **Rekap per Kata Kunci (Keyword) Keterangan**: Pengguna dapat menyimpan kata kunci belanja khusus (seperti *Beras*, *Skincare*, *Bensin*, *Kopi*, *Listrik*) yang tersimpan permanen di database. Setiap kata kunci memiliki batas atas anggaran; bila total mutasi dengan kata kunci tersebut melampaui batas, kartu otomatis ditandai **merah**.
+   - **Tampilan Daftar Mutasi Berbasis List (Bukan Tabel)**: Seluruh daftar mutasi disajikan dalam format list kartu transaksi yang bersih, modern, dan mudah dipindai di smartphone maupun komputer tanpa tabel yang kaku.
+
+4. **Pengaturan Akun & Kategori (`/account`)**:
+   - Pengguna dapat menambah, **mengubah (edit)**, dan **menghapus kategori transaksi**, termasuk menentukan nama, jenis (*income/expense*), ikon, warna, dan **batas atas anggaran (budget limit)** untuk setiap kategori.
 
 *(Catatan: Rute URL `/dashboard` dan `/transactions` tetap didukung melalui pengalihan/redirect otomatis ke `/home` dan `/recap` demi kompatibilitas).*
 

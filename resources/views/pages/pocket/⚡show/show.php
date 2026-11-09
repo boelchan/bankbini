@@ -432,7 +432,13 @@ class extends Component
     public function openExpenseModal(): void
     {
         $this->resetValidation();
-        $this->expense_category_id = null;
+        $defaultExpenseCat = TransactionCategory::query()
+            ->where('type', CategoryTypeEnum::EXPENSE->value)
+            ->orderBy('is_default', 'desc')
+            ->orderBy('name')
+            ->first();
+
+        $this->expense_category_id = $defaultExpenseCat?->id;
         $this->expense_amount = '';
         $this->expense_description = '';
         $this->expense_date = now()->format('Y-m-d\TH:i');

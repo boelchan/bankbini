@@ -35,6 +35,16 @@ new #[Title('Pengaturan & Profil')] class extends Component
     public string $cat_type = CategoryTypeEnum::EXPENSE->value;
     public string $cat_icon = WalletIconEnum::SHOPPING_BAG->value;
     public string $cat_color = WalletColorEnum::ROSE->value;
+    public string|int|float $cat_budget_limit = '';
+
+    // State Modal Ubah Kategori
+    public bool $editCategoryModal = false;
+    public ?int $editingCategoryId = null;
+    public string $edit_cat_name = '';
+    public string $edit_cat_type = CategoryTypeEnum::EXPENSE->value;
+    public string $edit_cat_icon = WalletIconEnum::SHOPPING_BAG->value;
+    public string $edit_cat_color = WalletColorEnum::ROSE->value;
+    public string|int|float $edit_cat_budget_limit = '';
 
     /**
      * Inisialisasi data profil pengguna yang sedang masuk.
@@ -165,8 +175,10 @@ new #[Title('Pengaturan & Profil')] class extends Component
             'cat_type' => 'required|in:income,expense',
             'cat_icon' => 'required|string|max:60',
             'cat_color' => 'required|string|max:30',
+            'cat_budget_limit' => 'nullable|numeric|gte:0',
         ], [
             'cat_name.required' => 'Nama kategori wajib diisi.',
+            'cat_budget_limit.gte' => 'Batas anggaran tidak boleh negatif.',
         ]);
 
         TransactionCategory::create([
@@ -175,31 +187,94 @@ new #[Title('Pengaturan & Profil')] class extends Component
             'type' => $this->cat_type,
             'icon' => $this->cat_icon,
             'color' => $this->cat_color,
+            'budget_limit' => $this->cat_budget_limit ? (float) $this->cat_budget_limit : 0,
             'is_default' => false,
         ]);
 
         $this->cat_name = '';
+        $this->cat_budget_limit = '';
         unset($this->categories);
 
         $this->toast()->success('Kategori Ditambahkan', 'Kategori transaksi baru siap digunakan.')->send();
     }
 
     /**
-     * Menghapus kategori transaksi kustom keluarga.
+     * Membuka modal ubah kategori transaksi.
+     */
+    public function openEditCategoryModal(int $categoryId): void
+    {
+        $cat = TransactionCategory::findOrFail($categoryId);
+        $this->editingCategoryId = $cat->id;
+        $this->edit_cat_name = $cat->name;
+        $this->edit_cat_type = $cat->type->value;
+        $this->edit_cat_icon = $cat->icon;
+        $this->edit_cat_color = $cat->color;
+        $this->edit_cat_budget_limit = (float) $cat->budget_limit > 0 ? (float) $cat->budget_limit : '';
+        $this->editCategoryModal = true;
+    }
+
+    /**
+     * Menyimpan perubahan informasi kategori transaksi.
+     */
+    public function updateCategory(): void
+    {
+        $this->validate([
+            'edit_cat_name' => 'required|string|max:60',
+            'edit_cat_type' => 'required|in:income,expense',
+            'edit_cat_icon' => 'required|string|max:60',
+            'edit_cat_color' => 'required|string|max:30',
+            'edit_cat_budget_limit' => 'nullable|numeric|gte:0',
+        ], [
+            'edit_cat_name.required' => 'Nama kategori wajib diisi.',
+            'edit_cat_budget_limit.gte' => 'Batas anggaran tidak boleh negatif.',
+        ]);
+
+        $cat = TransactionCategory::findOrFail($this->editingCategoryId);
+        $cat->update([
+            'name' => trim($this->edit_cat_name),
+            'type' => $this->edit_cat_type,
+            'icon' => $this->edit_cat_icon,
+            'color' => $this->edit_cat_color,
+            'budget_limit' => $this->edit_cat_budget_limit ? (float) $this->edit_cat_budget_limit : 0,
+        ]);
+
+        $this->editCategoryModal = false;
+        unset($this->categories);
+
+        $this->toast()->success('Berhasil', 'Kategori transaksi berhasil diperbarui.')->send();
+    }
+
+    /**
+     * Menampilkan dialog konfirmasi hapus kategori.
+     */
+    public function askDeleteCategory(int $categoryId): void
+    {
+        $cat = TransactionCategory::find($categoryId);
+        if (!$cat) {
+            return;
+        }
+
+        $this->dialog()
+            ->question('Hapus Kategori Ini?', sprintf('Kategori "%s" akan dihapus. Riwayat transaksi masa lalu tetap aman tersimpan.', $cat->name))
+            ->confirm('Ya, Hapus', 'deleteCategory', $categoryId)
+            ->cancel('Batal')
+            ->send();
+    }
+
+    /**
+     * Menghapus kategori transaksi.
      */
     public function deleteCategory(int $categoryId): void
     {
-        $cat = TransactionCategory::query()
-            ->where('is_default', false)
-            ->find($categoryId);
+        $cat = TransactionCategory::find($categoryId);
 
         if (!$cat) {
-            $this->toast()->error('Tidak Dapat Dihapus', 'Kategori bawaan sistem tidak dapat dihapus.')->send();
+            $this->toast()->error('Gagal', 'Kategori tidak ditemukan.')->send();
             return;
         }
 
         $cat->delete();
         unset($this->categories);
-        $this->toast()->success('Dihapus', 'Kategori kustom berhasil dihapus.')->send();
+        $this->toast()->success('Dihapus', 'Kategori berhasil dihapus.')->send();
     }
 };

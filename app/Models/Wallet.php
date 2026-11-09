@@ -143,18 +143,18 @@ class Wallet extends Model
     }
 
     /**
-     * Memformat saldo kantong saat ini ke format Rupiah.
+     * Memformat saldo kantong saat ini.
      */
     public function formattedBalance(): string
     {
-        return 'Rp' . number_format((float) $this->balance, 0, ',', '.');
+        return number_format((float) $this->balance, 0, ',', '.');
     }
 
     /**
-     * Memformat saldo awal kantong ke format Rupiah.
+     * Memformat saldo awal kantong.
      */
     public function formattedInitialBalance(): string
     {
-        return 'Rp' . number_format((float) $this->initial_balance, 0, ',', '.');
+        return number_format((float) $this->initial_balance, 0, ',', '.');
     }
 }
