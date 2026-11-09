@@ -64,79 +64,80 @@
         </div>
     </x-card>
 
-    {{-- Histori Masuk & Keluar Kantong Utama --}}
-    <x-card paddingless>
-        {{-- Toolbar Filter Transaksi --}}
-        <div class="border-b border-slate-200/80 px-3 py-2.5 sm:px-4 space-y-2.5">
+    {{-- Filter Riwayat Transaksi --}}
+    <x-card>
+        <div class="space-y-3">
             {{-- Filter Cepat Aliran Dana --}}
-            <div class="flex flex-wrap items-center gap-1">
+            <div class="flex items-center gap-1 self-start rounded-xl bg-slate-100 p-1 sm:self-auto">
                 <button
                     type="button"
                     wire:click="setFlowFilter('')"
-                    class="shrink-0 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors cursor-pointer {{ $flowFilter === '' ? 'bg-emerald-700 text-white' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-800' }}"
+                    class="rounded-lg px-3 py-1 text-xs font-semibold transition-colors cursor-pointer {{ $flowFilter === '' ? 'bg-white text-emerald-700 shadow-2xs' : 'text-slate-600 hover:text-slate-900' }}"
                 >
                     Semua
                 </button>
                 <button
                     type="button"
                     wire:click="setFlowFilter('income')"
-                    class="shrink-0 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors cursor-pointer {{ $flowFilter === 'income' ? 'bg-emerald-700 text-white' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-800' }}"
+                    class="rounded-lg px-3 py-1 text-xs font-semibold transition-colors cursor-pointer {{ $flowFilter === 'income' ? 'bg-white text-emerald-700 shadow-2xs' : 'text-slate-600 hover:text-slate-900' }}"
                 >
                     Masuk
                 </button>
                 <button
                     type="button"
                     wire:click="setFlowFilter('expense')"
-                    class="shrink-0 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors cursor-pointer {{ $flowFilter === 'expense' ? 'bg-emerald-700 text-white' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-800' }}"
+                    class="rounded-lg px-3 py-1 text-xs font-semibold transition-colors cursor-pointer {{ $flowFilter === 'expense' ? 'bg-white text-emerald-700 shadow-2xs' : 'text-slate-600 hover:text-slate-900' }}"
                 >
                     Keluar
                 </button>
                 <button
                     type="button"
                     wire:click="setFlowFilter('transfer')"
-                    class="shrink-0 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors cursor-pointer {{ $flowFilter === 'transfer' ? 'bg-emerald-700 text-white' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-800' }}"
+                    class="rounded-lg px-3 py-1 text-xs font-semibold transition-colors cursor-pointer {{ $flowFilter === 'transfer' ? 'bg-white text-emerald-700 shadow-2xs' : 'text-slate-600 hover:text-slate-900' }}"
                 >
                     Pindah
                 </button>
+            </div>
+
+            <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+                <div class="grid flex-1 grid-cols-2 gap-3">
+                    <x-input
+                        wire:model.live.debounce.300ms="search"
+                        placeholder="keterangan"
+                    />
+
+                    <x-select.styled
+                        label="Filter Bulan"
+                        wire:model.live="monthFilter"
+                        :options="$this->monthOptions"
+                    />
+
+                    <x-select.styled
+                        label="Jenis Transaksi"
+                        wire:model.live="typeFilter"
+                        :options="\App\Enums\TransactionTypeEnum::choices()"
+                    />
+
+                    <x-select.styled
+                        label="Kategori"
+                        wire:model.live="categoryFilter"
+                        :options="$this->categoryFilterOptions"
+                        searchable
+                    />
+                </div>
+
                 @if ($search !== '' || $flowFilter !== '' || $typeFilter !== '' || $monthFilter !== '' || $categoryFilter !== null)
-                    <button
-                        type="button"
-                        wire:click="resetFilters"
-                        class="ml-auto inline-flex shrink-0 items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs font-medium text-rose-600 transition-colors hover:bg-rose-50 cursor-pointer"
-                    >
-                        <x-ti-refresh class="size-3.5" />
-                        <span>Reset Filter</span>
-                    </button>
+                    <x-button color="slate" flat sm wire:click="resetFilters" class="self-start sm:self-auto">
+                        <x-ti-refresh class="size-4 mr-1" />
+                        Reset
+                    </x-button>
                 @endif
             </div>
-
-            {{-- Input Filter: Cari Keterangan, Bulan, Jenis Transaksi, Kategori --}}
-            <div class="grid grid-cols-2 gap-2 sm:gap-2.5">
-                <x-input
-                    wire:model.live.debounce.300ms="search"
-                    placeholder="Cari keterangan..."
-                />
-
-                <x-select.styled 
-                    placeholder="Semua Bulan"
-                    wire:model.live="monthFilter"
-                    :options="$this->monthOptions"
-                />
-
-                <x-select.styled
-                    placeholder="Semua Jenis"
-                    wire:model.live="typeFilter"
-                    :options="\App\Enums\TransactionTypeEnum::choices()"
-                />
-
-                <x-select.styled
-                    placeholder="Semua Kategori"
-                    wire:model.live="categoryFilter"
-                    :options="$this->categoryFilterOptions"
-                />
-            </div>
         </div>
+    </x-card>
 
+    {{-- Histori Masuk & Keluar Kantong Utama --}}
+    <x-card paddingless>
         @if ($this->transactions->isEmpty())
             <div class="p-8 text-center space-y-2">
                 <p class="text-sm font-semibold text-slate-800">Belum Ada Transaksi di Kantong Utama</p>

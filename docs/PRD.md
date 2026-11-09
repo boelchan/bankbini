@@ -10,7 +10,7 @@ Aplikasi menggunakan **3 menu utama** yang intuitif, ramah, dan terstruktur untu
 1. **Home (`/home`)**:
    - Menampilkan **detail lengkap Kantong Utama** keluarga yang menjadi rekening operasional harian.
    - Dilengkapi kartu saldo utama, statistik total uang masuk & keluar, serta tombol aksi cepat (**+ Masuk**, **- Keluar**, **⇄ Pindah**) yang melayang di ponsel.
-   - Menampilkan histori mutasi kantong utama lengkap dengan filter aliran dana (*quick swipe pills*), filter bulan, filter jenis, filter kategori, pencarian keterangan, dan pengelompokan transaksi per tanggal.
+   - Menampilkan histori mutasi kantong utama lengkap dengan kartu filter: chip cepat aliran dana (**Semua / Masuk / Keluar / Pindah**), pencarian keterangan, filter bulan, jenis transaksi, kategori, serta tombol reset. Transaksi dikelompokkan per tanggal.
    - Responsif ganda: kartu daftar mutasi mobile di smartphone (`sm:hidden`) dan tabel multi-kolom di desktop (`hidden sm:block`).
 
 2. **Kantong (`/pockets`)**:
@@ -18,7 +18,7 @@ Aplikasi menggunakan **3 menu utama** yang intuitif, ramah, dan terstruktur untu
    - Menampilkan ringkasan metrik saldo: Total Seluruh Saldo, Pemasukan Bulan Ini, dan Pengeluaran Bulan Ini.
    - Kotak-kotak kantong dengan warna pastel manis (*playful candy colors*), status khusus **Kantong Utama** (`is_primary`), saldo kantong, dan 3 transaksi terakhir (bisa di-*expand* hingga 100 baris).
    - Tombol pensil (*Catat Transaksi*) dan tombol titik tiga (*Detail Kantong*).
-   - Kotak kartu kosong `+ Tambah Kantong` di posisi terakhir untuk membuat pos anggaran baru.
+   - Tombol **Tambah Kantong Baru** di header halaman untuk membuat pos anggaran baru.
 
 3. **Rekap (`/recap`)**:
    - Halaman khusus rekapitulasi — **tanpa pencatatan transaksi** dan **tanpa daftar mutasi**; fokus hanya pada ringkasan dan analisis.

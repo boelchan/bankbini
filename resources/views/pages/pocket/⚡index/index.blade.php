@@ -18,52 +18,48 @@
         </div>
     </div>
 
-    {{-- Ringkasan Saldo Sederhana --}}
-    <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <x-card class="bg-emerald-300 border-emerald-400">
-            <div class="flex items-center justify-between gap-3">
-                <div>
-                    <p class="text-xs font-semibold uppercase tracking-wider text-emerald-950">Total Seluruh Saldo</p>
-                    <p class="mt-1.5 text-2xl font-bold text-emerald-950 tabular-nums">
+    {{-- Ringkasan Saldo Ringkas (3 Bagian) --}}
+    <x-card paddingless>
+        <div class="grid grid-cols-1 divide-y divide-slate-200/80 sm:grid-cols-3 sm:divide-x sm:divide-y-0">
+            <div class="flex items-center gap-2.5 px-4 py-3">
+                <span class="flex size-8 shrink-0 items-center justify-center rounded-lg bg-emerald-50 text-emerald-700">
+                    <x-ti-wallet class="size-4" />
+                </span>
+                <div class="min-w-0">
+                    <p class="text-xs font-medium text-slate-500">Total Seluruh Saldo</p>
+                    <p class="text-sm font-bold text-emerald-700 tabular-nums truncate">
                         {{ number_format((float) $this->summary['total_balance'], 0, ',', '.') }}
                     </p>
                 </div>
-                <div class="flex size-10 shrink-0 items-center justify-center rounded-xl bg-white/75 text-emerald-900 border border-emerald-400">
-                    <x-ti-wallet class="size-5" />
-                </div>
             </div>
-        </x-card>
 
-        <x-card class="bg-sky-300 border-sky-400">
-            <div class="flex items-center justify-between gap-3">
-                <div>
-                    <p class="text-xs font-semibold uppercase tracking-wider text-sky-950">Pemasukan Bulan Ini</p>
-                    <p class="mt-1.5 text-2xl font-bold text-sky-950 tabular-nums">
+            <div class="flex items-center gap-2.5 px-4 py-3">
+                <span class="flex size-8 shrink-0 items-center justify-center rounded-lg bg-sky-50 text-sky-700">
+                    <x-ti-arrow-down-left class="size-4" />
+                </span>
+                <div class="min-w-0">
+                    <p class="text-xs font-medium text-slate-500">Pemasukan Bulan Ini</p>
+                    <p class="text-sm font-bold text-sky-700 tabular-nums truncate">
                         +{{ number_format((float) $this->summary['monthly_income'], 0, ',', '.') }}
                     </p>
                 </div>
-                <div class="flex size-10 shrink-0 items-center justify-center rounded-xl bg-white/75 text-sky-900 border border-sky-400">
-                    <x-ti-arrow-down-left class="size-5" />
-                </div>
             </div>
-        </x-card>
 
-        <x-card class="bg-rose-300 border-rose-400">
-            <div class="flex items-center justify-between gap-3">
-                <div>
-                    <p class="text-xs font-semibold uppercase tracking-wider text-rose-950">Pengeluaran Bulan Ini</p>
-                    <p class="mt-1.5 text-2xl font-bold text-rose-950 tabular-nums">
+            <div class="flex items-center gap-2.5 px-4 py-3">
+                <span class="flex size-8 shrink-0 items-center justify-center rounded-lg bg-rose-50 text-rose-700">
+                    <x-ti-arrow-up-right class="size-4" />
+                </span>
+                <div class="min-w-0">
+                    <p class="text-xs font-medium text-slate-500">Pengeluaran Bulan Ini</p>
+                    <p class="text-sm font-bold text-rose-600 tabular-nums truncate">
                         -{{ number_format((float) $this->summary['monthly_expense'], 0, ',', '.') }}
                     </p>
                 </div>
-                <div class="flex size-10 shrink-0 items-center justify-center rounded-xl bg-white/75 text-rose-900 border border-rose-400">
-                    <x-ti-arrow-up-right class="size-5" />
-                </div>
             </div>
-        </x-card>
-    </div>
+        </div>
+    </x-card>
 
-    {{-- Kotak-Kotak Kantong + Kotak Terakhir "+ Tambah Kantong" --}}
+    {{-- Kotak-Kotak Kantong --}}
     <div class="space-y-3">
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 items-start">
             @foreach ($this->wallets as $wallet)
@@ -207,25 +203,6 @@
                     </div>
                 </x-card>
             @endforeach
-
-            {{-- Kotak Kantong Terakhir: Kotak Kosong + Tambah Kantong --}}
-            <button
-                type="button"
-                wire:click="openPocketModal"
-                class="group flex min-h-36 sm:min-h-52 flex-col items-center justify-center gap-2.5 sm:gap-3 rounded-2xl border-2 border-dashed border-rose-300 bg-rose-50/60 p-4 sm:p-6 text-center transition-all hover:border-rose-400 hover:bg-rose-100/70 focus-visible:outline-2 focus-visible:outline-emerald-600 cursor-pointer shadow-2xs"
-            >
-                <div class="flex size-11 sm:size-12 items-center justify-center rounded-2xl bg-white text-rose-600 border border-rose-200 shadow-xs group-hover:scale-110 transition-transform">
-                    <x-ti-plus class="size-5 sm:size-6" />
-                </div>
-                <div class="space-y-0.5 sm:space-y-1">
-                    <p class="text-sm font-bold text-rose-950">
-                        + Tambah Kantong
-                    </p>
-                    <p class="text-xs text-rose-900/80 max-w-xs">
-                        Buat kantong baru untuk belanja dapur, tabungan jajan, atau liburan
-                    </p>
-                </div>
-            </button>
         </div>
     </div>
 

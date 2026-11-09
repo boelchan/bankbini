@@ -36,52 +36,46 @@
         </div>
     </x-card>
 
-    {{-- Ringkasan Metrik Rekap --}}
-    <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <x-card class="bg-emerald-300 border-emerald-400">
-            <div class="flex items-center justify-between gap-3">
-                <div>
-                    <p class="text-xs font-semibold uppercase tracking-wider text-emerald-950">Total Pemasukan</p>
-                    <p class="mt-1.5 text-2xl font-bold text-emerald-950 tabular-nums">
+    {{-- Ringkasan Metrik Rekap (3 Bagian) --}}
+    <x-card paddingless>
+        <div class="grid grid-cols-1 divide-y divide-slate-200/80 sm:grid-cols-3 sm:divide-x sm:divide-y-0">
+            <div class="flex items-center gap-2.5 px-4 py-3">
+                <span class="flex size-8 shrink-0 items-center justify-center rounded-lg bg-emerald-50 text-emerald-700">
+                    <x-ti-arrow-down-left class="size-4" />
+                </span>
+                <div class="min-w-0">
+                    <p class="text-xs font-medium text-slate-500">Total Pemasukan</p>
+                    <p class="text-sm font-bold text-emerald-700 tabular-nums truncate">
                         +{{ number_format((float) $this->recapSummary['total_income'], 0, ',', '.') }}
                     </p>
                 </div>
-                <div class="flex size-10 shrink-0 items-center justify-center rounded-xl bg-white/75 text-emerald-900 border border-emerald-400">
-                    <x-ti-arrow-down-left class="size-5" />
-                </div>
             </div>
-        </x-card>
 
-        <x-card class="bg-rose-300 border-rose-400">
-            <div class="flex items-center justify-between gap-3">
-                <div>
-                    <p class="text-xs font-semibold uppercase tracking-wider text-rose-950">Total Pengeluaran</p>
-                    <p class="mt-1.5 text-2xl font-bold text-rose-950 tabular-nums">
+            <div class="flex items-center gap-2.5 px-4 py-3">
+                <span class="flex size-8 shrink-0 items-center justify-center rounded-lg bg-rose-50 text-rose-700">
+                    <x-ti-arrow-up-right class="size-4" />
+                </span>
+                <div class="min-w-0">
+                    <p class="text-xs font-medium text-slate-500">Total Pengeluaran</p>
+                    <p class="text-sm font-bold text-rose-600 tabular-nums truncate">
                         -{{ number_format((float) $this->recapSummary['total_expense'], 0, ',', '.') }}
                     </p>
                 </div>
-                <div class="flex size-10 shrink-0 items-center justify-center rounded-xl bg-white/75 text-rose-900 border border-rose-400">
-                    <x-ti-arrow-up-right class="size-5" />
-                </div>
             </div>
-        </x-card>
 
-        <x-card class="{{ $this->recapSummary['net_cashflow'] >= 0 ? 'bg-sky-300 border-sky-400' : 'bg-amber-300 border-amber-400' }}">
-            <div class="flex items-center justify-between gap-3">
-                <div>
-                    <p class="text-xs font-semibold uppercase tracking-wider {{ $this->recapSummary['net_cashflow'] >= 0 ? 'text-sky-950' : 'text-amber-950' }}">
-                        Arus Kas Bersih (Selisih)
-                    </p>
-                    <p class="mt-1.5 text-2xl font-bold {{ $this->recapSummary['net_cashflow'] >= 0 ? 'text-sky-950' : 'text-amber-950' }} tabular-nums">
+            <div class="flex items-center gap-2.5 px-4 py-3">
+                <span class="flex size-8 shrink-0 items-center justify-center rounded-lg {{ $this->recapSummary['net_cashflow'] >= 0 ? 'bg-sky-50 text-sky-700' : 'bg-amber-50 text-amber-700' }}">
+                    <x-ti-scale class="size-4" />
+                </span>
+                <div class="min-w-0">
+                    <p class="text-xs font-medium text-slate-500">Arus Kas Bersih</p>
+                    <p class="text-sm font-bold tabular-nums truncate {{ $this->recapSummary['net_cashflow'] >= 0 ? 'text-sky-700' : 'text-amber-700' }}">
                         {{ $this->recapSummary['net_cashflow'] >= 0 ? '+' : '' }}{{ number_format((float) $this->recapSummary['net_cashflow'], 0, ',', '.') }}
                     </p>
                 </div>
-                <div class="flex size-10 shrink-0 items-center justify-center rounded-xl bg-white/75 {{ $this->recapSummary['net_cashflow'] >= 0 ? 'text-sky-900 border border-sky-400' : 'text-amber-900 border border-amber-400' }}">
-                    <x-ti-scale class="size-5" />
-                </div>
             </div>
-        </x-card>
-    </div>
+        </div>
+    </x-card>
 
     {{-- Seksi Rekap per Kategori --}}
     <x-card>
