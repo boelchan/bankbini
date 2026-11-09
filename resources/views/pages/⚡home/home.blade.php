@@ -107,19 +107,19 @@
                     />
 
                     <x-select.styled
-                        label="Filter Bulan"
+                        placeholder="Semua Bulan"
                         wire:model.live="monthFilter"
                         :options="$this->monthOptions"
                     />
 
                     <x-select.styled
-                        label="Jenis Transaksi"
+                        placeholder="Semua Jenis"
                         wire:model.live="typeFilter"
                         :options="\App\Enums\TransactionTypeEnum::choices()"
                     />
 
                     <x-select.styled
-                        label="Kategori"
+                        placeholder="Semua Kategori"
                         wire:model.live="categoryFilter"
                         :options="$this->categoryFilterOptions"
                         searchable
