@@ -1,30 +1,40 @@
 <div class="space-y-6">
-    {{-- Header & Tombol Transaksi --}}
-    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-            <h1 class="text-lg font-bold text-slate-900 sm:text-xl">Rekap Transaksi</h1>
-            <p class="text-xs text-slate-500 mt-0.5">
-                Rekapitulasi mutasi uang masuk, uang keluar, dan pembagian per kategori belanja keluarga.
-            </p>
-        </div>
-
-        <div class="flex flex-wrap items-center gap-2">
-            <x-button color="emerald" wire:click="openIncomeModal" class="rounded-xl">
-                <x-ti-plus class="size-4 mr-1" />
-                Masuk
-            </x-button>
-
-            <x-button color="rose" light wire:click="openExpenseModal" class="rounded-xl">
-                <x-ti-minus class="size-4 mr-1" />
-                Keluar
-            </x-button>
-
-            <x-button color="sky" light wire:click="openTransferModal" class="rounded-xl">
-                <x-ti-arrows-exchange class="size-4 mr-1" />
-                Pindah
-            </x-button>
-        </div>
+    {{-- Header Rekap --}}
+    <div>
+        <h1 class="text-lg font-bold text-slate-900 sm:text-xl">Rekap Transaksi</h1>
+        <p class="text-xs text-slate-500 mt-0.5">
+            Rekapitulasi uang masuk, uang keluar, dan pembagian per kategori serta kata kunci.
+        </p>
     </div>
+
+    {{-- Filter Rekap --}}
+    <x-card>
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+            <div class="grid flex-1 grid-cols-1 gap-3 sm:grid-cols-2">
+                <x-select.styled
+                    label="Filter Bulan"
+                    placeholder="Semua Bulan"
+                    wire:model.live="monthFilter"
+                    :options="$this->monthOptions"
+                />
+
+                <x-select.styled
+                    label="Filter Kantong"
+                    placeholder="Semua Kantong"
+                    wire:model.live="walletFilter"
+                    :options="$this->allWalletFilterOptions"
+                    searchable
+                />
+            </div>
+
+            @if ($monthFilter !== '' || $walletFilter !== null)
+                <x-button color="slate" flat sm wire:click="resetFilters" class="self-start sm:self-auto">
+                    <x-ti-refresh class="size-4 mr-1" />
+                    Reset
+                </x-button>
+            @endif
+        </div>
+    </x-card>
 
     {{-- Ringkasan Metrik Rekap --}}
     <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
@@ -289,344 +299,6 @@
             </div>
         @endif
     </x-card>
-
-    {{-- Filter Rekap (Filter Bulan, Tanpa Tanggal) --}}
-    <x-card>
-        <div class="space-y-4">
-            <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 pb-3">
-                <div class="flex flex-wrap items-center gap-1.5 w-full sm:w-auto">
-                    <button
-                        type="button"
-                        wire:click="setQuickTypeFilter('')"
-                        class="shrink-0 rounded-xl px-3 py-1.5 text-xs font-semibold transition-colors {{ $typeFilter === '' ? 'bg-emerald-600 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200' }}"
-                    >
-                        Semua
-                    </button>
-                    <button
-                        type="button"
-                        wire:click="setQuickTypeFilter('income')"
-                        class="shrink-0 rounded-xl px-3 py-1.5 text-xs font-semibold transition-colors {{ $typeFilter === 'income' ? 'bg-emerald-600 text-white' : 'bg-emerald-50 text-emerald-800 hover:bg-emerald-100' }}"
-                    >
-                        Pemasukan
-                    </button>
-                    <button
-                        type="button"
-                        wire:click="setQuickTypeFilter('expense')"
-                        class="shrink-0 rounded-xl px-3 py-1.5 text-xs font-semibold transition-colors {{ $typeFilter === 'expense' ? 'bg-rose-600 text-white' : 'bg-rose-50 text-rose-800 hover:bg-rose-100' }}"
-                    >
-                        Pengeluaran
-                    </button>
-                    <button
-                        type="button"
-                        wire:click="setQuickTypeFilter('transfer')"
-                        class="shrink-0 rounded-xl px-3 py-1.5 text-xs font-semibold transition-colors {{ in_array($typeFilter, ['transfer', 'transfer_in', 'transfer_out'], true) ? 'bg-sky-600 text-white' : 'bg-sky-50 text-sky-800 hover:bg-sky-100' }}"
-                    >
-                        Pindah Uang
-                    </button>
-                </div>
-
-                <x-button color="slate" flat sm wire:click="resetFilters" class="self-end sm:self-auto">
-                    <x-ti-refresh class="size-4 mr-1" />
-                    Reset Filter
-                </x-button>
-            </div>
-
-            <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
-                <x-input
-                    label="Cari Keterangan"
-                    wire:model.live.debounce.300ms="search"
-                    placeholder="Ketik keterangan transaksi..."
-                />
-
-                <x-select.styled
-                    label="Filter Bulan"
-                    placeholder="Semua Bulan"
-                    wire:model.live="monthFilter"
-                    :options="$this->monthOptions"
-                />
-
-                <x-select.styled
-                    label="Filter Kantong"
-                    placeholder="Semua Kantong"
-                    wire:model.live="walletFilter"
-                    :options="$this->allWalletFilterOptions"
-                    searchable
-                />
-            </div>
-        </div>
-    </x-card>
-
-    {{-- Daftar Mutasi Transaksi (Menggunakan LIST Kartu, Bukan Tabel) --}}
-    <x-card paddingless>
-        <x-slot:header>
-            <div class="flex items-center justify-between w-full">
-                <div>
-                    <h2 class="text-sm sm:text-base font-semibold text-slate-900">Daftar Mutasi Transaksi</h2>
-                    <p class="text-xs text-slate-500">Menampilkan {{ $this->transactions->total() }} mutasi transaksi tercatat</p>
-                </div>
-            </div>
-        </x-slot:header>
-
-        @if ($this->transactions->isEmpty())
-            <div class="p-10 text-center space-y-2">
-                <div class="mx-auto flex size-12 items-center justify-center rounded-2xl bg-slate-100 text-slate-600">
-                    <x-ti-receipt class="size-6" />
-                </div>
-                <p class="text-sm font-semibold text-slate-900">Belum Ada Transaksi</p>
-                <p class="text-xs text-slate-500">Gunakan tombol Masuk, Keluar, atau Pindah di atas untuk mulai mencatat.</p>
-            </div>
-        @else
-            {{-- List Transaksi Bersih untuk Semua Layar (Simple & Clear Bank-Style) --}}
-            <div class="divide-y divide-slate-100">
-                @foreach ($this->transactions as $tx)
-                    <div class="p-3.5 sm:p-4 hover:bg-slate-50/70 transition-colors">
-                        <div class="flex items-center gap-3">
-                            {{-- Ikon Kategori / Aliran Dana --}}
-                            <div class="flex size-10 shrink-0 items-center justify-center rounded-xl {{ $tx->type->isPositive() ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200' }}">
-                                <x-transaction-icon :icon="$tx->category?->icon" :type="$tx->type" class="size-5" />
-                            </div>
-
-                            {{-- Info Keterangan & Metadata --}}
-                            <div class="min-w-0 flex-1">
-                                <div class="flex items-center justify-between gap-2">
-                                    <h4 class="text-sm font-semibold text-slate-900 truncate" title="{{ $tx->displayDescription() }}">
-                                        {{ $tx->displayDescription() }}
-                                    </h4>
-                                    {{-- Nominal Transaksi --}}
-                                    <span class="text-sm sm:text-base font-bold tabular-nums shrink-0 {{ $tx->type->amountClass() }}">
-                                        {{ $tx->formattedSignedAmount() }}
-                                    </span>
-                                </div>
-
-                                <div class="mt-0.5 flex items-center justify-between gap-2 text-xs text-slate-500">
-                                    {{-- Kiri: Tanggal + Kantong + Kategori --}}
-                                    <div class="flex items-center gap-1.5 truncate">
-                                        <span>{{ $tx->transaction_date?->translatedFormat('d M Y') }}</span>
-                                        <span>•</span>
-                                        <div class="inline-flex items-center gap-1 truncate">
-                                            @if ($tx->wallet)
-                                                <span class="size-1.5 rounded-full {{ $tx->wallet->colorEnum()->swatchClasses() }} inline-block shrink-0"></span>
-                                            @endif
-                                            <span class="font-medium text-slate-700 truncate">{{ $tx->resolvedWalletName() }}</span>
-                                        </div>
-                                        <span>•</span>
-                                        @if ($tx->category)
-                                            <span class="truncate text-slate-600">{{ $tx->category->name }}</span>
-                                        @elseif ($tx->counterpart_wallet_name_snapshot)
-                                            <span class="truncate text-sky-800">
-                                                {{ $tx->type === \App\Enums\TransactionTypeEnum::TRANSFER_IN ? 'Dari: ' : 'Ke: ' }}{{ $tx->resolvedCounterpartWalletName() }}
-                                            </span>
-                                        @else
-                                            <span class="truncate">{{ $tx->type->label() }}</span>
-                                        @endif
-                                    </div>
-
-                                    {{-- Kanan: Saldo Sisa Sesudah Transaksi --}}
-                                    <div class="flex items-center gap-2 shrink-0">
-                                        <span class="hidden sm:inline text-slate-400">Sisa:</span>
-                                        <span class="font-medium text-slate-600 tabular-nums">{{ $tx->formattedBalanceAfter() }}</span>
-                                        <button
-                                            type="button"
-                                            wire:click="askDeleteTransaction({{ $tx->id }})"
-                                            class="text-slate-400 hover:text-rose-600 p-0.5 rounded transition-colors cursor-pointer"
-                                            title="Hapus Transaksi"
-                                            aria-label="Hapus transaksi {{ $tx->displayDescription() }}"
-                                        >
-                                            <x-ti-trash class="size-3.5" />
-                                        </button>
-                                    </div>
-                                </div>
-
-                                @if ($tx->notes)
-                                    <p class="mt-1 text-xs text-slate-500 italic bg-slate-50/80 px-2 py-0.5 rounded border border-slate-100 line-clamp-1">
-                                        "{{ $tx->notes }}"
-                                    </p>
-                                @endif
-                            </div>
-                        </div>
-                    </div>
-                @endforeach
-            </div>
-
-            <div class="p-4 border-t border-slate-200">
-                {{ $this->transactions->links() }}
-            </div>
-        @endif
-    </x-card>
-
-    {{-- Modal Tambah Pemasukan (Langsung atau Ambil dari Kantong Lain) --}}
-    <x-modal wire="incomeModal" title="Tambah Pemasukan / Tambah Uang" size="lg">
-        <form wire:submit="saveIncome" class="space-y-4">
-            <x-radio.group
-                wire:model.live="income_wallet_id"
-                card
-                :columns="2"
-                color="emerald"
-                :options="$this->activeWalletOptions"
-            />
-
-            <x-radio.group
-                wire:model.live="income_source_type"
-                inline
-                class="[&>div]:flex-wrap sm:[&>div]:flex-nowrap [&>div]:gap-2"
-                color="emerald"
-                :options="\App\Enums\IncomeSourceEnum::choices()"
-            />
-
-            @if ($income_source_type === \App\Enums\IncomeSourceEnum::FROM_POCKET->value)
-                <div wire:key="recap-income-from-pocket-wrap-{{ $income_wallet_id ?? '0' }}">
-                    @if (empty($this->otherActiveWalletOptions))
-                        <div class="rounded-xl bg-amber-50 p-3 text-xs text-amber-800 border border-amber-200">
-                            Belum ada kantong aktif lain yang dapat dipilih.
-                        </div>
-                    @else
-                        <x-radio.group
-                            id="recap-income-pocket-wallet"
-                            wire:model.live="income_source_wallet_id"
-                            card
-                            :columns="2"
-                            color="emerald"
-                            :options="$this->otherActiveWalletOptions"
-                        />
-                    @endif
-                </div>
-            @else
-                <div wire:key="recap-income-direct-category-wrap">
-                    <x-radio.group
-                        id="recap-income-category"
-                        wire:model.live="income_category_id"
-                        card
-                        :columns="3"
-                        color="emerald"
-                        :options="$this->incomeCategoryOptions"
-                        class="[&>div]:!grid-cols-3 [&>div]:gap-2 sm:[&>div]:gap-3 [&_label]:p-2.5 sm:[&_label]:p-3.5 [&_label]:rounded-xl"
-                    />
-                </div>
-            @endif
-
-            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <x-currency
-                    wire:model="income_amount"
-                    locale="id-ID"
-                    symbol=""
-                    :decimals="0"
-                    :precision="0"
-                    placeholder="Nominal"
-                />
-
-                <x-input
-                    type="datetime-local"
-                    wire:model="income_date"
-                />
-            </div>
-
-            <x-input
-                wire:model="income_description"
-                placeholder="{{ $income_source_type !== \App\Enums\IncomeSourceEnum::DIRECT->value ? 'Keterangan pindah uang (opsional)' : 'Keterangan pemasukan (contoh: Gaji bulanan, Bonus)' }}"
-            />
-
-            <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-200">
-                <x-button color="slate" flat wire:click="$set('incomeModal', false)">Batal</x-button>
-                <x-button submit color="emerald" loading="saveIncome">Simpan Pemasukan</x-button>
-            </div>
-        </form>
-    </x-modal>
-
-    {{-- Modal Catat Pengeluaran --}}
-    <x-modal wire="expenseModal" title="Catat Pengeluaran Baru" size="lg">
-        <form wire:submit="saveExpense" class="space-y-4">
-            <x-radio.group
-                wire:model.live="expense_wallet_id"
-                card
-                :columns="2"
-                color="rose"
-                :options="$this->activeWalletOptions"
-            />
-
-            <x-radio.group
-                id="recap-expense-category"
-                wire:model.live="expense_category_id"
-                card
-                :columns="3"
-                color="rose"
-                :options="$this->expenseCategoryOptions"
-                class="[&>div]:!grid-cols-3 [&>div]:gap-2 sm:[&>div]:gap-3 [&_label]:p-2.5 sm:[&_label]:p-3.5 [&_label]:rounded-xl"
-            />
-
-            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <x-currency
-                    wire:model="expense_amount"
-                    locale="id-ID"
-                    symbol=""
-                    :decimals="0"
-                    :precision="0"
-                    placeholder="Nominal"
-                />
-
-                <x-input
-                    type="datetime-local"
-                    wire:model="expense_date"
-                />
-            </div>
-
-            <x-input
-                wire:model="expense_description"
-                placeholder="Keterangan pengeluaran (contoh: Belanja sayur & lauk)"
-            />
-
-            <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-200">
-                <x-button color="slate" flat wire:click="$set('expenseModal', false)">Batal</x-button>
-                <x-button submit color="rose" loading="saveExpense">Simpan Pengeluaran</x-button>
-            </div>
-        </form>
-    </x-modal>
-
-    {{-- Modal Pindah Uang Antar Kantong --}}
-    <x-modal wire="transferModal" title="Pindah Uang Antar Kantong" size="lg">
-        <form wire:submit="saveTransfer" class="space-y-4">
-            <x-radio.group
-                wire:model.live="transfer_source_wallet_id"
-                card
-                :columns="2"
-                color="sky"
-                :options="$this->activeWalletOptions"
-            />
-
-            <x-radio.group
-                wire:model.live="transfer_destination_wallet_id"
-                card
-                :columns="2"
-                color="emerald"
-                :options="$this->activeWalletOptions"
-            />
-
-            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <x-currency
-                    wire:model="transfer_amount"
-                    locale="id-ID"
-                    symbol=""
-                    :decimals="0"
-                    :precision="0"
-                    placeholder="Nominal"
-                />
-
-                <x-input
-                    type="datetime-local"
-                    wire:model="transfer_date"
-                />
-            </div>
-
-            <x-input
-                wire:model="transfer_description"
-                placeholder="Keterangan pindah uang (contoh: Sisihkan dana untuk tabungan jajan)"
-            />
-
-            <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-200">
-                <x-button color="slate" flat wire:click="$set('transferModal', false)">Batal</x-button>
-                <x-button submit color="emerald" loading="saveTransfer">Kirim Uang</x-button>
-            </div>
-        </form>
-    </x-modal>
 
     {{-- Modal Tambah / Edit Kata Kunci Rekap --}}
     <x-modal wire="keywordModal" title="{{ $editingKeywordId ? 'Ubah Kata Kunci Rekap' : 'Tambah Kata Kunci Rekap Baru' }}">

@@ -21,13 +21,11 @@ Aplikasi menggunakan **3 menu utama** yang intuitif, ramah, dan terstruktur untu
    - Kotak kartu kosong `+ Tambah Kantong` di posisi terakhir untuk membuat pos anggaran baru.
 
 3. **Rekap (`/recap`)**:
-   - Menampilkan **rekapitulasi seluruh transaksi** dari semua kantong keluarga.
+   - Halaman khusus rekapitulasi — **tanpa pencatatan transaksi** dan **tanpa daftar mutasi**; fokus hanya pada ringkasan dan analisis.
    - Ringkasan metrik: Total Pemasukan, Total Pengeluaran, dan Arus Kas Bersih (*Net Cashflow*).
-   - Dilengkapi tombol pencatatan cepat (**+ Masuk**, **- Keluar**, **⇄ Pindah**).
-   - **Filter Sederhana Berbasis Bulan**: Menggunakan filter bulan transaksi (*tanpa input tanggal yang membingungkan*), pencarian keterangan, dan filter spesifik kantong.
+   - **Filter Rekap Berbasis Bulan & Kantong**: Seluruh rekap mengikuti filter bulan dan kantong yang dipilih.
    - **Rekap per Kategori & Batas Anggaran (Limit)**: Menyajikan distribusi alokasi pengeluaran dan pemasukan per kategori. Setiap kategori dapat ditetapkan batas atas anggaran (*budget limit*); bila pengeluaran melampaui batas tersebut, kartu kategori otomatis ditandai **merah peringatan**.
    - **Rekap per Kata Kunci (Keyword) Keterangan**: Pengguna dapat menyimpan kata kunci belanja khusus (seperti *Beras*, *Skincare*, *Bensin*, *Kopi*, *Listrik*) yang tersimpan permanen di database. Setiap kata kunci memiliki batas atas anggaran; bila total mutasi dengan kata kunci tersebut melampaui batas, kartu otomatis ditandai **merah**.
-   - **Tampilan Daftar Mutasi Berbasis List (Bukan Tabel)**: Seluruh daftar mutasi disajikan dalam format list kartu transaksi yang bersih, modern, dan mudah dipindai di smartphone maupun komputer tanpa tabel yang kaku.
 
 4. **Pengaturan Akun & Kategori (`/account`)**:
    - Pengguna dapat menambah, **mengubah (edit)**, dan **menghapus kategori transaksi**, termasuk menentukan nama, jenis (*income/expense*), ikon, warna, dan **batas atas anggaran (budget limit)** untuk setiap kategori.
