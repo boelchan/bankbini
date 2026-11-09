@@ -351,7 +351,7 @@ class extends Component
                 ->where('wallet_id', $this->wallet->id)
                 ->findOrFail($transactionId);
 
-            $transactionService->deleteTransaction($transaction);
+            $transactionService->deleteTransaction($transaction->id);
             $this->wallet->refresh();
             $this->toast()->success('Dihapus!', 'Transaksi berhasil dihapus dan saldo telah diperbarui.');
         } catch (\Throwable $e) {

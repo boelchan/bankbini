@@ -313,7 +313,7 @@ class extends Component
     {
         try {
             $transaction = Transaction::query()->findOrFail($transactionId);
-            $transactionService->deleteTransaction($transaction);
+            $transactionService->deleteTransaction($transaction->id);
 
             unset($this->wallets);
             unset($this->summary);
