@@ -158,7 +158,7 @@
                                                     {{ $tx->displayDescription() }}
                                                 </p>
                                                 <p class="text-slate-500 truncate">
-                                                    {{ $tx->transaction_date?->translatedFormat('d M, H:i') }}
+                                                    {{ $tx->transaction_date?->translatedFormat('d M Y') }}
                                                     @if ($tx->category)
                                                         • {{ $tx->category->name }}
                                                     @elseif ($tx->notes)

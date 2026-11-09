@@ -163,7 +163,7 @@ class Transaction extends Model
      */
     public function displayDescription(): string
     {
-        $desc = (string) $this->description;
+        $desc = trim((string) $this->description);
 
         if ($this->type === TransactionTypeEnum::TRANSFER_OUT) {
             if (str_starts_with($desc, 'Transfer keluar ke ')) {
@@ -178,6 +178,10 @@ class Transaction extends Model
             if (str_starts_with($desc, 'Transfer masuk dari ')) {
                 return 'Terima dari ' . substr($desc, strlen('Transfer masuk dari '));
             }
+        }
+
+        if ($desc === '' || preg_match('/^(Pemasukan ke|Pengeluaran dari) /u', $desc) === 1) {
+            return $this->type->label();
         }
 
         return $desc;

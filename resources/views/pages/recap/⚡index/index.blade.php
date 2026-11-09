@@ -401,7 +401,7 @@
                                 <div class="mt-0.5 flex items-center justify-between gap-2 text-xs text-slate-500">
                                     {{-- Kiri: Tanggal + Kantong + Kategori --}}
                                     <div class="flex items-center gap-1.5 truncate">
-                                        <span>{{ $tx->transaction_date?->translatedFormat('d M Y, H:i') }}</span>
+                                        <span>{{ $tx->transaction_date?->translatedFormat('d M Y') }}</span>
                                         <span>•</span>
                                         <div class="inline-flex items-center gap-1 truncate">
                                             @if ($tx->wallet)
