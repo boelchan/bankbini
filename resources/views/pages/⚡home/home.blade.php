@@ -64,17 +64,17 @@
                     <div class="grid grid-cols-3 gap-2 sm:flex sm:flex-wrap sm:items-center">
                         <x-button color="emerald" sm wire:click="openIncomeModal('direct')" class="rounded-xl w-full sm:w-auto justify-center px-2 sm:px-3 text-xs">
                             <x-ti-plus class="size-4 mr-1 shrink-0" />
-                            <span>Tambah Uang</span>
+                            <span>Masuk</span>
                         </x-button>
 
                         <x-button color="rose" light sm wire:click="openExpenseModal" class="rounded-xl w-full sm:w-auto justify-center px-2 sm:px-3 text-xs">
                             <x-ti-minus class="size-4 mr-1 shrink-0" />
-                            <span>Pengeluaran</span>
+                            <span>Keluar</span>
                         </x-button>
 
                         <x-button color="sky" light sm wire:click="openTransferModal" class="rounded-xl w-full sm:w-auto justify-center px-2 sm:px-3 text-xs">
                             <x-ti-arrows-exchange class="size-4 mr-1 shrink-0" />
-                            <span>Pindah Uang</span>
+                            <span>Pindah</span>
                         </x-button>
                     </div>
                 @endif
@@ -169,7 +169,7 @@
         @if ($this->transactions->isEmpty())
             <div class="p-8 text-center space-y-2">
                 <p class="text-sm font-semibold text-slate-800">Belum Ada Transaksi di Kantong Utama</p>
-                <p class="text-xs text-slate-500">Gunakan tombol Tambah Uang, Pengeluaran, atau Pindah Uang di atas untuk mulai mencatat.</p>
+                <p class="text-xs text-slate-500">Gunakan tombol Masuk, Keluar, atau Pindah di atas untuk mulai mencatat.</p>
             </div>
         @else
             {{-- List Transaksi Kantong Utama (Simple & Clear Bank-Style) --}}

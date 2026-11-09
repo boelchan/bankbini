@@ -11,17 +11,17 @@
         <div class="flex flex-wrap items-center gap-2">
             <x-button color="emerald" wire:click="openIncomeModal" class="rounded-xl">
                 <x-ti-plus class="size-4 mr-1" />
-                Pemasukan
+                Masuk
             </x-button>
 
             <x-button color="rose" light wire:click="openExpenseModal" class="rounded-xl">
                 <x-ti-minus class="size-4 mr-1" />
-                Pengeluaran
+                Keluar
             </x-button>
 
             <x-button color="sky" light wire:click="openTransferModal" class="rounded-xl">
                 <x-ti-arrows-exchange class="size-4 mr-1" />
-                Pindah Uang
+                Pindah
             </x-button>
         </div>
     </div>
@@ -373,7 +373,7 @@
                     <x-ti-receipt class="size-6" />
                 </div>
                 <p class="text-sm font-semibold text-slate-900">Belum Ada Transaksi</p>
-                <p class="text-xs text-slate-500">Gunakan tombol Pemasukan, Pengeluaran, atau Pindah Uang di atas untuk mulai mencatat.</p>
+                <p class="text-xs text-slate-500">Gunakan tombol Masuk, Keluar, atau Pindah di atas untuk mulai mencatat.</p>
             </div>
         @else
             {{-- List Transaksi Bersih untuk Semua Layar (Simple & Clear Bank-Style) --}}
