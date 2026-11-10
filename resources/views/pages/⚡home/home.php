@@ -33,9 +33,9 @@ class extends Component
 
     /* Filter Riwayat Mutasi Kantong Utama */
     public string $search = '';
-    public string $typeFilter = '';
-    public string $flowFilter = '';
-    public string $monthFilter = '';
+    public ?string $typeFilter = '';
+    public ?string $flowFilter = '';
+    public ?string $monthFilter = '';
     public ?int $categoryFilter = null;
 
     /* Modal State */
@@ -97,6 +97,7 @@ class extends Component
      */
     public function updatedTypeFilter(): void
     {
+        $this->typeFilter = $this->typeFilter ?? '';
         $this->resetPage();
     }
 
@@ -105,6 +106,7 @@ class extends Component
      */
     public function updatedMonthFilter(): void
     {
+        $this->monthFilter = $this->monthFilter ?? '';
         $this->resetPage();
     }
 
@@ -113,6 +115,15 @@ class extends Component
      */
     public function updatedCategoryFilter(): void
     {
+        $this->resetPage();
+    }
+
+    /**
+     * Reset halaman paginasi saat filter aliran dana berubah.
+     */
+    public function updatedFlowFilter(): void
+    {
+        $this->flowFilter = $this->flowFilter ?? '';
         $this->resetPage();
     }
 

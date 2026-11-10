@@ -33,9 +33,9 @@ class extends Component
 
     /* Filter Riwayat Transaksi Kantong */
     public string $search = '';
-    public string $typeFilter = '';
-    public string $flowFilter = '';
-    public string $monthFilter = '';
+    public ?string $typeFilter = '';
+    public ?string $flowFilter = '';
+    public ?string $monthFilter = '';
     public ?int $categoryFilter = null;
 
     /* Modal State */
@@ -108,6 +108,7 @@ class extends Component
      */
     public function updatedTypeFilter(): void
     {
+        $this->typeFilter = $this->typeFilter ?? '';
         $this->resetPage();
     }
 
@@ -116,6 +117,7 @@ class extends Component
      */
     public function updatedFlowFilter(): void
     {
+        $this->flowFilter = $this->flowFilter ?? '';
         $this->resetPage();
     }
 
@@ -124,6 +126,7 @@ class extends Component
      */
     public function updatedMonthFilter(): void
     {
+        $this->monthFilter = $this->monthFilter ?? '';
         $this->resetPage();
     }
 
@@ -239,15 +242,17 @@ class extends Component
     #[Computed]
     public function transactions(): LengthAwarePaginator
     {
+        $search = trim($this->search);
+
         return Transaction::query()
             ->with(['user', 'category', 'counterpartWallet' => fn ($q) => $q->withTrashed()])
             ->where('wallet_id', $this->wallet->id)
-            ->when($this->search !== '', function ($query): void {
-                $term = '%' . trim($this->search) . '%';
-                $query->where(function ($sub) use ($term): void {
-                    $sub->where('description', 'like', $term)
-                        ->orWhere('notes', 'like', $term)
-                        ->orWhere('counterpart_wallet_name_snapshot', 'like', $term);
+            ->when($search !== '', function ($query) use ($search): void {
+                $query->where(function ($sub) use ($search): void {
+                    $sub->where('description', 'like', "%{$search}%")
+                        ->orWhere('notes', 'like', "%{$search}%")
+                        ->orWhere('counterpart_wallet_name_snapshot', 'like', "%{$search}%")
+                        ->orWhere('category_name_snapshot', 'like', "%{$search}%");
                 });
             })
             ->when($this->flowFilter !== '', function ($query): void {
@@ -262,20 +267,14 @@ class extends Component
                 $query->where('type', $this->typeFilter);
             })
             ->when($this->monthFilter !== '', function ($query): void {
-                try {
-                    $start = \Carbon\Carbon::createFromFormat('Y-m', $this->monthFilter)->startOfMonth();
-                    $end = (clone $start)->endOfMonth();
-                    $query->whereBetween('transaction_date', [$start, $end]);
-                } catch (\Throwable) {
-                    // Abaikan format yang tidak valid
-                }
+                $query->whereRaw("DATE_FORMAT(transaction_date, '%Y-%m') = ?", [$this->monthFilter]);
             })
             ->when($this->categoryFilter !== null, function ($query): void {
-                $query->where('transaction_category_id', $this->categoryFilter);
+                $query->where('category_id', $this->categoryFilter);
             })
             ->orderByDesc('transaction_date')
             ->orderByDesc('id')
-            ->paginate(10);
+            ->paginate(15);
     }
 
     /**

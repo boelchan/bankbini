@@ -81,62 +81,129 @@
         </div>
     @endif
 
-    {{-- Kartu Utama Kantong & Tombol Aksi (Tambah Uang, Pengeluaran, Pindah Uang) --}}
-    <x-card class="{{ $colorEnum->cardClasses() }}">
+    {{-- Area Utama Kantong (Bersih tanpa border dan tanpa background card) --}}
+    <div class="py-2">
         <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-            <div class="flex items-start gap-3.5">
-                <div class="flex size-12 sm:size-14 shrink-0 items-center justify-center rounded-2xl {{ $colorEnum->iconBadgeClasses() }}">
-                    <x-wallet-icon :icon="$wallet->icon" class="size-6 sm:size-7" />
-                </div>
-                <div class="space-y-1 min-w-0 flex-1">
-                    <div class="flex items-center gap-1.5 flex-wrap">
-                        <h2 class="text-base sm:text-lg font-bold {{ $colorEnum->accentTextClasses() }}">{{ $wallet->name }}</h2>
-                        @if ($wallet->is_primary)
-                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-900 border border-amber-300 shadow-2xs">
-                                <x-ti-star-filled class="size-3 text-amber-500" />
-                                <span>Kantong Utama</span>
-                            </span>
-                        @endif
-                        @if (!$wallet->isActive())
-                            <x-badge :text="$wallet->status->label()" :color="$wallet->status->color()" sm light />
-                        @endif
-                    </div>
-                    @if ($wallet->description)
-                        <p class="text-xs sm:text-sm text-slate-700">
-                            {{ $wallet->description }}
-                        </p>
+            <div class="space-y-2 min-w-0 flex-1 flex flex-col items-center text-center">
+                <div class="flex items-center justify-center gap-1.5 flex-wrap">
+                    <h2 class="text-base sm:text-lg font-bold {{ $colorEnum->accentTextClasses() }}">{{ $wallet->name }}</h2>
+                    @if ($wallet->is_primary)
+                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-900 border border-amber-300 shadow-2xs">
+                            <x-ti-star-filled class="size-3 text-amber-500" />
+                            <span>Kantong Utama</span>
+                        </span>
                     @endif
-                    <div class="flex flex-wrap items-center gap-x-4 gap-y-1 pt-1 text-xs text-slate-600">
-                        <span class="font-semibold text-emerald-700 tabular-nums">+{{ number_format((float) $this->walletStats['total_in'], 0, ',', '.') }}</span>
-                        <span class="font-semibold text-rose-700 tabular-nums">-{{ number_format((float) $this->walletStats['total_out'], 0, ',', '.') }}</span>
-                    </div>
+                    @if (!$wallet->isActive())
+                        <x-badge :text="$wallet->status->label()" :color="$wallet->status->color()" sm light />
+                    @endif
+                </div>
+                @if ($wallet->description)
+                    <p class="text-xs sm:text-sm text-slate-500 max-w-md">
+                        {{ $wallet->description }}
+                    </p>
+                @endif
+                <p class="text-3xl sm:text-4xl font-extrabold text-slate-900 tabular-nums text-center tracking-tight">
+                    {{ $wallet->formattedBalance() }}
+                </p>
+                <div class="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-xs text-slate-600">
+                    <span class="inline-flex items-center gap-1 font-semibold text-emerald-700 tabular-nums">
+                        <x-ti-arrow-down-left class="size-3.5 shrink-0" aria-hidden="true" />
+                        +{{ number_format((float) $this->walletStats['total_in'], 0, ',', '.') }}
+                    </span>
+                    <span class="inline-flex items-center gap-1 font-semibold text-rose-700 tabular-nums">
+                        <x-ti-arrow-up-right class="size-3.5 shrink-0" aria-hidden="true" />
+                        -{{ number_format((float) $this->walletStats['total_out'], 0, ',', '.') }}
+                    </span>
                 </div>
             </div>
 
-            <div class="flex flex-col gap-3 border-t lg:border-t-0 pt-3 lg:pt-0 border-slate-200/80">
-                <div>
-                    <p class="text-2xl sm:text-3xl font-extrabold text-slate-900 tabular-nums tracking-tight">
-                        {{ $wallet->formattedBalance() }}
-                    </p>
+            @if ($wallet->isActive())
+                <div class="fixed inset-x-3 bottom-20 z-40 grid grid-cols-3 gap-1.5 rounded-2xl border border-slate-200/80 bg-white/95 p-1.5 shadow-md shadow-slate-900/5 backdrop-blur-md sm:static sm:inset-auto sm:z-auto sm:flex sm:flex-wrap sm:items-center sm:gap-2 sm:rounded-none sm:border-0 sm:bg-transparent sm:p-0 sm:shadow-none sm:backdrop-blur-none">
+                    <x-button color="emerald" sm wire:click="openIncomeModal('direct')" class="rounded-xl w-full sm:w-auto justify-center px-2 sm:px-3 text-xs">
+                        <x-ti-arrow-down-left class="size-4 mr-1 shrink-0" />
+                        <span>Masuk</span>
+                    </x-button>
+
+                    <x-button color="rose" light sm wire:click="openExpenseModal" class="rounded-xl w-full sm:w-auto justify-center px-2 sm:px-3 text-xs">
+                        <x-ti-arrow-up-right class="size-4 mr-1 shrink-0" />
+                        <span>Keluar</span>
+                    </x-button>
+
+                    <x-button color="sky" light sm wire:click="openTransferModal" class="rounded-xl w-full sm:w-auto justify-center px-2 sm:px-3 text-xs">
+                        <x-ti-arrows-exchange class="size-4 mr-1 shrink-0" />
+                        <span>Pindah</span>
+                    </x-button>
+                </div>
+            @endif
+        </div>
+    </div>
+
+    {{-- Filter Riwayat Transaksi --}}
+    <x-card>
+        <div class="space-y-3">
+            {{-- Filter Cepat Aliran Dana --}}
+            <div class="flex items-center gap-1 self-start rounded-xl bg-slate-100 p-1 sm:self-auto">
+                <button
+                    type="button"
+                    wire:click="setFlowFilter('')"
+                    class="rounded-lg px-3 py-1 text-xs font-semibold transition-colors cursor-pointer {{ $flowFilter === '' ? 'bg-white text-rose-700 shadow-2xs' : 'text-slate-600 hover:text-slate-900' }}"
+                >
+                    Semua
+                </button>
+                <button
+                    type="button"
+                    wire:click="setFlowFilter('income')"
+                    class="rounded-lg px-3 py-1 text-xs font-semibold transition-colors cursor-pointer {{ $flowFilter === 'income' ? 'bg-white text-rose-700 shadow-2xs' : 'text-slate-600 hover:text-slate-900' }}"
+                >
+                    Masuk
+                </button>
+                <button
+                    type="button"
+                    wire:click="setFlowFilter('expense')"
+                    class="rounded-lg px-3 py-1 text-xs font-semibold transition-colors cursor-pointer {{ $flowFilter === 'expense' ? 'bg-white text-rose-700 shadow-2xs' : 'text-slate-600 hover:text-slate-900' }}"
+                >
+                    Keluar
+                </button>
+                <button
+                    type="button"
+                    wire:click="setFlowFilter('transfer')"
+                    class="rounded-lg px-3 py-1 text-xs font-semibold transition-colors cursor-pointer {{ $flowFilter === 'transfer' ? 'bg-white text-rose-700 shadow-2xs' : 'text-slate-600 hover:text-slate-900' }}"
+                >
+                    Pindah
+                </button>
+            </div>
+
+            <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+                <div class="grid flex-1 grid-cols-2 gap-3">
+                    <x-input
+                        wire:model.live.debounce.300ms="search"
+                        placeholder="Keterangan"
+                    />
+
+                    <x-select.styled
+                        placeholder="Bulan"
+                        wire:model.live="monthFilter"
+                        :options="$this->monthOptions"
+                    />
+
+                    <x-select.styled
+                        placeholder="Jenis"
+                        wire:model.live="typeFilter"
+                        :options="\App\Enums\TransactionTypeEnum::choices()"
+                    />
+
+                    <x-select.styled
+                        placeholder="Kategori"
+                        wire:model.live="categoryFilter"
+                        :options="$this->categoryFilterOptions"
+                    />
                 </div>
 
-                @if ($wallet->isActive())
-                    <div class="fixed inset-x-3 bottom-20 z-40 grid grid-cols-3 gap-1.5 rounded-2xl border border-slate-200/80 bg-white/95 p-1.5 shadow-md shadow-slate-900/5 backdrop-blur-md sm:static sm:inset-auto sm:z-auto sm:flex sm:flex-wrap sm:items-center sm:gap-2 sm:rounded-none sm:border-0 sm:bg-transparent sm:p-0 sm:shadow-none sm:backdrop-blur-none">
-                        <x-button color="emerald" sm wire:click="openIncomeModal('direct')" class="rounded-xl w-full sm:w-auto justify-center px-2 sm:px-3 text-xs">
-                            <x-ti-arrow-down-left class="size-4 mr-1 shrink-0" />
-                            <span>Masuk</span>
-                        </x-button>
-
-                        <x-button color="rose" light sm wire:click="openExpenseModal" class="rounded-xl w-full sm:w-auto justify-center px-2 sm:px-3 text-xs">
-                            <x-ti-arrow-up-right class="size-4 mr-1 shrink-0" />
-                            <span>Keluar</span>
-                        </x-button>
-
-                        <x-button color="sky" light sm wire:click="openTransferModal" class="rounded-xl w-full sm:w-auto justify-center px-2 sm:px-3 text-xs">
-                            <x-ti-arrows-exchange class="size-4 mr-1 shrink-0" />
-                            <span>Pindah</span>
-                        </x-button>
-                    </div>
+                @if ($search !== '' || $flowFilter !== '' || $typeFilter !== '' || $monthFilter !== '' || $categoryFilter !== null)
+                    <x-button color="slate" flat sm wire:click="resetFilters" class="self-start sm:self-auto">
+                        <x-ti-refresh class="size-4 mr-1" />
+                        Reset
+                    </x-button>
                 @endif
             </div>
         </div>
@@ -144,77 +211,6 @@
 
     {{-- Histori Masuk & Keluar Kantong (Tanpa Kode TRX) --}}
     <x-card paddingless>
-        {{-- Toolbar Filter Transaksi Lengkap (Bulan, Pemasukan/Pengeluaran, Jenis & Kategori) --}}
-        <div class="border-b border-slate-200/80 px-3 py-2.5 sm:px-4 space-y-2.5">
-            {{-- Filter Cepat Aliran Dana --}}
-            <div class="flex flex-wrap items-center gap-1">
-                <button
-                    type="button"
-                    wire:click="setFlowFilter('')"
-                    class="shrink-0 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors cursor-pointer {{ $flowFilter === '' ? 'bg-rose-700 text-white' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-800' }}"
-                >
-                    Semua
-                </button>
-                <button
-                    type="button"
-                    wire:click="setFlowFilter('income')"
-                    class="shrink-0 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors cursor-pointer {{ $flowFilter === 'income' ? 'bg-rose-700 text-white' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-800' }}"
-                >
-                    Masuk
-                </button>
-                <button
-                    type="button"
-                    wire:click="setFlowFilter('expense')"
-                    class="shrink-0 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors cursor-pointer {{ $flowFilter === 'expense' ? 'bg-rose-700 text-white' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-800' }}"
-                >
-                    Keluar
-                </button>
-                <button
-                    type="button"
-                    wire:click="setFlowFilter('transfer')"
-                    class="shrink-0 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors cursor-pointer {{ $flowFilter === 'transfer' ? 'bg-rose-700 text-white' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-800' }}"
-                >
-                    Pindah
-                </button>
-                @if ($search !== '' || $flowFilter !== '' || $typeFilter !== '' || $monthFilter !== '' || $categoryFilter !== null)
-                    <button
-                        type="button"
-                        wire:click="resetFilters"
-                        class="ml-auto inline-flex shrink-0 items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs font-medium text-rose-600 transition-colors hover:bg-rose-50 cursor-pointer"
-                    >
-                        <x-ti-refresh class="size-3.5" />
-                        <span>Reset Filter</span>
-                    </button>
-                @endif
-            </div>
-
-            {{-- Input Filter: Cari Keterangan, Bulan, Jenis Transaksi, Kategori --}}
-            <div class="grid grid-cols-2 gap-2 sm:gap-2.5">
-                <x-input
-                    wire:model.live.debounce.300ms="search"
-                    placeholder="Cari keterangan..."
-                />
-
-                <x-select.styled
-                    placeholder="Semua Bulan"
-                    wire:model.live="monthFilter"
-                    :options="$this->monthOptions"
-                />
-
-                <x-select.styled
-                    placeholder="Semua Jenis"
-                    wire:model.live="typeFilter"
-                    :options="\App\Enums\TransactionTypeEnum::choices()"
-                />
-
-                <x-select.styled
-                    placeholder="Semua Kategori"
-                    wire:model.live="categoryFilter"
-                    :options="$this->categoryFilterOptions"
-                />
-            </div>
-        </div>
-
         @if ($this->transactions->isEmpty())
             <div class="p-8 text-center space-y-2">
                 <p class="text-sm font-semibold text-slate-800">Belum Ada Transaksi di Kantong Ini</p>

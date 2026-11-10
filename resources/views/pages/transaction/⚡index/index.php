@@ -37,7 +37,7 @@ class extends Component
     public ?int $walletFilter = null;
 
     #[Url(as: 'type', except: '')]
-    public string $typeFilter = '';
+    public ?string $typeFilter = '';
 
     #[Url(as: 'from', except: '')]
     public string $dateFrom = '';
@@ -111,6 +111,9 @@ class extends Component
     public function updated(string $property): void
     {
         if (in_array($property, ['search', 'walletFilter', 'typeFilter', 'dateFrom', 'dateTo'], true)) {
+            if ($property === 'typeFilter') {
+                $this->typeFilter = $this->typeFilter ?? '';
+            }
             $this->resetPage();
         }
     }

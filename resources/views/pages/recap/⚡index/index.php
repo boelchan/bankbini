@@ -25,8 +25,8 @@ class extends Component
     #[Url(as: 'wallet', except: null)]
     public ?int $walletFilter = null;
 
-    #[Url(as: 'month', except: '')]
-    public string $monthFilter = '';
+    #[Url(as: 'month', except: null)]
+    public ?string $monthFilter = null;
 
     /* Tab Rekap Kategori: Pengeluaran atau Pemasukan */
     public string $categoryRecapTab = 'expense';
@@ -45,21 +45,40 @@ class extends Component
     public string $editingCategoryName = '';
     public string|int|float $category_budget_limit = '';
 
+    /* Kantong utama yang menjadi pilihan bawaan filter */
+    public ?int $defaultWalletId = null;
+
     /**
      * Inisialisasi komponen.
      */
     public function mount(): void
     {
-        $this->monthFilter = now()->format('Y-m');
+        $this->defaultWalletId = Wallet::query()
+            ->where('is_primary', true)
+            ->value('id');
+
+        $this->monthFilter ??= now()->format('Y-m');
+
+        if ($this->walletFilter === null) {
+            $this->walletFilter = $this->defaultWalletId;
+        }
     }
 
     /**
-     * Mengatur ulang filter rekap.
+     * Menormalkan filter bulan yang dikosongkan menjadi tanpa filter.
+     */
+    public function updatedMonthFilter(?string $value): void
+    {
+        $this->monthFilter = $value === '' ? null : $value;
+    }
+
+    /**
+     * Mengembalikan filter ke tampilan awal: bulan ini dan kantong utama.
      */
     public function resetFilters(): void
     {
-        $this->walletFilter = null;
-        $this->monthFilter = '';
+        $this->walletFilter = $this->defaultWalletId;
+        $this->monthFilter = now()->format('Y-m');
     }
 
     /**
@@ -102,7 +121,7 @@ class extends Component
     {
         $query = Transaction::query()
             ->when($this->walletFilter !== null, fn ($q) => $q->where('wallet_id', $this->walletFilter))
-            ->when($this->monthFilter !== '', fn ($q) => $q->whereRaw("DATE_FORMAT(transaction_date, '%Y-%m') = ?", [$this->monthFilter]));
+            ->when(filled($this->monthFilter), fn ($q) => $q->whereRaw("DATE_FORMAT(transaction_date, '%Y-%m') = ?", [$this->monthFilter]));
 
         $income = (float) (clone $query)
             ->where('type', TransactionTypeEnum::INCOME)
@@ -258,7 +277,7 @@ class extends Component
         $baseQuery = Transaction::query()
             ->whereIn('type', [TransactionTypeEnum::EXPENSE, TransactionTypeEnum::TRANSFER_OUT])
             ->when($this->walletFilter !== null, fn ($q) => $q->where('wallet_id', $this->walletFilter))
-            ->when($this->monthFilter !== '', fn ($q) => $q->whereRaw("DATE_FORMAT(transaction_date, '%Y-%m') = ?", [$this->monthFilter]));
+            ->when(filled($this->monthFilter), fn ($q) => $q->whereRaw("DATE_FORMAT(transaction_date, '%Y-%m') = ?", [$this->monthFilter]));
 
         $totalExpense = (float) (clone $baseQuery)->sum('amount');
         $keywords = RecapKeyword::orderBy('keyword')->get();
@@ -336,7 +355,7 @@ class extends Component
         $query = Transaction::query()
             ->where('type', TransactionTypeEnum::EXPENSE)
             ->when($this->walletFilter !== null, fn ($q) => $q->where('wallet_id', $this->walletFilter))
-            ->when($this->monthFilter !== '', fn ($q) => $q->whereRaw("DATE_FORMAT(transaction_date, '%Y-%m') = ?", [$this->monthFilter]));
+            ->when(filled($this->monthFilter), fn ($q) => $q->whereRaw("DATE_FORMAT(transaction_date, '%Y-%m') = ?", [$this->monthFilter]));
 
         $totalExpense = (float) (clone $query)->sum('amount');
 
@@ -384,7 +403,7 @@ class extends Component
         $query = Transaction::query()
             ->where('type', TransactionTypeEnum::INCOME)
             ->when($this->walletFilter !== null, fn ($q) => $q->where('wallet_id', $this->walletFilter))
-            ->when($this->monthFilter !== '', fn ($q) => $q->whereRaw("DATE_FORMAT(transaction_date, '%Y-%m') = ?", [$this->monthFilter]));
+            ->when(filled($this->monthFilter), fn ($q) => $q->whereRaw("DATE_FORMAT(transaction_date, '%Y-%m') = ?", [$this->monthFilter]));
 
         $totalIncome = (float) (clone $query)->sum('amount');
 

@@ -24,7 +24,7 @@
                 />
             </div>
 
-            @if ($monthFilter !== '' || $walletFilter !== null)
+            @if ($monthFilter !== now()->format('Y-m') || $walletFilter !== $defaultWalletId)
                 <x-button color="red" flat sm wire:click="resetFilters" class="self-start sm:self-auto">
                     <x-ti-refresh class="size-4 mr-1" />
                     Reset

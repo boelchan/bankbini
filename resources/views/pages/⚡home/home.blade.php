@@ -15,29 +15,26 @@
         </div>
     </div>
 
-    {{-- Kartu Utama Kantong Utama & Tombol Aksi --}}
-    <x-card class="{{ $colorEnum->cardClasses() }}">
+    {{-- Area Utama Kantong Utama (Bersih tanpa border dan tanpa background card) --}}
+    <div class="py-2">
         <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-            <div class="space-y-2 min-w-0 flex-1">
-                <div class="flex items-center gap-1.5 flex-wrap">
+            <div class="space-y-2 min-w-0 flex-1 flex flex-col items-center text-center">
+                <div class="flex items-center justify-center gap-1.5 flex-wrap">
                     <h2 class="text-base sm:text-lg font-bold {{ $colorEnum->accentTextClasses() }}">{{ $wallet->name }}</h2>
-                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-900 border border-amber-300 shadow-2xs">
-                        <x-ti-star-filled class="size-3 text-amber-500" />
-                        <span>Kantong Utama</span>
-                    </span>
+                    <x-ti-star-filled class="size-3 text-amber-500" />
                     @if (!$wallet->isActive())
                         <x-badge :text="$wallet->status->label()" :color="$wallet->status->color()" sm light />
                     @endif
                 </div>
                 @if ($wallet->description)
-                    <p class="text-xs sm:text-sm text-slate-700">
+                    <p class="text-xs sm:text-sm text-slate-500 max-w-md">
                         {{ $wallet->description }}
                     </p>
                 @endif
-                <p class="text-2xl sm:text-3xl font-extrabold text-slate-900 tabular-nums tracking-tight">
+                <p class="text-3xl sm:text-4xl font-extrabold text-slate-900 tabular-nums text-center tracking-tight">
                     {{ $wallet->formattedBalance() }}
                 </p>
-                <div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-600">
+                <div class="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-xs text-slate-600">
                     <span class="inline-flex items-center gap-1 font-semibold text-emerald-700 tabular-nums">
                         <x-ti-arrow-down-left class="size-3.5 shrink-0" aria-hidden="true" />
                         +{{ number_format((float) $this->walletStats['total_in'], 0, ',', '.') }}
@@ -68,7 +65,7 @@
                 </div>
             @endif
         </div>
-    </x-card>
+    </div>
 
     {{-- Filter Riwayat Transaksi --}}
     <x-card>

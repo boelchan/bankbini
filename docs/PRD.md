@@ -35,12 +35,13 @@ Aplikasi menggunakan **3 menu utama** yang intuitif, ramah, dan terstruktur untu
 ## 3. Halaman Detail Kantong (`/pockets/{wallet}`)
 Diakses dengan mengetuk kotak kantong pada halaman **Kantong**:
 - Menampilkan informasi kantong, status (`Aktif` / `Dibekukan`), total uang masuk, total uang keluar, dan saldo saat ini.
+- **Tata letak mengikuti halaman Home**: kartu kantong (nama, badge, deskripsi, saldo, ringkasan masuk/keluar, serta tombol aksi), lalu kartu filter riwayat transaksi terpisah, dan terakhir kartu riwayat transaksi.
 - Menyediakan 3 tombol transaksi utama untuk kantong tersebut (melayang di bagian bawah ponsel):
   1. **↓ Masuk**: Pilih sumber uang dari **Pemasukan Baru (Langsung)** atau **Ambil dari Kantong Lain**.
   2. **↗ Keluar**: Catat pengeluaran dari kantong ini.
   3. **⇄ Pindah**: Pindahkan saldo dari kantong ini ke kantong aktif lain.
 - Menyediakan tombol pengelolaan kantong: **Ubah Kantong**, **Bekukan / Aktifkan**, dan **Hapus Kantong** (wajib memindahkan sisa saldo ke kantong lain bila saldo > Rp0).
-- Menampilkan **Histori Masuk & Keluar Kantong** tanpa kode TRX, lengkap dengan filter bulan transaksi, filter cepat aliran dana (Semua / Masuk / Keluar / Pindah), filter jenis transaksi, filter kategori, pencarian keterangan, tombol reset filter, serta daftar transaksi yang dikelompokkan per tanggal. Setiap transaksi dapat **dihapus** (saldo dikembalikan) dan transaksi **pemasukan/pengeluaran** dapat **diubah** (nominal, tanggal, keterangan, kategori); transaksi pindah/terima uang hanya dapat dihapus agar pasangan antar kantong tetap konsisten.
+- Menampilkan **Histori Masuk & Keluar Kantong** tanpa kode TRX, lengkap dengan filter bulan transaksi, filter cepat aliran dana (Semua / Masuk / Keluar / Pindah), filter jenis transaksi, filter kategori, pencarian keterangan, tombol reset filter, serta daftar transaksi yang dikelompokkan per tanggal. Perilaku filter dan daftar transaksi **sama dengan riwayat transaksi di Home**: pencarian mencakup keterangan, catatan, nama kantong lawan, dan nama kategori; filter kategori memakai kategori transaksi; serta 15 transaksi per halaman. Setiap transaksi dapat **dihapus** (saldo dikembalikan) dan transaksi **pemasukan/pengeluaran** dapat **diubah** (nominal, tanggal, keterangan, kategori); transaksi pindah/terima uang hanya dapat dihapus agar pasangan antar kantong tetap konsisten.
 
 ## 4. Integritas Keuangan & Database
 - Seluruh perubahan saldo diproses melalui backend service (`WalletService`, `TransactionService`, `TransferService`) di dalam `DB::transaction` dengan penguncian baris `SELECT ... FOR UPDATE` (`lockForUpdate()`).
