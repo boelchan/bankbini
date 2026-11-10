@@ -37,5 +37,10 @@ class AppServiceProvider extends ServiceProvider
         TallStackUi::customize()
             ->form('radio.group')
             ->block('columns.3', 'grid-cols-3');
+
+        // TallStackUi::customize()
+        //     ->card()
+        //     ->block('wrapper.second')
+        //     ->replace('bg-white', 'bg-transparent');
     }
 }

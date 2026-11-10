@@ -123,12 +123,12 @@
                 @if ($wallet->isActive())
                     <div class="fixed inset-x-3 bottom-20 z-40 grid grid-cols-3 gap-1.5 rounded-2xl border border-slate-200/80 bg-white/95 p-1.5 shadow-md shadow-slate-900/5 backdrop-blur-md sm:static sm:inset-auto sm:z-auto sm:flex sm:flex-wrap sm:items-center sm:gap-2 sm:rounded-none sm:border-0 sm:bg-transparent sm:p-0 sm:shadow-none sm:backdrop-blur-none">
                         <x-button color="emerald" sm wire:click="openIncomeModal('direct')" class="rounded-xl w-full sm:w-auto justify-center px-2 sm:px-3 text-xs">
-                            <x-ti-plus class="size-4 mr-1 shrink-0" />
+                            <x-ti-arrow-down-left class="size-4 mr-1 shrink-0" />
                             <span>Masuk</span>
                         </x-button>
 
                         <x-button color="rose" light sm wire:click="openExpenseModal" class="rounded-xl w-full sm:w-auto justify-center px-2 sm:px-3 text-xs">
-                            <x-ti-minus class="size-4 mr-1 shrink-0" />
+                            <x-ti-arrow-up-right class="size-4 mr-1 shrink-0" />
                             <span>Keluar</span>
                         </x-button>
 

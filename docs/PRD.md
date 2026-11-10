@@ -23,8 +23,8 @@ Aplikasi menggunakan **3 menu utama** yang intuitif, ramah, dan terstruktur untu
    - Halaman khusus rekapitulasi — **tanpa pencatatan transaksi** dan **tanpa daftar mutasi**; fokus hanya pada ringkasan dan analisis.
    - Ringkasan metrik: Total Pemasukan, Total Pengeluaran, dan Arus Kas Bersih (*Net Cashflow*).
    - **Filter Rekap Berbasis Bulan & Kantong**: Seluruh rekap mengikuti filter bulan dan kantong yang dipilih.
-   - **Rekap per Kategori & Batas Anggaran (Limit)**: Menyajikan distribusi alokasi pengeluaran dan pemasukan per kategori. Setiap kategori dapat ditetapkan batas atas anggaran (*budget limit*); bila pengeluaran melampaui batas tersebut, baris kategori otomatis ditandai **merah peringatan**.
-   - **Rekap per Kata Kunci (Keyword) Keterangan**: Pengguna dapat menyimpan kata kunci belanja khusus (seperti *Beras*, *Skincare*, *Bensin*, *Kopi*, *Listrik*) yang tersimpan permanen di database. Setiap kata kunci memiliki batas atas anggaran; rekap disajikan sebagai tabel yang bisa diubah dan dihapus per baris, dan baris otomatis ditandai **merah** bila total mutasi dengan kata kunci tersebut melampaui batas.
+   - **Rekap per Kategori & Batas Anggaran (Limit)**: Satu kartu berisi judul, tab **Pengeluaran / Pemasukan**, dan tabel kategori. Setiap baris kategori memiliki tombol pensil untuk mengubah batas atas anggaran (*budget limit*) pada kedua tab. Di bawah setiap baris, bilah pemakaian anggaran membentang penuh dari kiri ke kanan dengan persentase `aktual ÷ batas`: **hijau** di bawah 80%, **merah** 80-100%, dan **hitam** bila melewati batas. Bila pengeluaran melampaui batas, baris kategori juga ditandai **merah peringatan**. Kategori tanpa batas tetap menampilkan persentase porsi terhadap total dengan bilah netral abu-abu agar tidak terbaca sebagai peringatan.
+   - **Rekap per Kata Kunci (Keyword) Keterangan**: Satu kartu berisi judul, tombol tambah kata kunci berbentuk ikon di sisi kanan judul, dan tabel kata kunci. Pengguna dapat menyimpan kata kunci belanja khusus (seperti *Beras*, *Skincare*, *Bensin*, *Kopi*, *Listrik*) yang tersimpan permanen di database. Setiap baris hanya memiliki satu tombol pensil untuk mengubah kata kunci dan batas anggaran; tombol hapus tersedia di dalam modal ubah. Baris otomatis ditandai **merah** bila total mutasi dengan kata kunci tersebut melampaui batas. Bilah persentase di bawah tiap baris memakai aturan warna yang sama dengan kategori: persentase `aktual ÷ batas` bila batas diisi, atau porsi terhadap total pengeluaran dengan bilah netral bila batas kosong.
 
 4. **Pengaturan Akun & Kategori (`/account`)**:
    - Pengguna dapat menambah, **mengubah (edit)**, dan **menghapus kategori transaksi**, termasuk menentukan nama, jenis (*income/expense*), ikon, warna, dan **batas atas anggaran (budget limit)** untuk setiap kategori.
@@ -36,8 +36,8 @@ Aplikasi menggunakan **3 menu utama** yang intuitif, ramah, dan terstruktur untu
 Diakses dengan mengetuk kotak kantong pada halaman **Kantong**:
 - Menampilkan informasi kantong, status (`Aktif` / `Dibekukan`), total uang masuk, total uang keluar, dan saldo saat ini.
 - Menyediakan 3 tombol transaksi utama untuk kantong tersebut (melayang di bagian bawah ponsel):
-  1. **+ Masuk**: Pilih sumber uang dari **Pemasukan Baru (Langsung)** atau **Ambil dari Kantong Lain**.
-  2. **- Keluar**: Catat pengeluaran dari kantong ini.
+  1. **↓ Masuk**: Pilih sumber uang dari **Pemasukan Baru (Langsung)** atau **Ambil dari Kantong Lain**.
+  2. **↗ Keluar**: Catat pengeluaran dari kantong ini.
   3. **⇄ Pindah**: Pindahkan saldo dari kantong ini ke kantong aktif lain.
 - Menyediakan tombol pengelolaan kantong: **Ubah Kantong**, **Bekukan / Aktifkan**, dan **Hapus Kantong** (wajib memindahkan sisa saldo ke kantong lain bila saldo > Rp0).
 - Menampilkan **Histori Masuk & Keluar Kantong** tanpa kode TRX, lengkap dengan filter bulan transaksi, filter cepat aliran dana (Semua / Masuk / Keluar / Pindah), filter jenis transaksi, filter kategori, pencarian keterangan, tombol reset filter, serta daftar transaksi yang dikelompokkan per tanggal. Setiap transaksi dapat **dihapus** (saldo dikembalikan) dan transaksi **pemasukan/pengeluaran** dapat **diubah** (nominal, tanggal, keterangan, kategori); transaksi pindah/terima uang hanya dapat dihapus agar pasangan antar kantong tetap konsisten.

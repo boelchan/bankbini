@@ -6,6 +6,7 @@ use App\Enums\TransactionTypeEnum;
 use App\Enums\WalletStatusEnum;
 use App\Models\RecapKeyword;
 use App\Models\Transaction;
+use App\Models\TransactionCategory;
 use App\Models\Wallet;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
@@ -37,6 +38,12 @@ class extends Component
     public ?int $editingKeywordId = null;
     public string $keyword_text = '';
     public string|int|float $keyword_budget_limit = '';
+
+    /* State Modal Batas Kategori */
+    public bool $categoryBudgetModal = false;
+    public ?int $editingCategoryId = null;
+    public string $editingCategoryName = '';
+    public string|int|float $category_budget_limit = '';
 
     /**
      * Inisialisasi komponen.
@@ -189,38 +196,89 @@ class extends Component
     public function deleteKeyword(int $id): void
     {
         RecapKeyword::destroy($id);
+        $this->keywordModal = false;
         unset($this->keywordRecap);
         $this->toast()->success('Dihapus!', 'Kata kunci berhasil dihapus.');
     }
 
     /**
+     * Membuka modal pengaturan batas anggaran kategori.
+     */
+    public function openEditCategoryBudget(int $categoryId): void
+    {
+        $category = TransactionCategory::find($categoryId);
+
+        if (!$category) {
+            return;
+        }
+
+        $this->resetValidation('category_budget_limit');
+        $this->editingCategoryId = $category->id;
+        $this->editingCategoryName = $category->name;
+        $this->category_budget_limit = (float) $category->budget_limit > 0 ? (float) $category->budget_limit : '';
+        $this->categoryBudgetModal = true;
+    }
+
+    /**
+     * Menyimpan batas anggaran kategori.
+     */
+    public function saveCategoryBudget(): void
+    {
+        $this->validate([
+            'category_budget_limit' => ['nullable', 'numeric', 'gte:0'],
+        ], [
+            'category_budget_limit.gte' => 'Batas anggaran tidak boleh negatif.',
+        ]);
+
+        $category = TransactionCategory::find($this->editingCategoryId);
+
+        if (!$category) {
+            $this->categoryBudgetModal = false;
+
+            return;
+        }
+
+        $category->update([
+            'budget_limit' => $this->category_budget_limit ? (float) $this->category_budget_limit : 0,
+        ]);
+
+        $this->categoryBudgetModal = false;
+        unset($this->categoryExpenseRecap, $this->categoryIncomeRecap);
+        $this->toast()->success('Berhasil!', 'Batas kategori berhasil disimpan.')->send();
+    }
+
+    /**
      * Rekapitulasi pengeluaran berdasarkan kata kunci pencarian keterangan yang disimpan di DB.
      *
-     * @return array<int, array{id: int, keyword: string, amount: float, formatted_amount: string, total_tx: int, limit: float, formatted_limit: string, is_over_limit: bool, over_amount: float, percentage: ?float}>
+     * @return array<int, array{id: int, keyword: string, amount: float, formatted_amount: string, total_tx: int, limit: float, formatted_limit: string, is_over_limit: bool, over_amount: float, percentage: float}>
      */
     #[Computed]
     public function keywordRecap(): array
     {
+        $baseQuery = Transaction::query()
+            ->whereIn('type', [TransactionTypeEnum::EXPENSE, TransactionTypeEnum::TRANSFER_OUT])
+            ->when($this->walletFilter !== null, fn ($q) => $q->where('wallet_id', $this->walletFilter))
+            ->when($this->monthFilter !== '', fn ($q) => $q->whereRaw("DATE_FORMAT(transaction_date, '%Y-%m') = ?", [$this->monthFilter]));
+
+        $totalExpense = (float) (clone $baseQuery)->sum('amount');
         $keywords = RecapKeyword::orderBy('keyword')->get();
 
-        return $keywords->map(function (RecapKeyword $kw): array {
+        return $keywords->map(function (RecapKeyword $kw) use ($baseQuery, $totalExpense): array {
             $term = '%' . trim($kw->keyword) . '%';
 
-            $query = Transaction::query()
-                ->whereIn('type', [TransactionTypeEnum::EXPENSE, TransactionTypeEnum::TRANSFER_OUT])
-                ->when($this->walletFilter !== null, fn ($q) => $q->where('wallet_id', $this->walletFilter))
-                ->when($this->monthFilter !== '', fn ($q) => $q->whereRaw("DATE_FORMAT(transaction_date, '%Y-%m') = ?", [$this->monthFilter]))
-                ->where(function ($sub) use ($term): void {
-                    $sub->where('description', 'like', $term)
-                        ->orWhere('notes', 'like', $term);
-                });
+            $query = (clone $baseQuery)->where(function ($sub) use ($term): void {
+                $sub->where('description', 'like', $term)
+                    ->orWhere('notes', 'like', $term);
+            });
 
             $amount = (float) (clone $query)->sum('amount');
             $totalTx = (int) (clone $query)->count();
             $limit = (float) $kw->budget_limit;
             $isOverLimit = $limit > 0 && $amount > $limit;
             $overAmount = $isOverLimit ? $amount - $limit : 0.0;
-            $percentage = $limit > 0 ? round(($amount / $limit) * 100, 1) : null;
+            $percentage = $limit > 0
+                ? round(($amount / $limit) * 100, 2)
+                : ($totalExpense > 0 ? round(($amount / $totalExpense) * 100, 2) : 0.0);
 
             return [
                 'id' => $kw->id,
@@ -238,9 +296,39 @@ class extends Component
     }
 
     /**
+     * Menentukan warna bilah dan angka pemakaian anggaran.
+     *
+     * @return array{bar: string, text: string}
+     */
+    public function budgetTone(float $usage, float $limit): array
+    {
+        $hasLimit = $limit > 0;
+
+        if ($hasLimit && $usage > 100) {
+            return ['bar' => 'bg-slate-900', 'text' => 'text-slate-900 font-semibold'];
+        }
+
+        if ($hasLimit && $usage >= 80) {
+            return ['bar' => 'bg-rose-500', 'text' => 'text-rose-700 font-semibold'];
+        }
+
+        return $hasLimit
+            ? ['bar' => 'bg-emerald-500', 'text' => 'text-emerald-700']
+            : ['bar' => 'bg-slate-400', 'text' => 'text-slate-500'];
+    }
+
+    /**
+     * Memformat angka persentase tanpa angka nol di belakang koma.
+     */
+    public function formatPercentage(float $value): string
+    {
+        return rtrim(rtrim(number_format($value, 2, ',', '.'), '0'), ',');
+    }
+
+    /**
      * Rekapitulasi transaksi pengeluaran per kategori.
      *
-     * @return array<int, array{name: string, icon: string, color: string, amount: float, formatted_amount: string, total_tx: int, percentage: float, limit: float, formatted_limit: string, is_over_limit: bool, over_amount: float, budget_percentage: ?float}>
+     * @return array<int, array{category_id: ?int, name: string, icon: string, color: string, amount: float, formatted_amount: string, total_tx: int, percentage: float, limit: float, formatted_limit: string, is_over_limit: bool, over_amount: float, budget_percentage: ?float}>
      */
     #[Computed]
     public function categoryExpenseRecap(): array
@@ -265,9 +353,10 @@ class extends Component
             $limit = (float) ($row->category?->budget_limit ?? 0);
             $isOverLimit = $limit > 0 && $amount > $limit;
             $overAmount = $isOverLimit ? $amount - $limit : 0.0;
-            $budgetPercentage = $limit > 0 ? round(($amount / $limit) * 100, 1) : null;
+            $budgetPercentage = $limit > 0 ? round(($amount / $limit) * 100, 2) : null;
 
             return [
+                'category_id' => $row->category?->id,
                 'name' => $row->category?->name ?? $row->category_name_snapshot ?? 'Lainnya',
                 'icon' => $row->category?->icon ?? 'shopping-bag',
                 'color' => $row->category?->color ?? 'rose',
@@ -287,7 +376,7 @@ class extends Component
     /**
      * Rekapitulasi transaksi pemasukan per kategori.
      *
-     * @return array<int, array{name: string, icon: string, color: string, amount: float, formatted_amount: string, total_tx: int, percentage: float}>
+     * @return array<int, array{category_id: ?int, name: string, icon: string, color: string, amount: float, formatted_amount: string, total_tx: int, percentage: float, limit: float, formatted_limit: string, is_over_limit: bool, over_amount: float, budget_percentage: ?float}>
      */
     #[Computed]
     public function categoryIncomeRecap(): array
@@ -309,8 +398,11 @@ class extends Component
         return $rows->map(function ($row) use ($totalIncome) {
             $amount = (float) $row->total_amount;
             $percentage = $totalIncome > 0 ? round(($amount / $totalIncome) * 100, 1) : 0.0;
+            $limit = (float) ($row->category?->budget_limit ?? 0);
+            $budgetPercentage = $limit > 0 ? round(($amount / $limit) * 100, 2) : null;
 
             return [
+                'category_id' => $row->category?->id,
                 'name' => $row->category?->name ?? $row->category_name_snapshot ?? 'Pemasukan Lainnya',
                 'icon' => $row->category?->icon ?? 'wallet',
                 'color' => $row->category?->color ?? 'emerald',
@@ -318,6 +410,11 @@ class extends Component
                 'formatted_amount' => number_format($amount, 0, ',', '.'),
                 'total_tx' => (int) $row->total_tx,
                 'percentage' => $percentage,
+                'limit' => $limit,
+                'formatted_limit' => $limit > 0 ? number_format($limit, 0, ',', '.') : 'Tanpa Batas',
+                'is_over_limit' => false,
+                'over_amount' => 0.0,
+                'budget_percentage' => $budgetPercentage,
             ];
         })->all();
     }

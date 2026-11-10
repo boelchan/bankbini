@@ -12,23 +12,20 @@
         <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div class="grid flex-1 grid-cols-2 gap-3">
                 <x-select.styled
-                    label="Filter Bulan"
-                    placeholder="Semua Bulan"
+                    placeholder="Bulan"
                     wire:model.live="monthFilter"
                     :options="$this->monthOptions"
                 />
 
                 <x-select.styled
-                    label="Filter Kantong"
-                    placeholder="Semua Kantong"
+                    placeholder="Kantong"
                     wire:model.live="walletFilter"
                     :options="$this->allWalletFilterOptions"
-                    searchable
                 />
             </div>
 
             @if ($monthFilter !== '' || $walletFilter !== null)
-                <x-button color="slate" flat sm wire:click="resetFilters" class="self-start sm:self-auto">
+                <x-button color="red" flat sm wire:click="resetFilters" class="self-start sm:self-auto">
                     <x-ti-refresh class="size-4 mr-1" />
                     Reset
                 </x-button>
@@ -78,198 +75,215 @@
     </x-card>
 
     {{-- Seksi Rekap per Kategori --}}
-    <div class="space-y-2">
-        <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-            <h2 class="text-sm sm:text-base font-semibold text-slate-900 flex items-center gap-1.5">
-                <x-ti-chart-pie class="size-4.5 text-rose-600" />
-                <span>Rekap per Kategori</span>
-            </h2>
+    @php
+        $isExpenseTab = $categoryRecapTab === 'expense';
+        $categoryRows = $isExpenseTab ? $this->categoryExpenseRecap : $this->categoryIncomeRecap;
+    @endphp
 
-            {{-- Tab Pilihan: Pengeluaran atau Pemasukan --}}
-            <div class="flex items-center gap-1 bg-slate-100 p-1 rounded-xl self-start sm:self-auto">
-                <button
-                    type="button"
-                    wire:click="$set('categoryRecapTab', 'expense')"
-                    class="rounded-lg px-3 py-1 text-xs font-semibold transition-colors cursor-pointer {{ $categoryRecapTab === 'expense' ? 'bg-white text-rose-700 shadow-2xs' : 'text-slate-600 hover:text-slate-900' }}"
-                >
-                    Pengeluaran
-                </button>
-                <button
-                    type="button"
-                    wire:click="$set('categoryRecapTab', 'income')"
-                    class="rounded-lg px-3 py-1 text-xs font-semibold transition-colors cursor-pointer {{ $categoryRecapTab === 'income' ? 'bg-white text-emerald-700 shadow-2xs' : 'text-slate-600 hover:text-slate-900' }}"
-                >
-                    Pemasukan
-                </button>
+    <x-table flush>
+        <x-slot:header>
+            <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                <h2 class="text-sm font-semibold text-slate-900 sm:text-base">Rekap per Kategori</h2>
+
+                {{-- Tab Pilihan: Pengeluaran atau Pemasukan --}}
+                <div class="flex items-center gap-1 bg-slate-100 p-1 rounded-xl self-start sm:self-auto">
+                    <button
+                        type="button"
+                        wire:click="$set('categoryRecapTab', 'expense')"
+                        class="rounded-lg px-3 py-1 text-xs font-semibold transition-colors cursor-pointer {{ $categoryRecapTab === 'expense' ? 'bg-white text-rose-700 shadow-2xs' : 'text-slate-600 hover:text-slate-900' }}"
+                    >
+                        Pengeluaran
+                    </button>
+                    <button
+                        type="button"
+                        wire:click="$set('categoryRecapTab', 'income')"
+                        class="rounded-lg px-3 py-1 text-xs font-semibold transition-colors cursor-pointer {{ $categoryRecapTab === 'income' ? 'bg-white text-emerald-700 shadow-2xs' : 'text-slate-600 hover:text-slate-900' }}"
+                    >
+                        Pemasukan
+                    </button>
+                </div>
             </div>
-        </div>
-
-        @php
-            $isExpenseTab = $categoryRecapTab === 'expense';
-            $categoryRows = $isExpenseTab ? $this->categoryExpenseRecap : $this->categoryIncomeRecap;
-        @endphp
+        </x-slot:header>
 
         @if (empty($categoryRows))
-            <x-card>
-                <div class="py-4 text-center text-xs text-slate-400">
+            <x-slot:empty>
+                <div class="px-4 py-8 text-center text-xs text-slate-400">
                     {{ $isExpenseTab ? 'Belum ada data pengeluaran berkategori pada periode ini.' : 'Belum ada data pemasukan berkategori pada periode ini.' }}
                 </div>
-            </x-card>
+            </x-slot:empty>
         @else
-            <x-table>
-                <x-table.thead class="bg-slate-100">
-                    <x-table.th label="Kategori" width="38%" />
-                    <x-table.th label="Batas" width="24%" />
-                    <x-table.th label="Aktual" width="38%" />
-                </x-table.thead>
+            <x-table.thead class="bg-slate-100">
+                <x-table.th label="Kategori" width="32%" />
+                <x-table.th label="Batas" width="32%" />
+                <x-table.th label="Aktual" width="36%" />
+            </x-table.thead>
 
-                <tbody>
-                    @foreach ($categoryRows as $cat)
-                        @php
-                            $isOver = $cat['is_over_limit'] ?? false;
-                        @endphp
-                        <tr class="transition-colors {{ $isOver ? 'bg-rose-50 hover:bg-rose-100/70' : 'bg-white hover:bg-slate-50' }}">
-                            <td class="p-3 align-top">
-                                <span class="block truncate text-sm font-medium {{ $isOver ? 'text-rose-900' : 'text-slate-800' }}">
+            <tbody>
+                @foreach ($categoryRows as $cat)
+                    @php
+                        $isOver = $cat['is_over_limit'] ?? false;
+                        $usage = (float) ($cat['budget_percentage'] ?? $cat['percentage']);
+                        $usageLabel = $this->formatPercentage($usage);
+                        $tone = $this->budgetTone($usage, (float) ($cat['limit'] ?? 0));
+                    @endphp
+                    <tr class="transition-colors {{ $isOver ? 'bg-rose-50 hover:bg-rose-100/70' : 'bg-white hover:bg-slate-50' }}">
+                        <td class="px-3 pb-0 pt-3 align-top">
+                            <div class="flex items-center gap-1.5">
+                                <span class="min-w-0 truncate text-sm font-medium {{ $isOver ? 'text-rose-900' : 'text-slate-800' }}">
                                     {{ $cat['name'] }}
                                 </span>
-                                <div class="mt-1.5 flex items-center gap-2">
-                                    <div class="h-1.5 w-full max-w-24 overflow-hidden rounded-full bg-slate-200/80">
-                                        <div
-                                            class="h-full rounded-full {{ $isOver ? 'bg-rose-600' : ($isExpenseTab ? 'bg-rose-400' : 'bg-emerald-500') }}"
-                                            style="width: {{ min(100, max(4, $cat['percentage'])) }}%"
-                                        ></div>
-                                    </div>
-                                    <span class="shrink-0 text-xs tabular-nums {{ $isOver ? 'text-rose-700' : 'text-slate-500' }}">
-                                        {{ $cat['percentage'] }}%
-                                    </span>
-                                </div>
-                            </td>
-
-                            <td class="p-3 align-top">
-                                <span class="text-sm tabular-nums {{ $isOver ? 'font-semibold text-rose-700' : 'text-slate-700' }}">
-                                    {{ $cat['formatted_limit'] ?? '—' }}
-                                </span>
-                            </td>
-
-                            <td class="p-3 align-top">
-                                <p class="text-sm font-semibold tabular-nums {{ $isOver ? 'text-rose-700' : 'text-slate-900' }}">
-                                    {{ $cat['formatted_amount'] }}
-                                </p>
-                                @if ($isOver)
-                                    <span class="mt-0.5 inline-flex items-center gap-1 text-xs font-semibold text-rose-700">
-                                        <x-ti-alert-triangle class="size-3" />
-                                        <span>Lewat {{ number_format($cat['over_amount'], 0, ',', '.') }}</span>
-                                    </span>
-                                @endif
-                            </td>
-                        </tr>
-                    @endforeach
-                </tbody>
-            </x-table>
-        @endif
-    </div>
-
-    {{-- Seksi Rekap per Kata Kunci di Keterangan --}}
-    <div class="space-y-2">
-        <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-            <h2 class="text-sm sm:text-base font-semibold text-slate-900 flex items-center gap-1.5">
-                <x-ti-tags class="size-4.5 text-amber-600" />
-                <span>Rekap per Kata Kunci Keterangan</span>
-            </h2>
-
-            <x-button color="rose" sm wire:click="openAddKeywordModal" class="rounded-xl self-start sm:self-auto">
-                <x-ti-plus class="size-4 mr-1" />
-                <span>Tambah Kata Kunci</span>
-            </x-button>
-        </div>
-
-        @if (empty($this->keywordRecap))
-            <x-card>
-                <div class="py-8 text-center space-y-2">
-                    <div class="mx-auto flex size-12 items-center justify-center rounded-2xl bg-amber-50 text-amber-700 border border-amber-200">
-                        <x-ti-tags class="size-6" />
-                    </div>
-                    <p class="text-sm font-semibold text-slate-800">Belum Ada Kata Kunci yang Disimpan</p>
-                    <p class="text-xs text-slate-500 max-w-md mx-auto">
-                        Tambahkan kata kunci belanja (contoh: <em>Beras</em>, <em>Skincare</em>, <em>Kopi</em>, <em>Bensin</em>, <em>Listrik</em>) beserta batas anggarannya untuk memantau pengeluaran pos tersebut secara otomatis.
-                    </p>
-                    <x-button color="rose" sm wire:click="openAddKeywordModal" class="rounded-xl mt-2">
-                        <x-ti-plus class="size-4 mr-1" />
-                        Tambah Kata Kunci Pertama
-                    </x-button>
-                </div>
-            </x-card>
-        @else
-            <x-table>
-                <x-table.thead class="bg-slate-100">
-                    <x-table.th label="Kata Kunci" width="40%" />
-                    <x-table.th label="Batas" width="20%" />
-                    <x-table.th label="Aktual" width="25%" />
-                    <x-table.th label="Aksi" width="15%" />
-                </x-table.thead>
-
-                <tbody>
-                    @foreach ($this->keywordRecap as $kw)
-                        <tr
-                            class="transition-colors {{ $kw['is_over_limit'] ? 'bg-rose-50 hover:bg-rose-100/70' : 'bg-white hover:bg-slate-50' }}"
-                            wire:key="keyword-{{ $kw['id'] }}"
-                        >
-                            <td class="p-3 align-top">
-                                <span class="inline-flex items-center gap-1 text-sm font-semibold {{ $kw['is_over_limit'] ? 'text-rose-900' : 'text-slate-900' }}">
-                                    <x-ti-hash class="size-3.5 shrink-0 {{ $kw['is_over_limit'] ? 'text-rose-500' : 'text-amber-500' }}" />
-                                    <span>{{ $kw['keyword'] }}</span>
-                                </span>
-                            </td>
-
-                            <td class="p-3 align-top">
-                                <span class="text-sm tabular-nums {{ $kw['is_over_limit'] ? 'font-semibold text-rose-700' : 'text-slate-700' }}">
-                                    {{ $kw['formatted_limit'] }}
-                                </span>
-                            </td>
-
-                            <td class="p-3 align-top">
-                                <p class="text-sm font-bold tabular-nums {{ $kw['is_over_limit'] ? 'text-rose-700' : 'text-slate-900' }}">
-                                    {{ $kw['formatted_amount'] }}
-                                </p>
-                                @if ($kw['is_over_limit'])
-                                    <span class="mt-0.5 inline-flex items-center gap-1 text-xs font-semibold text-rose-700">
-                                        <x-ti-alert-triangle class="size-3" />
-                                        <span>Lebih {{ number_format($kw['over_amount'], 0, ',', '.') }}</span>
-                                    </span>
-                                @endif
-                            </td>
-
-                            <td class="p-3 align-top">
-                                <div class="flex items-center gap-1.5">
+                                @if (! empty($cat['category_id']))
                                     <x-button.circle
                                         color="slate"
                                         flat
                                         xs
-                                        wire:click="openEditKeywordModal({{ $kw['id'] }})"
-                                        title="Ubah batas atas kata kunci"
-                                        aria-label="Ubah {{ $kw['keyword'] }}"
+                                        wire:click="openEditCategoryBudget({{ $cat['category_id'] }})"
+                                        title="Ubah batas kategori"
+                                        aria-label="Ubah batas kategori {{ $cat['name'] }}"
                                     >
-                                        <x-ti-edit class="size-3.5" />
+                                        <x-ti-pencil class="size-3.5" />
                                     </x-button.circle>
-                                    <x-button.circle
-                                        color="red"
-                                        flat
-                                        xs
-                                        wire:click="askDeleteKeyword({{ $kw['id'] }})"
-                                        title="Hapus kata kunci"
-                                        aria-label="Hapus {{ $kw['keyword'] }}"
-                                    >
-                                        <x-ti-trash class="size-3.5" />
-                                    </x-button.circle>
+                                @endif
+                            </div>
+                        </td>
+
+                        <td class="px-3 pb-0 pt-3 align-top">
+                            <span class="text-sm tabular-nums {{ $isOver ? 'font-semibold text-rose-700' : 'text-slate-700' }}">
+                                {{ $cat['formatted_limit'] }}
+                            </span>
+                        </td>
+
+                        <td class="px-3 pb-0 pt-3 align-top">
+                            <p class="text-sm font-semibold tabular-nums {{ $isOver ? 'text-rose-700' : 'text-slate-900' }}">
+                                {{ $cat['formatted_amount'] }}
+                            </p>
+                            @if ($isOver)
+                                <span class="mt-0.5 inline-flex items-center gap-1 text-xs font-semibold text-rose-700">
+                                    <x-ti-alert-triangle class="size-3" />
+                                    <span>Lewat {{ number_format($cat['over_amount'], 0, ',', '.') }}</span>
+                                </span>
+                            @endif
+                        </td>
+                    </tr>
+
+                    <tr class="{{ $isOver ? 'bg-rose-50' : 'bg-white' }}">
+                        <td colspan="3" class="px-3 pb-3 pt-1.5">
+                            <div class="flex items-center gap-2">
+                                <div class="h-1.5 flex-1 overflow-hidden rounded-full bg-slate-200/80">
+                                    <div
+                                        class="h-full rounded-full {{ $tone['bar'] }}"
+                                        style="width: {{ min(100, max(3, (float) $usage)) }}%"
+                                    ></div>
                                 </div>
-                            </td>
-                        </tr>
-                    @endforeach
-                </tbody>
-            </x-table>
+                                <span class="shrink-0 text-xs tabular-nums {{ $tone['text'] }}">
+                                    {{ $usageLabel }}%
+                                </span>
+                            </div>
+                        </td>
+                    </tr>
+                @endforeach
+            </tbody>
         @endif
-    </div>
+    </x-table>
+
+    {{-- Seksi Rekap per Kata Kunci di Keterangan --}}
+    <x-table flush>
+        <x-slot:header>
+            <div class="flex items-center justify-between gap-2">
+                <h2 class="text-sm font-semibold text-slate-900 sm:text-base">Rekap per Kata Kunci Keterangan</h2>
+
+                <x-button.circle
+                    color="rose"
+                    sm
+                    wire:click="openAddKeywordModal"
+                    title="Tambah Kata Kunci"
+                    aria-label="Tambah Kata Kunci"
+                >
+                    <x-ti-plus class="size-4" />
+                </x-button.circle>
+            </div>
+        </x-slot:header>
+
+        @if (empty($this->keywordRecap))
+            <x-slot:empty>
+                <div class="px-4 py-8 text-center text-xs text-slate-400">
+                    Belum ada kata kunci. Tambahkan kata kunci belanja (contoh: Beras, Skincare, Kopi) untuk memantau pengeluaran pos tersebut.
+                </div>
+            </x-slot:empty>
+        @else
+            <x-table.thead class="bg-slate-100">
+                <x-table.th label="Kata Kunci" width="55%" />
+                <x-table.th label="Batas" width="20%" />
+                <x-table.th label="Aktual" width="25%" />
+            </x-table.thead>
+
+            <tbody>
+                @foreach ($this->keywordRecap as $kw)
+                    @php
+                        $kwUsage = (float) ($kw['percentage'] ?? 0);
+                        $kwUsageLabel = $this->formatPercentage($kwUsage);
+                        $kwTone = $this->budgetTone($kwUsage, (float) ($kw['limit'] ?? 0));
+                    @endphp
+                    <tr
+                        class="transition-colors {{ $kw['is_over_limit'] ? 'bg-rose-50 hover:bg-rose-100/70' : 'bg-white hover:bg-slate-50' }}"
+                        wire:key="keyword-{{ $kw['id'] }}"
+                    >
+                        <td class="px-3 pb-0 pt-3 align-top">
+                            <div class="flex items-center gap-1.5">
+                                <span class="text-sm font-semibold {{ $kw['is_over_limit'] ? 'text-rose-900' : 'text-slate-900' }}">
+                                    {{ $kw['keyword'] }}
+                                </span>
+                                <x-button.circle
+                                    color="slate"
+                                    flat
+                                    xs
+                                    wire:click="openEditKeywordModal({{ $kw['id'] }})"
+                                    title="Ubah kata kunci"
+                                    aria-label="Ubah {{ $kw['keyword'] }}"
+                                >
+                                    <x-ti-pencil class="size-3.5" />
+                                </x-button.circle>
+                            </div>
+                        </td>
+
+                        <td class="px-3 pb-0 pt-3 align-top">
+                            <span class="text-sm tabular-nums {{ $kw['is_over_limit'] ? 'font-semibold text-rose-700' : 'text-slate-700' }}">
+                                {{ $kw['formatted_limit'] }}
+                            </span>
+                        </td>
+
+                        <td class="px-3 pb-0 pt-3 align-top">
+                            <p class="text-sm font-bold tabular-nums {{ $kw['is_over_limit'] ? 'text-rose-700' : 'text-slate-900' }}">
+                                {{ $kw['formatted_amount'] }}
+                            </p>
+                            @if ($kw['is_over_limit'])
+                                <span class="mt-0.5 inline-flex items-center gap-1 text-xs font-semibold text-rose-700">
+                                    <x-ti-alert-triangle class="size-3" />
+                                    <span>Lebih {{ number_format($kw['over_amount'], 0, ',', '.') }}</span>
+                                </span>
+                            @endif
+                        </td>
+                    </tr>
+
+                    <tr class="{{ $kw['is_over_limit'] ? 'bg-rose-50' : 'bg-white' }}">
+                        <td colspan="3" class="px-3 pb-3 pt-1.5">
+                            <div class="flex items-center gap-2">
+                                <div class="h-1.5 flex-1 overflow-hidden rounded-full bg-slate-200/80">
+                                    <div
+                                        class="h-full rounded-full {{ $kwTone['bar'] }}"
+                                        style="width: {{ min(100, max(3, $kwUsage)) }}%"
+                                    ></div>
+                                </div>
+                                <span class="shrink-0 text-xs tabular-nums {{ $kwTone['text'] }}">
+                                    {{ $kwUsageLabel }}%
+                                </span>
+                            </div>
+                        </td>
+                    </tr>
+                @endforeach
+            </tbody>
+        @endif
+    </x-table>
 
     {{-- Modal Tambah / Edit Kata Kunci Rekap --}}
     <x-modal wire="keywordModal" title="{{ $editingKeywordId ? 'Ubah Kata Kunci Rekap' : 'Tambah Kata Kunci Rekap Baru' }}">
@@ -292,11 +306,51 @@
                 hint="Jika total pengeluaran melebihi batas ini, baris tabel akan ditandai warna merah."
             />
 
+            <div class="space-y-2 pt-3 border-t border-slate-200">
+                <div class="flex items-center justify-end gap-2">
+                    <x-button color="slate" flat wire:click="$set('keywordModal', false)">Batal</x-button>
+                    <x-button submit color="rose" loading="saveKeyword">
+                        <x-ti-check class="size-4 mr-1" />
+                        Simpan Kata Kunci
+                    </x-button>
+                </div>
+
+                @if ($editingKeywordId)
+                    <x-button
+                        color="red"
+                        flat
+                        class="w-full"
+                        wire:click="askDeleteKeyword({{ $editingKeywordId }})"
+                    >
+                        <x-ti-trash class="size-4 mr-1" />
+                        Hapus Kata Kunci
+                    </x-button>
+                @endif
+            </div>
+        </form>
+    </x-modal>
+
+    {{-- Modal Batas Anggaran Kategori --}}
+    <x-modal wire="categoryBudgetModal" title="Ubah Batas Kategori">
+        <form wire:submit="saveCategoryBudget" class="space-y-4">
+            <p class="text-sm font-semibold text-slate-900">{{ $editingCategoryName }}</p>
+
+            <x-currency
+                label="Batas Anggaran / Limit (Opsional)"
+                placeholder="0 (Tanpa batas)"
+                wire:model="category_budget_limit"
+                locale="id-ID"
+                symbol=""
+                :decimals="0"
+                :precision="0"
+                hint="Kosongkan bila kategori ini tidak memiliki batas anggaran."
+            />
+
             <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-200">
-                <x-button color="slate" flat wire:click="$set('keywordModal', false)">Batal</x-button>
-                <x-button submit color="rose" loading="saveKeyword">
+                <x-button color="slate" flat wire:click="$set('categoryBudgetModal', false)">Batal</x-button>
+                <x-button submit color="rose" loading="saveCategoryBudget">
                     <x-ti-check class="size-4 mr-1" />
-                    Simpan Kata Kunci
+                    Simpan Batas
                 </x-button>
             </div>
         </form>
