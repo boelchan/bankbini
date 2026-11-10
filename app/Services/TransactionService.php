@@ -318,6 +318,110 @@ class TransactionService
     }
 
     /**
+     * Memperbarui transaksi pemasukan/pengeluaran dan menyesuaikan saldo kantong secara atomik.
+     * Transaksi pindah uang (transfer) tidak dapat diubah melalui metode ini.
+     *
+     * @param array<string, mixed> $data
+     */
+    public function updateTransaction(int $transactionId, array $data): Transaction
+    {
+        return DB::transaction(function () use ($transactionId, $data): Transaction {
+            $transaction = Transaction::query()
+                ->lockForUpdate()
+                ->findOrFail($transactionId);
+
+            if (in_array($transaction->type, [TransactionTypeEnum::TRANSFER_IN, TransactionTypeEnum::TRANSFER_OUT], true)
+                || !empty($transaction->transfer_reference)) {
+                throw new DomainException('Transaksi pindah uang tidak dapat diubah. Hapus lalu catat ulang jika perlu.');
+            }
+
+            $newAmount = round((float) ($data['amount'] ?? $transaction->amount), 2);
+            if ($newAmount <= 0) {
+                throw new DomainException('Nominal transaksi harus lebih besar dari nol.');
+            }
+
+            $newDescription = trim((string) ($data['description'] ?? $transaction->description));
+            if ($newDescription === '') {
+                throw new DomainException('Keterangan transaksi wajib diisi.');
+            }
+
+            $wallet = Wallet::query()
+                ->withTrashed()
+                ->lockForUpdate()
+                ->findOrFail($transaction->wallet_id);
+
+            $this->assertWalletCanTransact($wallet, 'mengubah transaksi');
+
+            $oldAmount = round((float) $transaction->amount, 2);
+            $currentBalance = round((float) $wallet->balance, 2);
+
+            if ($transaction->type === TransactionTypeEnum::EXPENSE) {
+                $balanceAfterReversal = round($currentBalance + $oldAmount, 2);
+                if ($balanceAfterReversal < $newAmount) {
+                    throw new DomainException(
+                        sprintf(
+                            'Saldo pada %s tidak mencukupi untuk nominal baru sebesar Rp%s.',
+                            $wallet->name,
+                            number_format($newAmount, 0, ',', '.')
+                        )
+                    );
+                }
+                $newBalance = round($balanceAfterReversal - $newAmount, 2);
+            } else {
+                $balanceAfterReversal = round($currentBalance - $oldAmount, 2);
+                if ($balanceAfterReversal < 0) {
+                    throw new DomainException(
+                        sprintf(
+                            'Perubahan nominal tidak dapat dilakukan karena saldo %s akan menjadi minus.',
+                            $wallet->name
+                        )
+                    );
+                }
+                $newBalance = round($balanceAfterReversal + $newAmount, 2);
+            }
+
+            $wallet->update([
+                'balance' => number_format($newBalance, 2, '.', ''),
+            ]);
+
+            $category = null;
+            if (array_key_exists('category_id', $data)) {
+                $categoryType = $transaction->type === TransactionTypeEnum::EXPENSE
+                    ? CategoryTypeEnum::EXPENSE->value
+                    : CategoryTypeEnum::INCOME->value;
+                $categoryId = $data['category_id'];
+                if (!empty($categoryId)) {
+                    $category = TransactionCategory::query()
+                        ->where('type', $categoryType)
+                        ->find((int) $categoryId);
+                }
+            } else {
+                $category = $transaction->category;
+            }
+
+            $transactionDate = !empty($data['transaction_date'])
+                ? Carbon::parse($data['transaction_date'])
+                : $transaction->transaction_date;
+
+            $notes = array_key_exists('notes', $data)
+                ? (trim((string) ($data['notes'] ?? '')) !== '' ? trim((string) $data['notes']) : null)
+                : $transaction->notes;
+
+            $transaction->update([
+                'category_id' => $category?->id,
+                'category_name_snapshot' => $category?->name ?? ($transaction->category_name_snapshot ?: 'Lainnya'),
+                'amount' => number_format($newAmount, 2, '.', ''),
+                'balance_after' => number_format($newBalance, 2, '.', ''),
+                'description' => $newDescription,
+                'notes' => $notes,
+                'transaction_date' => $transactionDate,
+            ]);
+
+            return $transaction->refresh();
+        });
+    }
+
+    /**
      * Alias untuk pencatatan transaksi pemasukan baru (kompatibilitas alur pembuatan transaksi).
      *
      * @param array<string, mixed> $data

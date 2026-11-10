@@ -73,6 +73,15 @@ class extends Component
     public string $transfer_date = '';
     public string $transfer_description = '';
 
+    /* Form Ubah Transaksi (pemasukan/pengeluaran) */
+    public bool $editModal = false;
+    public ?int $editTransactionId = null;
+    public string $edit_type = '';
+    public ?int $edit_category_id = null;
+    public string|int|float $edit_amount = '';
+    public string $edit_date = '';
+    public string $edit_description = '';
+
     /**
      * Inisialisasi komponen.
      */
@@ -492,6 +501,90 @@ class extends Component
                 ? (collect($e->errors())->flatten()->first() ?? 'Gagal memindahkan uang.')
                 : $e->getMessage();
             $this->addError('transfer_amount', $msg);
+        }
+    }
+
+    /**
+     * Mengambil opsi kategori sesuai jenis transaksi yang sedang diubah.
+     *
+     * @return array<int, array{label: string, value: int}>
+     */
+    #[Computed]
+    public function editCategoryOptions(): array
+    {
+        $type = $this->edit_type === TransactionTypeEnum::EXPENSE->value
+            ? CategoryTypeEnum::EXPENSE
+            : CategoryTypeEnum::INCOME;
+
+        return TransactionCategory::query()
+            ->where('type', $type)
+            ->orderBy('name')
+            ->get()
+            ->map(fn (TransactionCategory $cat): array => [
+                'label' => $cat->name,
+                'value' => $cat->id,
+            ])
+            ->all();
+    }
+
+    /**
+     * Membuka modal ubah transaksi pemasukan/pengeluaran.
+     */
+    public function openEditTransaction(int $transactionId): void
+    {
+        $tx = Transaction::query()->find($transactionId);
+        if ($tx === null) {
+            return;
+        }
+
+        if (in_array($tx->type, [TransactionTypeEnum::TRANSFER_IN, TransactionTypeEnum::TRANSFER_OUT], true)
+            || !empty($tx->transfer_reference)) {
+            $this->toast()->warning('Tidak Bisa Diubah', 'Transaksi pindah uang tidak dapat diubah. Hapus lalu catat ulang jika perlu.')->send();
+            return;
+        }
+
+        $this->resetValidation();
+        $this->editTransactionId = $tx->id;
+        $this->edit_type = $tx->type instanceof TransactionTypeEnum ? $tx->type->value : (string) $tx->type;
+        $this->edit_category_id = $tx->category_id;
+        $this->edit_amount = (float) $tx->amount;
+        $this->edit_date = $tx->transaction_date?->format('Y-m-d\TH:i') ?? now()->format('Y-m-d\TH:i');
+        $this->edit_description = (string) $tx->description;
+        unset($this->editCategoryOptions);
+        $this->editModal = true;
+    }
+
+    /**
+     * Menyimpan perubahan transaksi pemasukan/pengeluaran.
+     */
+    public function saveEditTransaction(TransactionService $transactionService): void
+    {
+        $validated = $this->validate([
+            'editTransactionId' => ['required', 'integer'],
+            'edit_category_id' => ['nullable', 'integer'],
+            'edit_amount' => ['required', 'numeric', 'gt:0'],
+            'edit_date' => ['required', 'date'],
+            'edit_description' => ['required', 'string', 'max:190'],
+        ], [
+            'edit_amount.required' => 'Nominal transaksi wajib diisi.',
+            'edit_amount.gt' => 'Nominal harus lebih besar dari Rp0.',
+            'edit_description.required' => 'Keterangan transaksi wajib diisi.',
+            'edit_date.required' => 'Tanggal transaksi wajib diisi.',
+        ]);
+
+        try {
+            $transactionService->updateTransaction((int) $validated['editTransactionId'], [
+                'category_id' => $validated['edit_category_id'] ? (int) $validated['edit_category_id'] : null,
+                'amount' => $validated['edit_amount'],
+                'transaction_date' => $validated['edit_date'],
+                'description' => $validated['edit_description'],
+            ]);
+
+            $this->editModal = false;
+            unset($this->transactions, $this->activeWalletOptions, $this->otherActiveWalletOptions);
+            $this->toast()->success('Transaksi Diperbarui', 'Perubahan transaksi berhasil disimpan.')->send();
+        } catch (\DomainException $e) {
+            $this->addError('edit_amount', $e->getMessage());
         }
     }
 

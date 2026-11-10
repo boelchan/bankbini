@@ -10,22 +10,21 @@ Aplikasi menggunakan **3 menu utama** yang intuitif, ramah, dan terstruktur untu
 1. **Home (`/home`)**:
    - Menampilkan **detail lengkap Kantong Utama** keluarga yang menjadi rekening operasional harian.
    - Dilengkapi kartu saldo utama, statistik total uang masuk & keluar, serta tombol aksi cepat (**+ Masuk**, **- Keluar**, **⇄ Pindah**) yang melayang di ponsel.
-   - Menampilkan histori mutasi kantong utama lengkap dengan kartu filter: chip cepat aliran dana (**Semua / Masuk / Keluar / Pindah**), pencarian keterangan, filter bulan, jenis transaksi, kategori, serta tombol reset. Transaksi dikelompokkan per tanggal.
+   - Menampilkan histori mutasi kantong utama lengkap dengan kartu filter: chip cepat aliran dana (**Semua / Masuk / Keluar / Pindah**), pencarian keterangan, filter bulan, jenis transaksi, kategori, serta tombol reset. Transaksi dikelompokkan per tanggal. Setiap transaksi dapat **dihapus** (saldo kantong dipulihkan otomatis); transaksi **pemasukan/pengeluaran** juga dapat **diubah** (nominal, tanggal, keterangan, kategori), sedangkan transaksi pindah/terima uang hanya dapat dihapus karena berdampak pada dua kantong.
    - Responsif ganda: kartu daftar mutasi mobile di smartphone (`sm:hidden`) dan tabel multi-kolom di desktop (`hidden sm:block`).
 
 2. **Kantong (`/pockets`)**:
    - Menampilkan **daftar seluruh kantong-kantong keluarga** (*Pocket Grid*).
    - Menampilkan ringkasan metrik saldo: Total Seluruh Saldo, Pemasukan Bulan Ini, dan Pengeluaran Bulan Ini.
-   - Kotak-kotak kantong dengan warna pastel manis (*playful candy colors*), status khusus **Kantong Utama** (`is_primary`), saldo kantong, dan 3 transaksi terakhir (bisa di-*expand* hingga 100 baris).
-   - Tombol pensil (*Catat Transaksi*) dan tombol titik tiga (*Detail Kantong*).
+   - Kotak-kotak kantong dengan warna pastel manis (*playful candy colors*) tersusun **2 kolom** di semua ukuran layar. Setiap kotak hanya menampilkan nama kantong dan saldo; mengetuk kotak membuka halaman detail kantong.
    - Tombol **Tambah Kantong Baru** di header halaman untuk membuat pos anggaran baru.
 
 3. **Rekap (`/recap`)**:
    - Halaman khusus rekapitulasi — **tanpa pencatatan transaksi** dan **tanpa daftar mutasi**; fokus hanya pada ringkasan dan analisis.
    - Ringkasan metrik: Total Pemasukan, Total Pengeluaran, dan Arus Kas Bersih (*Net Cashflow*).
    - **Filter Rekap Berbasis Bulan & Kantong**: Seluruh rekap mengikuti filter bulan dan kantong yang dipilih.
-   - **Rekap per Kategori & Batas Anggaran (Limit)**: Menyajikan distribusi alokasi pengeluaran dan pemasukan per kategori. Setiap kategori dapat ditetapkan batas atas anggaran (*budget limit*); bila pengeluaran melampaui batas tersebut, kartu kategori otomatis ditandai **merah peringatan**.
-   - **Rekap per Kata Kunci (Keyword) Keterangan**: Pengguna dapat menyimpan kata kunci belanja khusus (seperti *Beras*, *Skincare*, *Bensin*, *Kopi*, *Listrik*) yang tersimpan permanen di database. Setiap kata kunci memiliki batas atas anggaran; bila total mutasi dengan kata kunci tersebut melampaui batas, kartu otomatis ditandai **merah**.
+   - **Rekap per Kategori & Batas Anggaran (Limit)**: Menyajikan distribusi alokasi pengeluaran dan pemasukan per kategori. Setiap kategori dapat ditetapkan batas atas anggaran (*budget limit*); bila pengeluaran melampaui batas tersebut, baris kategori otomatis ditandai **merah peringatan**.
+   - **Rekap per Kata Kunci (Keyword) Keterangan**: Pengguna dapat menyimpan kata kunci belanja khusus (seperti *Beras*, *Skincare*, *Bensin*, *Kopi*, *Listrik*) yang tersimpan permanen di database. Setiap kata kunci memiliki batas atas anggaran; rekap disajikan sebagai tabel yang bisa diubah dan dihapus per baris, dan baris otomatis ditandai **merah** bila total mutasi dengan kata kunci tersebut melampaui batas.
 
 4. **Pengaturan Akun & Kategori (`/account`)**:
    - Pengguna dapat menambah, **mengubah (edit)**, dan **menghapus kategori transaksi**, termasuk menentukan nama, jenis (*income/expense*), ikon, warna, dan **batas atas anggaran (budget limit)** untuk setiap kategori.
@@ -34,14 +33,14 @@ Aplikasi menggunakan **3 menu utama** yang intuitif, ramah, dan terstruktur untu
 *(Catatan: Rute URL `/dashboard` dan `/transactions` tetap didukung melalui pengalihan/redirect otomatis ke `/home` dan `/recap` demi kompatibilitas).*
 
 ## 3. Halaman Detail Kantong (`/pockets/{wallet}`)
-Diakses melalui tombol **Detail** pada kotak kantong di Dashboard:
+Diakses dengan mengetuk kotak kantong pada halaman **Kantong**:
 - Menampilkan informasi kantong, status (`Aktif` / `Dibekukan`), total uang masuk, total uang keluar, dan saldo saat ini.
 - Menyediakan 3 tombol transaksi utama untuk kantong tersebut (melayang di bagian bawah ponsel):
   1. **+ Masuk**: Pilih sumber uang dari **Pemasukan Baru (Langsung)** atau **Ambil dari Kantong Lain**.
   2. **- Keluar**: Catat pengeluaran dari kantong ini.
   3. **⇄ Pindah**: Pindahkan saldo dari kantong ini ke kantong aktif lain.
 - Menyediakan tombol pengelolaan kantong: **Ubah Kantong**, **Bekukan / Aktifkan**, dan **Hapus Kantong** (wajib memindahkan sisa saldo ke kantong lain bila saldo > Rp0).
-- Menampilkan tabel **Histori Masuk & Keluar Kantong** beserta saldo sebelum dan sesudah transaksi tanpa kode TRX, lengkap dengan filter bulan transaksi, filter cepat aliran dana (Semua / Masuk / Keluar / Pindah), filter jenis transaksi, filter kategori, pencarian keterangan, tombol reset filter, serta daftar transaksi yang dikelompokkan per tanggal.
+- Menampilkan **Histori Masuk & Keluar Kantong** tanpa kode TRX, lengkap dengan filter bulan transaksi, filter cepat aliran dana (Semua / Masuk / Keluar / Pindah), filter jenis transaksi, filter kategori, pencarian keterangan, tombol reset filter, serta daftar transaksi yang dikelompokkan per tanggal. Setiap transaksi dapat **dihapus** (saldo dikembalikan) dan transaksi **pemasukan/pengeluaran** dapat **diubah** (nominal, tanggal, keterangan, kategori); transaksi pindah/terima uang hanya dapat dihapus agar pasangan antar kantong tetap konsisten.
 
 ## 4. Integritas Keuangan & Database
 - Seluruh perubahan saldo diproses melalui backend service (`WalletService`, `TransactionService`, `TransferService`) di dalam `DB::transaction` dengan penguncian baris `SELECT ... FOR UPDATE` (`lockForUpdate()`).
@@ -52,7 +51,7 @@ Diakses melalui tombol **Detail** pada kotak kantong di Dashboard:
 ## 5. Pengoptimalan Tampilan Mobile First (Smartphone Utama)
 Karena aplikasi utamanya digunakan langsung dari smartphone (HP) oleh istri:
 - **Riwayat Transaksi Responsif**:
-  - Di layar ponsel (`sm:hidden`): Riwayat transaksi disajikan dalam bentuk daftar kartu transaksi vertikal yang padat, rapi, dan mudah dibaca tanpa perlu geser layar ke kanan (*no horizontal scroll fatigue*), menampilkan tanggal & waktu, nominal berwarna tebal (`+Rp...` / `-Rp...`), nama kantong dengan swatch warna, badge jenis/kategori, dan sisa saldo kantong.
+  - Di layar ponsel (`sm:hidden`): Riwayat transaksi disajikan dalam bentuk daftar kartu transaksi vertikal yang padat, rapi, dan mudah dibaca tanpa perlu geser layar ke kanan (*no horizontal scroll fatigue*), menampilkan tanggal & waktu, nominal berwarna tebal (`+Rp...` / `-Rp...`), nama kantong dengan swatch warna, badge jenis/kategori, serta aksi ubah/hapus transaksi.
   - Di tablet dan desktop (`hidden sm:block`): Tetap menyajikan data table lengkap multi-kolom.
 - **Toolbar & Filter Ramah Sentuhan**:
   - Tombol filter cepat (*quick pills*) pada riwayat transaksi dan detail kantong mendukung *horizontal swipe* yang mulus di ponsel tanpa memakan ruang vertikal.

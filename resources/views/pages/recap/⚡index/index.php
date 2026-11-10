@@ -166,6 +166,24 @@ class extends Component
     }
 
     /**
+     * Menampilkan dialog konfirmasi hapus kata kunci.
+     */
+    public function askDeleteKeyword(int $id): void
+    {
+        $keyword = RecapKeyword::find($id);
+
+        if (!$keyword) {
+            return;
+        }
+
+        $this->dialog()
+            ->question('Hapus Kata Kunci Ini?', sprintf('Kata kunci "%s" akan dihapus dari rekap.', $keyword->keyword))
+            ->confirm('Ya, Hapus', 'deleteKeyword', $id)
+            ->cancel('Batal')
+            ->send();
+    }
+
+    /**
      * Menghapus kata kunci dari database.
      */
     public function deleteKeyword(int $id): void

@@ -1,97 +1,91 @@
-<div>
-    @push('styles')
-    <style>
-        .bankbini-login-bg {
-            background-color: #fffbfa;
-            background-image:
-                radial-gradient(ellipse 70% 50% at 50% 0%, rgba(244, 63, 94, 0.10) 0%, rgba(251, 113, 133, 0.08) 50%, transparent 80%);
-        }
-    </style>
-    @endpush
+<div class="relative flex min-h-[calc(100dvh-10rem)] items-center justify-center px-4 py-8 lg:min-h-[calc(100dvh-7rem)]">
+    <div class="w-full max-w-sm">
+        {{-- Sapaan hangat bersama maskot dompet --}}
+        <div class="mb-5 flex items-center gap-3 px-1">
+            <svg class="size-20 shrink-0" viewBox="0 0 96 96" fill="none" aria-hidden="true">
+                <ellipse cx="48" cy="86" rx="27" ry="4.5" fill="#fecdd3" opacity="0.7" />
 
-    <div class="bankbini-login-bg relative min-h-screen flex items-center justify-center p-4 py-12">
-        <div class="w-full max-w-md">
-            <!-- Identitas Brand Bank BINI -->
-            <div class="mb-6 text-center">
-                <div class="inline-flex items-center justify-center size-16 rounded-2xl bg-rose-100 text-rose-700 border border-rose-200 shadow-xs mb-3.5">
-                    <x-ti-wallet class="size-8" />
-                </div>
+                {{-- Hati kecil yang melayang --}}
+                <path d="M82 24c-2-1.4-5-3.4-5-6.2 0-1.7 1.3-3 3-3 .9 0 1.6.4 2 1 .4-.6 1.1-1 2-1 1.7 0 3 1.3 3 3 0 2.8-3 4.8-5 6.2Z" fill="#fda4af" />
+                <path d="M17 29c-1.5-1-3.6-2.5-3.6-4.5 0-1.2.9-2.1 2.1-2.1.6 0 1.1.3 1.5.7.3-.4.8-.7 1.4-.7 1.2 0 2.1.9 2.1 2.1 0 2-2.1 3.5-3.5 4.5Z" fill="#fecdd3" />
 
-                <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-50 border border-rose-200 text-rose-800 text-xs font-semibold mb-2">
-                    <x-ti-heart class="size-3.5 text-rose-600" />
-                    <span>Dompet Manis Keluarga</span>
-                </div>
+                {{-- Badan dompet --}}
+                <rect x="12" y="32" width="72" height="52" rx="16" fill="#fecdd3" stroke="#fb7185" stroke-width="2.5" />
+                <path d="M12 48c0-9 7-16 16-16h40c9 0 16 7 16 16v2H12v-2Z" fill="#fda4af" />
+                <path d="M12 50h72" stroke="#fb7185" stroke-width="2.5" stroke-linecap="round" />
 
-                <h1 class="text-2xl font-bold tracking-tight text-slate-900">
-                    Bank BINI
+                {{-- Kancing berbentuk hati --}}
+                <path d="M48 56.5c-1.8-1.3-4.8-3.3-4.8-6.2 0-1.7 1.3-3 2.9-3 1.1 0 1.9.5 2.4 1.2.4-.7 1.2-1.2 2.3-1.2 1.6 0 2.9 1.3 2.9 3 0 2.9-3 4.9-5.7 6.2Z" fill="#e11d48" />
+
+                {{-- Wajah lucu --}}
+                <path d="M31 64.5c1.7 2.2 4.3 2.2 6 0" stroke="#881337" stroke-width="2.4" stroke-linecap="round" />
+                <path d="M51 64.5c1.7 2.2 4.3 2.2 6 0" stroke="#881337" stroke-width="2.4" stroke-linecap="round" />
+                <path d="M41 71.5c2.3 3 7.7 3 10 0" stroke="#881337" stroke-width="2.4" stroke-linecap="round" />
+                <circle cx="27.5" cy="70.5" r="3.4" fill="#fda4af" />
+                <circle cx="68.5" cy="70.5" r="3.4" fill="#fda4af" />
+            </svg>
+
+            <div class="min-w-0">
+                <h1 class="flex items-center gap-1.5 text-2xl font-extrabold tracking-tight text-slate-900">
+                    <span>Hai, Bini!</span>
+                    <x-ti-heart class="size-5 shrink-0 text-rose-500" aria-hidden="true" />
                 </h1>
-                <p class="text-sm text-slate-600 mt-1">
-                    Kelola saldo, kantong belanja, dan tabungan impian dengan rapi dan menyenangkan.
+                <p class="mt-0.5 text-sm text-slate-600">
+                    Dompet manis keluarga siap dibuka.
                 </p>
             </div>
-
-            <!-- Kartu Masuk -->
-            <x-card class="bg-white border border-rose-200/80 shadow-xs rounded-2xl">
-                <div class="mb-5 pb-3.5 border-b border-slate-100">
-                    <h2 class="text-base font-bold text-slate-900 flex items-center gap-2">
-                        <x-ti-sparkles class="size-5 text-rose-600" />
-                        <span>Selamat Datang Kembali</span>
-                    </h2>
-                    <p class="text-xs text-slate-600 mt-1">
-                        Masukkan alamat email dan kata sandi untuk membuka kantong keuangan Anda.
-                    </p>
-                </div>
-
-                @if (session('error'))
-                    <div class="mb-4">
-                        <x-alert color="red" light :text="session('error')" />
-                    </div>
-                @endif
-
-                <form class="space-y-4" wire:submit="authenticate">
-                    <div>
-                        <x-input
-                            type="email"
-                            label="Alamat Email"
-                            placeholder="istri@bankbini.id"
-                            wire:model="email"
-                        />
-                    </div>
-
-                    <div>
-                        <x-password
-                            label="Kata Sandi"
-                            placeholder="Masukkan kata sandi"
-                            wire:model="password"
-                        />
-                    </div>
-
-                    <div class="flex items-center justify-between pt-1">
-                        <x-checkbox
-                            label="Ingat sesi saya di perangkat ini"
-                            wire:model="remember"
-                            color="rose"
-                        />
-                    </div>
-
-                    <div class="pt-2">
-                        <x-button
-                            submit
-                            color="rose"
-                            loading="authenticate"
-                            class="w-full justify-center text-sm font-semibold py-2.5 rounded-xl cursor-pointer"
-                        >
-                            <x-ti-login-2 class="size-4 mr-1.5" />
-                            <span>Buka Dompet Saya</span>
-                        </x-button>
-                    </div>
-                </form>
-
-            </x-card>
-
-            <p class="mt-5 text-center text-xs text-slate-500">
-                &copy; {{ date('Y') }} Bank BINI &bull; Pencatatan Kantong Keuangan Rumah Tangga
-            </p>
         </div>
+
+        {{-- Kartu Masuk --}}
+        <x-card>
+            <div class="mb-5">
+                <h2 class="text-base font-bold text-slate-900">Masuk ke dompet</h2>
+                <p class="mt-1 text-sm text-slate-600">Isi email dan kata sandi, ya.</p>
+            </div>
+
+            @if (session('error'))
+                <div class="mb-4">
+                    <x-alert color="red" light :text="session('error')" />
+                </div>
+            @endif
+
+            <form class="space-y-4" wire:submit="authenticate">
+                <x-input
+                    type="email"
+                    label="Alamat Email"
+                    placeholder="nama@email.com"
+                    wire:model="email"
+                />
+
+                <x-password
+                    label="Kata Sandi"
+                    placeholder="Masukkan kata sandi"
+                    wire:model="password"
+                />
+
+                <x-checkbox
+                    label="Ingat aku di perangkat ini"
+                    wire:model="remember"
+                    color="rose"
+                />
+
+                <div class="pt-1">
+                    <x-button
+                        submit
+                        color="rose"
+                        loading="authenticate"
+                        class="w-full justify-center rounded-xl py-2.5 text-sm font-semibold cursor-pointer"
+                    >
+                        <x-ti-lock-open class="mr-1.5 size-4" aria-hidden="true" />
+                        <span>Buka Dompet</span>
+                    </x-button>
+                </div>
+            </form>
+        </x-card>
+
+        <p class="mt-4 flex items-center justify-center gap-1.5 text-xs text-slate-500">
+            <x-ti-shield-lock class="size-3.5 text-rose-400" aria-hidden="true" />
+            <span>Aman, cuma kamu yang bisa buka.</span>
+        </p>
     </div>
 </div>

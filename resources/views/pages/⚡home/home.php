@@ -63,6 +63,15 @@ class extends Component
     public string $transfer_date = '';
     public string $transfer_description = '';
 
+    /* Form Ubah Transaksi (pemasukan/pengeluaran) */
+    public bool $editTransactionModal = false;
+    public ?int $editTransactionId = null;
+    public string $edit_tx_type = '';
+    public ?int $edit_tx_category_id = null;
+    public string|int|float $edit_tx_amount = '';
+    public string $edit_tx_date = '';
+    public string $edit_tx_description = '';
+
     /**
      * Inisialisasi halaman Home dengan kantong utama keluarga.
      */
@@ -330,19 +339,119 @@ class extends Component
     }
 
     /**
-     * Konfirmasi hapus transaksi terakhir.
+     * Opsi kategori sesuai jenis transaksi yang sedang diubah.
+     *
+     * @return array<int, array{label: string, value: int}>
+     */
+    #[Computed]
+    public function editTxCategoryOptions(): array
+    {
+        $type = $this->edit_tx_type === TransactionTypeEnum::EXPENSE->value
+            ? CategoryTypeEnum::EXPENSE
+            : CategoryTypeEnum::INCOME;
+
+        return TransactionCategory::query()
+            ->where('type', $type)
+            ->orderBy('name')
+            ->get()
+            ->map(fn (TransactionCategory $c): array => [
+                'label' => $c->name,
+                'value' => $c->id,
+            ])
+            ->values()
+            ->all();
+    }
+
+    /**
+     * Membuka modal ubah transaksi pemasukan/pengeluaran.
+     */
+    public function openEditTransaction(int $transactionId): void
+    {
+        $tx = Transaction::query()
+            ->where('wallet_id', $this->wallet->id)
+            ->find($transactionId);
+
+        if ($tx === null) {
+            return;
+        }
+
+        if (in_array($tx->type, [TransactionTypeEnum::TRANSFER_IN, TransactionTypeEnum::TRANSFER_OUT], true)
+            || !empty($tx->transfer_reference)) {
+            $this->toast()->warning('Tidak Bisa Diubah', 'Transaksi pindah uang tidak dapat diubah. Hapus lalu catat ulang jika perlu.');
+            return;
+        }
+
+        $this->resetValidation();
+        $this->editTransactionId = $tx->id;
+        $this->edit_tx_type = $tx->type instanceof TransactionTypeEnum ? $tx->type->value : (string) $tx->type;
+        $this->edit_tx_category_id = $tx->category_id;
+        $this->edit_tx_amount = (float) $tx->amount;
+        $this->edit_tx_date = $tx->transaction_date?->format('Y-m-d\TH:i') ?? now()->format('Y-m-d\TH:i');
+        $this->edit_tx_description = (string) $tx->description;
+        unset($this->editTxCategoryOptions);
+        $this->editTransactionModal = true;
+    }
+
+    /**
+     * Menyimpan perubahan transaksi pemasukan/pengeluaran.
+     */
+    public function saveEditTransaction(TransactionService $transactionService): void
+    {
+        $validated = $this->validate([
+            'editTransactionId' => ['required', 'integer'],
+            'edit_tx_category_id' => ['nullable', 'integer'],
+            'edit_tx_amount' => ['required', 'numeric', 'gt:0'],
+            'edit_tx_date' => ['required', 'date'],
+            'edit_tx_description' => ['required', 'string', 'max:190'],
+        ], [
+            'edit_tx_amount.required' => 'Nominal transaksi wajib diisi.',
+            'edit_tx_amount.gt' => 'Nominal harus lebih besar dari Rp0.',
+            'edit_tx_description.required' => 'Keterangan transaksi wajib diisi.',
+            'edit_tx_date.required' => 'Tanggal transaksi wajib diisi.',
+        ]);
+
+        try {
+            $transactionService->updateTransaction((int) $validated['editTransactionId'], [
+                'category_id' => $validated['edit_tx_category_id'] ? (int) $validated['edit_tx_category_id'] : null,
+                'amount' => $validated['edit_tx_amount'],
+                'transaction_date' => $validated['edit_tx_date'],
+                'description' => $validated['edit_tx_description'],
+            ]);
+
+            $this->editTransactionModal = false;
+            $this->wallet->refresh();
+            unset($this->transactions, $this->walletStats);
+            $this->toast()->success('Berhasil!', 'Transaksi berhasil diperbarui.');
+        } catch (\Throwable $e) {
+            $this->addError('edit_tx_amount', $e->getMessage());
+        }
+    }
+
+    /**
+     * Konfirmasi hapus transaksi.
      */
     public function askDeleteTransaction(int $transactionId): void
     {
+        $tx = Transaction::query()->where('wallet_id', $this->wallet->id)->find($transactionId);
+        if ($tx === null) {
+            return;
+        }
+
+        $isTransfer = in_array($tx->type, [TransactionTypeEnum::TRANSFER_IN, TransactionTypeEnum::TRANSFER_OUT], true)
+            || !empty($tx->transfer_reference);
+        $description = $isTransfer
+            ? 'Transaksi pindah/terima uang ini beserta pasangannya akan dihapus dan saldo dikembalikan.'
+            : 'Transaksi akan dibatalkan dan saldo kantong akan dipulihkan secara otomatis.';
+
         $this->dialog()
-            ->question('Hapus Transaksi Ini?', 'Transaksi akan dibatalkan dan saldo kantong akan dipulihkan secara otomatis.')
+            ->question('Hapus Transaksi Ini?', $description)
             ->confirm('Ya, Hapus', 'confirmDeleteTransaction', $transactionId)
             ->cancel('Batal')
             ->send();
     }
 
     /**
-     * Eksekusi hapus transaksi terakhir.
+     * Eksekusi hapus transaksi.
      */
     public function confirmDeleteTransaction(int $transactionId, TransactionService $transactionService): void
     {
@@ -353,6 +462,7 @@ class extends Component
 
             $transactionService->deleteTransaction($transaction->id);
             $this->wallet->refresh();
+            unset($this->transactions, $this->walletStats);
             $this->toast()->success('Dihapus!', 'Transaksi berhasil dihapus dan saldo telah diperbarui.');
         } catch (\Throwable $e) {
             $this->toast()->error('Gagal!', $e->getMessage());

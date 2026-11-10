@@ -194,21 +194,27 @@
                                             @endif
                                         </div>
 
-                                        {{-- Kanan: Saldo Sisa Sesudah Transaksi --}}
-                                        <div class="flex items-center gap-2 shrink-0">
-                                            <span class="hidden sm:inline text-slate-400">Sisa:</span>
-                                            <span class="font-medium text-slate-600 tabular-nums">{{ $tx->formattedBalanceAfter() }}</span>
-                                            @if ($loop->parent->first && $loop->first && $this->transactions->currentPage() === 1)
+                                        <div class="flex items-center gap-1 shrink-0">
+                                            @if (! in_array($tx->type, [\App\Enums\TransactionTypeEnum::TRANSFER_IN, \App\Enums\TransactionTypeEnum::TRANSFER_OUT], true) && empty($tx->transfer_reference))
                                                 <button
                                                     type="button"
-                                                    wire:click="askDeleteTransaction({{ $tx->id }})"
-                                                    class="text-slate-400 hover:text-rose-600 p-0.5 rounded transition-colors cursor-pointer"
-                                                    title="Hapus Transaksi Terakhir"
-                                                    aria-label="Hapus transaksi terakhir {{ $tx->displayDescription() }}"
+                                                    wire:click="openEditTransaction({{ $tx->id }})"
+                                                    class="text-slate-400 hover:text-slate-700 p-0.5 rounded transition-colors cursor-pointer"
+                                                    title="Ubah Transaksi"
+                                                    aria-label="Ubah transaksi {{ $tx->displayDescription() }}"
                                                 >
-                                                    <x-ti-trash class="size-3.5" />
+                                                    <x-ti-edit class="size-3.5" />
                                                 </button>
                                             @endif
+                                            <button
+                                                type="button"
+                                                wire:click="askDeleteTransaction({{ $tx->id }})"
+                                                class="text-slate-400 hover:text-rose-600 p-0.5 rounded transition-colors cursor-pointer"
+                                                title="Hapus Transaksi"
+                                                aria-label="Hapus transaksi {{ $tx->displayDescription() }}"
+                                            >
+                                                <x-ti-trash class="size-3.5" />
+                                            </button>
                                         </div>
                                     </div>
 
@@ -386,6 +392,47 @@
             <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-200">
                 <x-button color="slate" flat wire:click="$set('transferModal', false)">Batal</x-button>
                 <x-button submit color="rose" loading="saveTransfer">Kirim Uang</x-button>
+            </div>
+        </form>
+    </x-modal>
+
+    {{-- Modal Ubah Transaksi --}}
+    <x-modal wire="editTransactionModal" :title="$edit_tx_type === 'expense' ? 'Ubah Pengeluaran' : 'Ubah Pemasukan'" size="lg">
+        <form wire:submit="saveEditTransaction" class="space-y-4">
+            <x-radio.group
+                id="home-edit-tx-category"
+                wire:model.live="edit_tx_category_id"
+                card
+                :columns="3"
+                :color="$edit_tx_type === 'expense' ? 'rose' : 'emerald'"
+                :options="$this->editTxCategoryOptions"
+                class="[&>div]:!grid-cols-3 [&>div]:gap-2 sm:[&>div]:gap-3 [&_label]:p-2.5 sm:[&_label]:p-3.5 [&_label]:rounded-xl [&_input]:sr-only"
+            />
+
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <x-currency
+                    wire:model="edit_tx_amount"
+                    locale="id-ID"
+                    symbol=""
+                    :decimals="0"
+                    :precision="0"
+                    placeholder="Nominal"
+                />
+
+                <x-input
+                    type="datetime-local"
+                    wire:model="edit_tx_date"
+                />
+            </div>
+
+            <x-input
+                wire:model="edit_tx_description"
+                placeholder="Keterangan transaksi"
+            />
+
+            <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-200">
+                <x-button color="slate" flat wire:click="$set('editTransactionModal', false)">Batal</x-button>
+                <x-button submit :color="$edit_tx_type === 'expense' ? 'rose' : 'emerald'" loading="saveEditTransaction">Simpan Perubahan</x-button>
             </div>
         </form>
     </x-modal>
