@@ -77,6 +77,16 @@ class Wallet extends Model
     }
 
     /**
+     * Relasi ke catatan saldo hitungan manual untuk rekonsiliasi.
+     *
+     * @return HasMany<WalletReconciliation, $this>
+     */
+    public function reconciliations(): HasMany
+    {
+        return $this->hasMany(WalletReconciliation::class, 'wallet_id');
+    }
+
+    /**
      * Scope kantong yang masih tampil di daftar kantong (aktif dan dibekukan).
      *
      * @param Builder<Wallet> $query

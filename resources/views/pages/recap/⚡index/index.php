@@ -8,6 +8,7 @@ use App\Models\RecapKeyword;
 use App\Models\Transaction;
 use App\Models\TransactionCategory;
 use App\Models\Wallet;
+use App\Models\WalletReconciliation;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Computed;
@@ -45,6 +46,15 @@ class extends Component
     public string $editingCategoryName = '';
     public string|int|float $category_budget_limit = '';
 
+    /* Kantong yang sedang direkonsiliasi; bawaan: kantong utama. */
+    public ?int $reconcileWalletId = null;
+
+    /* State Modal Saldo Hitungan Manual */
+    public bool $reconcileModal = false;
+    public ?int $editingReconcileId = null;
+    public string $reconcile_label = '';
+    public string|int|float $reconcile_amount = '';
+
     /* Kantong utama yang menjadi pilihan bawaan filter */
     public ?int $defaultWalletId = null;
 
@@ -62,6 +72,8 @@ class extends Component
         if ($this->walletFilter === null) {
             $this->walletFilter = $this->defaultWalletId;
         }
+
+        $this->reconcileWalletId ??= $this->defaultWalletId;
     }
 
     /**
@@ -264,6 +276,184 @@ class extends Component
         $this->categoryBudgetModal = false;
         unset($this->categoryExpenseRecap, $this->categoryIncomeRecap);
         $this->toast()->success('Berhasil!', 'Batas kategori berhasil disimpan.')->send();
+    }
+
+    /**
+     * Mengambil opsi kantong aktif/dibekukan untuk pemilihan target rekonsiliasi.
+     *
+     * @return array<int, array{label: string, value: int}>
+     */
+    #[Computed]
+    public function reconcileWalletOptions(): array
+    {
+        return Wallet::query()
+            ->visible()
+            ->orderByDesc('is_primary')
+            ->orderBy('name')
+            ->get()
+            ->map(fn (Wallet $wallet): array => [
+                'label' => $wallet->is_primary ? $wallet->name . ' (Utama)' : $wallet->name,
+                'value' => $wallet->id,
+            ])
+            ->all();
+    }
+
+    /**
+     * Mengambil kantong yang sedang dipilih untuk rekonsiliasi.
+     */
+    #[Computed]
+    public function reconcileWallet(): ?Wallet
+    {
+        return $this->reconcileWalletId === null
+            ? null
+            : Wallet::query()->visible()->find($this->reconcileWalletId);
+    }
+
+    /**
+     * Daftar saldo hitungan manual milik kantong yang dipilih.
+     *
+     * @return array<int, array{id: int, label: string, amount: float, formatted_amount: string}>
+     */
+    #[Computed]
+    public function reconciliationEntries(): array
+    {
+        $wallet = $this->reconcileWallet;
+
+        if ($wallet === null) {
+            return [];
+        }
+
+        return $wallet->reconciliations()
+            ->orderBy('label')
+            ->get()
+            ->map(fn (WalletReconciliation $entry): array => [
+                'id' => $entry->id,
+                'label' => $entry->label,
+                'amount' => (float) $entry->amount,
+                'formatted_amount' => $entry->formattedAmount(),
+            ])
+            ->all();
+    }
+
+    /**
+     * Ringkasan rekonsiliasi: saldo akhir kantong vs total hitungan manual.
+     *
+     * @return array{calculated: float, formatted_calculated: string, manual_total: float, formatted_manual_total: string, difference: float, formatted_difference: string, is_match: bool, has_data: bool}
+     */
+    #[Computed]
+    public function reconciliationSummary(): array
+    {
+        $wallet = $this->reconcileWallet;
+        $calculated = $wallet === null ? 0.0 : round((float) $wallet->balance, 2);
+        $manualTotal = round(array_sum(array_column($this->reconciliationEntries, 'amount')), 2);
+        $difference = round($manualTotal - $calculated, 2);
+
+        return [
+            'calculated' => $calculated,
+            'formatted_calculated' => number_format($calculated, 0, ',', '.'),
+            'manual_total' => $manualTotal,
+            'formatted_manual_total' => number_format($manualTotal, 0, ',', '.'),
+            'difference' => $difference,
+            'formatted_difference' => number_format(abs($difference), 0, ',', '.'),
+            'is_match' => $difference === 0.0,
+            'has_data' => $wallet !== null,
+        ];
+    }
+
+    /**
+     * Membuka modal tambah saldo hitungan manual.
+     */
+    public function openAddReconcileModal(): void
+    {
+        $this->resetValidation(['reconcile_label', 'reconcile_amount']);
+        $this->editingReconcileId = null;
+        $this->reconcile_label = '';
+        $this->reconcile_amount = '';
+        $this->reconcileModal = true;
+    }
+
+    /**
+     * Membuka modal ubah saldo hitungan manual.
+     */
+    public function openEditReconcileModal(int $id): void
+    {
+        $entry = WalletReconciliation::find($id);
+
+        if (!$entry) {
+            return;
+        }
+
+        $this->resetValidation(['reconcile_label', 'reconcile_amount']);
+        $this->editingReconcileId = $entry->id;
+        $this->reconcile_label = $entry->label;
+        $this->reconcile_amount = (float) $entry->amount > 0 ? (float) $entry->amount : '';
+        $this->reconcileModal = true;
+    }
+
+    /**
+     * Menyimpan saldo hitungan manual ke database.
+     */
+    public function saveReconcile(): void
+    {
+        $this->validate([
+            'reconcile_label' => ['required', 'string', 'max:100'],
+            'reconcile_amount' => ['required', 'numeric', 'gte:0'],
+        ], [
+            'reconcile_label.required' => 'Nama sumber saldo wajib diisi.',
+            'reconcile_amount.required' => 'Nominal saldo wajib diisi.',
+            'reconcile_amount.gte' => 'Nominal saldo tidak boleh negatif.',
+        ]);
+
+        $wallet = $this->reconcileWallet;
+
+        if ($wallet === null) {
+            $this->reconcileModal = false;
+
+            return;
+        }
+
+        WalletReconciliation::updateOrCreate(
+            ['id' => $this->editingReconcileId],
+            [
+                'wallet_id' => $wallet->id,
+                'user_id' => (int) Auth::id(),
+                'label' => trim($this->reconcile_label),
+                'amount' => (float) $this->reconcile_amount,
+            ]
+        );
+
+        $this->reconcileModal = false;
+        unset($this->reconciliationEntries, $this->reconciliationSummary);
+        $this->toast()->success('Berhasil!', 'Saldo hitungan manual berhasil disimpan.');
+    }
+
+    /**
+     * Menampilkan dialog konfirmasi hapus saldo hitungan manual.
+     */
+    public function askDeleteReconcile(int $id): void
+    {
+        $entry = WalletReconciliation::find($id);
+
+        if (!$entry) {
+            return;
+        }
+
+        $this->dialog()
+            ->question('Hapus Saldo Manual Ini?', sprintf('Saldo "%s" akan dihapus dari rekonsiliasi.', $entry->label))
+            ->confirm('Ya, Hapus', 'deleteReconcile', $id)
+            ->cancel('Batal')
+            ->send();
+    }
+
+    /**
+     * Menghapus saldo hitungan manual dari database.
+     */
+    public function deleteReconcile(int $id): void
+    {
+        WalletReconciliation::destroy($id);
+        $this->reconcileModal = false;
+        unset($this->reconciliationEntries, $this->reconciliationSummary);
+        $this->toast()->success('Dihapus!', 'Saldo hitungan manual berhasil dihapus.');
     }
 
     /**

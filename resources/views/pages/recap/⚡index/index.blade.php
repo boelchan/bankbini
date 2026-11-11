@@ -249,6 +249,165 @@
         @endif
     </x-table>
 
+    {{-- Seksi Saldo Akhir & Rekonsiliasi --}}
+    @php
+        $recon = $this->reconciliationSummary;
+        $reconDiff = (float) $recon['difference'];
+        $reconMatch = (bool) $recon['is_match'];
+        $reconDiffLabel = $reconMatch
+            ? 'Cocok'
+            : ($reconDiff > 0 ? '+' . $recon['formatted_difference'] : '-' . $recon['formatted_difference']);
+    @endphp
+
+    <x-card paddingless>
+        <div class="flex flex-col gap-2 px-4 pt-4 sm:flex-row sm:items-center sm:justify-between">
+            <div class="min-w-0">
+                <h2 class="text-sm font-semibold text-slate-900 sm:text-base">Saldo Akhir &amp; Rekonsiliasi</h2>
+                <p class="text-xs text-slate-500 mt-0.5">
+                    Bandingkan saldo akhir kantong dengan hitungan manual keluarga (contoh: Tunai, Bank A, Bank B).
+                </p>
+            </div>
+
+            <div class="flex items-center gap-2 self-start sm:self-auto">
+                <x-select.styled
+                    placeholder="Kantong"
+                    wire:model.live="reconcileWalletId"
+                    :options="$this->reconcileWalletOptions"
+                    class="w-44 [&_button]:text-xs"
+                />
+
+                <x-button.circle
+                    color="emerald"
+                    sm
+                    wire:click="openAddReconcileModal"
+                    title="Tambah Saldo Manual"
+                    aria-label="Tambah Saldo Manual"
+                >
+                    <x-ti-plus class="size-4" />
+                </x-button.circle>
+            </div>
+        </div>
+
+        @if ($recon['has_data'])
+            <div class="mt-3 grid grid-cols-1 divide-y divide-slate-200/80 sm:grid-cols-3 sm:divide-x sm:divide-y-0">
+                <div class="flex items-center gap-2.5 px-4 py-3">
+                    <span class="flex size-8 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-600">
+                        <x-ti-wallet class="size-4" />
+                    </span>
+                    <div class="min-w-0">
+                        <p class="text-xs font-medium text-slate-500">Saldo Akhir Kantong</p>
+                        <p class="text-sm font-bold text-slate-900 tabular-nums truncate">
+                            {{ $recon['formatted_calculated'] }}
+                        </p>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-2.5 px-4 py-3">
+                    <span class="flex size-8 shrink-0 items-center justify-center rounded-lg bg-sky-50 text-sky-700">
+                        <x-ti-calculator class="size-4" />
+                    </span>
+                    <div class="min-w-0">
+                        <p class="text-xs font-medium text-slate-500">Total Hitungan Manual</p>
+                        <p class="text-sm font-bold text-sky-700 tabular-nums truncate">
+                            {{ $recon['formatted_manual_total'] }}
+                        </p>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-2.5 px-4 py-3">
+                    <span class="flex size-8 shrink-0 items-center justify-center rounded-lg {{ $reconMatch ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-700' }}">
+                        <x-ti-scale class="size-4" />
+                    </span>
+                    <div class="min-w-0">
+                        <p class="text-xs font-medium text-slate-500">Selisih</p>
+                        <p class="text-sm font-bold tabular-nums truncate {{ $reconMatch ? 'text-emerald-700' : 'text-rose-600' }}">
+                            {{ $reconDiffLabel }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="border-t border-slate-200/80">
+                @if (empty($this->reconciliationEntries))
+                    <div class="px-4 py-8 text-center text-xs text-slate-400">
+                        Belum ada hitungan manual. Tambahkan sumber saldo (contoh: Tunai, Bank A, Bank B) untuk dibandingkan dengan saldo akhir kantong.
+                    </div>
+                @else
+                    <ul class="divide-y divide-slate-200/60">
+                        @foreach ($this->reconciliationEntries as $entry)
+                            <li class="flex items-center justify-between gap-2 px-4 py-2.5">
+                                <span class="min-w-0 truncate text-sm font-medium text-slate-800">{{ $entry['label'] }}</span>
+
+                                <span class="flex items-center gap-2">
+                                    <span class="text-sm font-semibold tabular-nums text-slate-700">{{ $entry['formatted_amount'] }}</span>
+
+                                    <x-button.circle
+                                        color="slate"
+                                        flat
+                                        xs
+                                        wire:click="openEditReconcileModal({{ $entry['id'] }})"
+                                        title="Ubah saldo manual"
+                                        aria-label="Ubah saldo manual {{ $entry['label'] }}"
+                                    >
+                                        <x-ti-pencil class="size-3.5" />
+                                    </x-button.circle>
+                                </span>
+                            </li>
+                        @endforeach
+                    </ul>
+                @endif
+            </div>
+        @else
+            <div class="px-4 py-8 text-center text-xs text-slate-400">
+                Pilih kantong aktif untuk memulai rekonsiliasi.
+            </div>
+        @endif
+    </x-card>
+
+    {{-- Modal Tambah / Edit Saldo Hitungan Manual --}}
+    <x-modal wire="reconcileModal" title="{{ $editingReconcileId ? 'Ubah Saldo Hitungan Manual' : 'Tambah Saldo Hitungan Manual' }}">
+        <form wire:submit="saveReconcile" class="space-y-4">
+            <x-input
+                label="Nama Sumber Saldo *"
+                placeholder="Contoh: Tunai, Bank A, Bank B"
+                wire:model="reconcile_label"
+                hint="Satu sumber saldo per baris; totalnya akan dibandingkan dengan saldo akhir kantong."
+            />
+
+            <x-currency
+                label="Nominal Saldo *"
+                placeholder="0"
+                wire:model="reconcile_amount"
+                locale="id-ID"
+                symbol=""
+                :decimals="0"
+                :precision="0"
+            />
+
+            <div class="space-y-2 pt-3 border-t border-slate-200">
+                <div class="flex items-center justify-end gap-2">
+                    <x-button color="slate" flat wire:click="$set('reconcileModal', false)">Batal</x-button>
+                    <x-button submit color="emerald" loading="saveReconcile">
+                        <x-ti-check class="size-4 mr-1" />
+                        Simpan Saldo
+                    </x-button>
+                </div>
+
+                @if ($editingReconcileId)
+                    <x-button
+                        color="red"
+                        flat
+                        class="w-full"
+                        wire:click="askDeleteReconcile({{ $editingReconcileId }})"
+                    >
+                        <x-ti-trash class="size-4 mr-1" />
+                        Hapus Saldo Manual
+                    </x-button>
+                @endif
+            </div>
+        </form>
+    </x-modal>
+
     {{-- Modal Tambah / Edit Kata Kunci Rekap --}}
     <x-modal wire="keywordModal" title="{{ $editingKeywordId ? 'Ubah Kata Kunci Rekap' : 'Tambah Kata Kunci Rekap Baru' }}">
         <form wire:submit="saveKeyword" class="space-y-4">
