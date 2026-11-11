@@ -315,25 +315,23 @@ class extends Component
     }
 
     /**
-     * Menentukan warna bilah dan angka pemakaian anggaran.
+     * Menentukan warna angka aktual pemakaian anggaran.
      *
-     * @return array{bar: string, text: string}
+     * @return array{text: string}
      */
     public function budgetTone(float $usage, float $limit): array
     {
-        $hasLimit = $limit > 0;
-
-        if ($hasLimit && $usage > 100) {
-            return ['bar' => 'bg-slate-900', 'text' => 'text-slate-900 font-semibold'];
+        if ($limit > 0 && $usage > 100) {
+            return ['text' => 'text-slate-900 font-semibold'];
         }
 
-        if ($hasLimit && $usage >= 80) {
-            return ['bar' => 'bg-rose-500', 'text' => 'text-rose-700 font-semibold'];
+        if ($limit > 0 && $usage >= 80) {
+            return ['text' => 'text-rose-700 font-semibold'];
         }
 
-        return $hasLimit
-            ? ['bar' => 'bg-emerald-500', 'text' => 'text-emerald-700']
-            : ['bar' => 'bg-slate-400', 'text' => 'text-slate-500'];
+        return $limit > 0
+            ? ['text' => 'text-emerald-700']
+            : ['text' => 'text-slate-500'];
     }
 
     /**
