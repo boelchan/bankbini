@@ -276,14 +276,16 @@
             @endif
 
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <x-currency
-                    wire:model="income_amount"
-                    locale="id-ID"
-                    symbol=""
-                    :decimals="0"
-                    :precision="0"
-                    placeholder="Nominal"
-                />
+                <x-amount-calculator model="income_amount">
+                    <x-currency
+                        wire:model="income_amount"
+                        locale="id-ID"
+                        symbol=""
+                        :decimals="0"
+                        :precision="0"
+                        placeholder="Nominal"
+                    />
+                </x-amount-calculator>
 
                 <x-input
                     type="datetime-local"
@@ -317,15 +319,17 @@
             />
 
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <x-currency
-                    wire:model="expense_amount"
-                    locale="id-ID"
-                    symbol=""
-                    :decimals="0"
-                    :precision="0"
-                    hint="Saldo tersedia: {{ $wallet->formattedBalance() }}"
-                    placeholder="Nominal"
-                />
+                <x-amount-calculator model="expense_amount">
+                    <x-currency
+                        wire:model="expense_amount"
+                        locale="id-ID"
+                        symbol=""
+                        :decimals="0"
+                        :precision="0"
+                        hint="Saldo tersedia: {{ $wallet->formattedBalance() }}"
+                        placeholder="Nominal"
+                    />
+                </x-amount-calculator>
 
                 <x-input
                     type="datetime-local"
@@ -364,15 +368,17 @@
             @endif
 
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <x-currency
-                    wire:model="transfer_amount"
-                    locale="id-ID"
-                    symbol=""
-                    :decimals="0"
-                    :precision="0"
-                    hint="Saldo tersedia: {{ $wallet->formattedBalance() }}"
-                    placeholder="Nominal"
-                />
+                <x-amount-calculator model="transfer_amount">
+                    <x-currency
+                        wire:model="transfer_amount"
+                        locale="id-ID"
+                        symbol=""
+                        :decimals="0"
+                        :precision="0"
+                        hint="Saldo tersedia: {{ $wallet->formattedBalance() }}"
+                        placeholder="Nominal"
+                    />
+                </x-amount-calculator>
 
                 <x-input
                     type="datetime-local"
@@ -406,14 +412,16 @@
             />
 
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <x-currency
-                    wire:model="edit_tx_amount"
-                    locale="id-ID"
-                    symbol=""
-                    :decimals="0"
-                    :precision="0"
-                    placeholder="Nominal"
-                />
+                <x-amount-calculator model="edit_tx_amount">
+                    <x-currency
+                        wire:model="edit_tx_amount"
+                        locale="id-ID"
+                        symbol=""
+                        :decimals="0"
+                        :precision="0"
+                        placeholder="Nominal"
+                    />
+                </x-amount-calculator>
 
                 <x-input
                     type="datetime-local"

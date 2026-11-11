@@ -63,3 +63,11 @@ Karena aplikasi utamanya digunakan langsung dari smartphone (HP) oleh istri:
 - **Ukuran Sentuh & Jarak Ergonomis**:
   - Tombol-tombol aksi utama, pemilihan kategori radio 3 kolom, dan menu tab di profil dirancang dengan ukuran sentuh nyaman (touch target >= 40-44px) yang bersahabat untuk sentuhan jempol di smartphone.
   - Pembuatan kantong baru hanya melalui tombol **Tambah Kantong Baru** di header halaman Kantong, tanpa kartu kosong tambahan di dalam daftar.
+
+## 6. Kalkulator Mini pada Field Nominal
+Field **Nominal** pada form **Masuk** dan **Keluar** (di Home maupun detail kantong) dilengkapi **popup kalkulator mini** untuk menghitung nominal langsung tanpa keluar dari form:
+- Tombol ikon kalkulator di sisi kanan field membuka popup berisi keypad angka (0-9) dan empat operasi aritmetika: **+ − × ÷**.
+- Display popup menampilkan ekspresi yang sedang disusun (contoh: `12 × 5`), dengan tombol `C` (bersihkan) dan `⌫` (hapus satu karakter).
+- Perhitungan berlangsung **dua langkah**: tombol **= Hitung** menghitung ekspresi dan menampilkan hasilnya di display (belum mengisi field), lalu tombol **Masukkan** yang memasukkan hasil ke field nominal (popup menutup otomatis). Tombol `Masukkan` non-aktif selama belum ada hasil perhitungan. Hasil dibulatkan ke rupiah penuh dan ditampilkan dengan pemisah ribuan gaya Indonesia (contoh: `60.000`).
+- Hasil perhitungan ditulis ke field dengan simulasi input yang sama seperti ketikan pengguna, sehingga sinkronisasi Livewire (`wire:model` pada `x-currency`) tetap bekerja normal.
+- Implementasi memakai komponen Blade reusable `resources/views/components/amount-calculator.blade.php` yang membungkus field: `<x-amount-calculator model="...">...</x-amount-calculator>`; ekspresi divalidasi whitelist (`0-9 + - * / .`) sebelum dievaluasi. Diterapkan pada seluruh field nominal transaksi: form **Masuk**, **Keluar**, **Pindah**, dan modal **Ubah Transaksi** (di Home maupun detail kantong).
