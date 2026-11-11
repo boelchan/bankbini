@@ -246,6 +246,12 @@ Seluruh dokumentasi resmi TallStackUI sudah terpasang lengkap di dalam folder `v
 
 Setiap perubahan alur harus mengupdate file PRD yang ada
 
+## Aturan Git (Wajib)
+
+* **DILARANG melakukan `git commit` dan `git push` secara otomatis** kecuali pengguna memintanya secara eksplisit pada momen tersebut.
+* Agent hanya mengerjakan perubahan di working directory (edit kode, verifikasi, update PRD).
+* Commit dan push dilakukan **manual oleh pengguna**.
+
 <!-- antislop:start -->
 ## antislop
 For UI, copy, people, mobile layout, or code comments work, read these installed skill files directly (use these paths even if a same-named global skill exists):

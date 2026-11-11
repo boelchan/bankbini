@@ -317,21 +317,28 @@ class extends Component
     /**
      * Menentukan warna angka aktual pemakaian anggaran.
      *
+     * Aturan warna: lebih dari batas = merah, tepat 100% = hijau,
+     * kurang dari batas atau tanpa batas = netral (warna teks default).
+     *
      * @return array{text: string}
      */
     public function budgetTone(float $usage, float $limit): array
     {
-        if ($limit > 0 && $usage > 100) {
-            return ['text' => 'text-slate-900 font-semibold'];
+        if ($limit <= 0) {
+            return ['text' => 'text-slate-500'];
         }
 
-        if ($limit > 0 && $usage >= 80) {
+        $rounded = round($usage, 2);
+
+        if ($rounded > 100.0) {
             return ['text' => 'text-rose-700 font-semibold'];
         }
 
-        return $limit > 0
-            ? ['text' => 'text-emerald-700']
-            : ['text' => 'text-slate-500'];
+        if ($rounded === 100.0) {
+            return ['text' => 'text-emerald-700 font-semibold'];
+        }
+
+        return ['text' => 'text-slate-900'];
     }
 
     /**

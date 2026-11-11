@@ -113,9 +113,9 @@
             </x-slot:empty>
         @else
             <x-table.thead class="bg-slate-100">
-                <x-table.th label="Kategori" width="32%" />
-                <x-table.th label="Batas" width="32%" />
-                <x-table.th label="Aktual" width="36%" />
+                <x-table.th label="Kategori" width="40%" />
+                <x-table.th label="Batas" width="30%" />
+                <x-table.th label="Aktual" width="30%" />
             </x-table.thead>
 
             <tbody>
@@ -126,10 +126,10 @@
                         $usageLabel = $this->formatPercentage($usage);
                         $tone = $this->budgetTone($usage, (float) ($cat['limit'] ?? 0));
                     @endphp
-                    <tr class="transition-colors {{ $isOver ? 'bg-rose-50 hover:bg-rose-100/70' : 'bg-white hover:bg-slate-50' }}">
+                    <tr>
                         <td class="px-3 py-3 align-top">
                             <div class="flex items-center gap-1.5">
-                                <span class="min-w-0 truncate text-sm font-medium {{ $isOver ? 'text-rose-900' : 'text-slate-800' }}">
+                                <span class="min-w-0 truncate text-sm font-medium {{ $usage >= 100 ? 'italic line-through':'' }} {{ $isOver ? 'text-rose-900' : 'text-slate-800' }}">
                                     {{ $cat['name'] }}
                                 </span>
                                 @if (! empty($cat['category_id']))
@@ -157,13 +157,9 @@
                             <p class="text-sm font-semibold tabular-nums {{ $tone['text'] }}">
                                 {{ $cat['formatted_amount'] }}
                             </p>
-                            <span class="mt-0.5 block text-xs tabular-nums {{ $tone['text'] }}">
-                                {{ $usageLabel }}%
-                            </span>
                             @if ($isOver)
-                                <span class="mt-0.5 inline-flex items-center gap-1 text-xs font-semibold text-rose-700">
-                                    <x-ti-alert-triangle class="size-3" />
-                                    <span>Lewat {{ number_format($cat['over_amount'], 0, ',', '.') }}</span>
+                                <span class="mt-0.5 text-xs font-semibold text-rose-700">
+                                    <span>+{{ number_format($cat['over_amount'], 0, ',', '.') }}</span>
                                 </span>
                             @endif
                         </td>
@@ -199,9 +195,9 @@
             </x-slot:empty>
         @else
             <x-table.thead class="bg-slate-100">
-                <x-table.th label="Kata Kunci" width="55%" />
-                <x-table.th label="Batas" width="20%" />
-                <x-table.th label="Aktual" width="25%" />
+                <x-table.th label="Kata Kunci" width="40%" />
+                <x-table.th label="Batas" width="30%" />
+                <x-table.th label="Aktual" width="30%" />
             </x-table.thead>
 
             <tbody>
@@ -211,13 +207,10 @@
                         $kwUsageLabel = $this->formatPercentage($kwUsage);
                         $kwTone = $this->budgetTone($kwUsage, (float) ($kw['limit'] ?? 0));
                     @endphp
-                    <tr
-                        class="transition-colors {{ $kw['is_over_limit'] ? 'bg-rose-50 hover:bg-rose-100/70' : 'bg-white hover:bg-slate-50' }}"
-                        wire:key="keyword-{{ $kw['id'] }}"
-                    >
+                    <tr wire:key="keyword-{{ $kw['id'] }}" >
                         <td class="px-3 py-3 align-top">
                             <div class="flex items-center gap-1.5">
-                                <span class="text-sm font-semibold {{ $kw['is_over_limit'] ? 'text-rose-900' : 'text-slate-900' }}">
+                                <span class="text-sm font-semibold {{ $kwUsage >= 100 ? 'italic line-through':'' }} {{ $kw['is_over_limit'] ? 'text-rose-900' : 'text-slate-900' }}">
                                     {{ $kw['keyword'] }}
                                 </span>
                                 <x-button.circle
@@ -243,13 +236,10 @@
                             <p class="text-sm font-semibold tabular-nums {{ $kwTone['text'] }}">
                                 {{ $kw['formatted_amount'] }}
                             </p>
-                            <span class="mt-0.5 block text-xs tabular-nums {{ $kwTone['text'] }}">
-                                {{ $kwUsageLabel }}%
-                            </span>
+    
                             @if ($kw['is_over_limit'])
-                                <span class="mt-0.5 inline-flex items-center gap-1 text-xs font-semibold text-rose-700">
-                                    <x-ti-alert-triangle class="size-3" />
-                                    <span>Lebih {{ number_format($kw['over_amount'], 0, ',', '.') }}</span>
+                                <span class="mt-0.5 text-xs font-semibold text-rose-700">
+                                    <span>+{{ number_format($kw['over_amount'], 0, ',', '.') }}</span>
                                 </span>
                             @endif
                         </td>
