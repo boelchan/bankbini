@@ -8,15 +8,25 @@
         open: false,
         expr: '',
         result: null,
-        toggle() { this.open = !this.open; this.expr = ''; this.result = null; },
+        mem: null,
+        op: '+',
+        toggle() { this.open = !this.open; this.expr = ''; this.result = null; this.mem = null; this.op = '+'; },
         display() {
             if (this.result !== null) return Number(this.result).toLocaleString('id-ID');
-            return this.expr.replace(/\*/g, ' × ').replace(/\//g, ' ÷ ') || '0';
+            const expr = this.expr.replace(/\*/g, ' × ').replace(/\//g, ' ÷ ');
+            if (this.mem !== null) {
+                return Number(this.mem).toLocaleString('id-ID') + ' ' + (this.op === '-' ? '−' : '+') + ' ' + (expr || '…');
+            }
+            return expr || '0';
         },
         press(key) {
             if (this.result !== null) { this.expr = ''; this.result = null; }
             const ops = '+-*/';
             if (ops.includes(key)) {
+                if (this.mem !== null && this.expr === '') {
+                    if (key === '+' || key === '-') this.op = key;
+                    return;
+                }
                 if (this.expr === '') return;
                 if (ops.includes(this.expr.slice(-1))) this.expr = this.expr.slice(0, -1);
             }
@@ -24,6 +34,13 @@
         },
         backspace() { this.expr = this.expr.slice(0, -1); },
         clear() { this.expr = ''; this.result = null; },
+        store() {
+            if (this.result === null) return;
+            this.mem = this.result;
+            this.op = '+';
+            this.expr = '';
+            this.result = null;
+        },
         calculate() {
             if (this.expr === '' || !/^[0-9+\-*/.]+$/.test(this.expr) || /[+\-*/]$/.test(this.expr)) return;
             let value;
@@ -33,7 +50,10 @@
                 return;
             }
             if (typeof value !== 'number' || !isFinite(value)) return;
-            this.result = Math.round(value);
+            value = Math.round(value);
+            this.result = this.mem === null ? value : Math.round(this.op === '-' ? this.mem - value : this.mem + value);
+            this.mem = null;
+            this.op = '+';
         },
         insert() {
             if (this.result === null) return;
@@ -71,6 +91,13 @@
     >
         <div class="mb-2 min-h-9 break-all rounded-xl bg-slate-50 px-3 py-2 text-right font-mono text-sm text-slate-800" x-text="display()"></div>
 
+        <div x-show="mem !== null" x-cloak class="mb-1.5 flex items-center justify-between rounded-lg bg-emerald-50 px-2.5 py-1 text-xs text-emerald-700">
+            <span class="font-medium">
+                Tersimpan: <span class="font-semibold tabular-nums" x-text="mem === null ? '' : Number(mem).toLocaleString('id-ID')"></span>
+            </span>
+            <button type="button" x-on:click="mem = null" title="Buang hasil tersimpan" class="cursor-pointer font-bold text-emerald-700/60 transition-colors hover:text-emerald-900">×</button>
+        </div>
+
         <div class="grid grid-cols-4 gap-1.5">
             <button type="button" x-on:click="press('7')" class="cursor-pointer rounded-lg border border-slate-200 bg-white py-1.5 text-sm font-semibold text-slate-800 tabular-nums transition-colors hover:bg-slate-100">7</button>
             <button type="button" x-on:click="press('8')" class="cursor-pointer rounded-lg border border-slate-200 bg-white py-1.5 text-sm font-semibold text-slate-800 tabular-nums transition-colors hover:bg-slate-100">8</button>
@@ -94,6 +121,15 @@
         </div>
 
         <div class="mt-1.5 flex gap-1.5">
+            <button
+                type="button"
+                x-on:click="store()"
+                :disabled="result === null"
+                title="Simpan hasil untuk dijumlahkan dengan hitungan berikutnya"
+                class="w-16 shrink-0 cursor-pointer rounded-xl bg-slate-100 py-2 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-200 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+                M+
+            </button>
             <button
                 type="button"
                 x-on:click="calculate()"
