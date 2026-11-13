@@ -106,11 +106,11 @@
                     {{ $wallet->formattedBalance() }}
                 </p>
                 <div class="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-xs text-slate-600">
-                    <span class="inline-flex items-center gap-1 font-semibold text-emerald-700 tabular-nums">
+                    <span class="inline-flex items-center gap-1 font-semibold text-emerald-700 tabular-nums" title="Total masuk {{ $this->activeMonthLabel }}">
                         <x-ti-arrow-down-left class="size-3.5 shrink-0" aria-hidden="true" />
                         +{{ number_format((float) $this->walletStats['total_in'], 0, ',', '.') }}
                     </span>
-                    <span class="inline-flex items-center gap-1 font-semibold text-rose-700 tabular-nums">
+                    <span class="inline-flex items-center gap-1 font-semibold text-rose-700 tabular-nums" title="Total keluar {{ $this->activeMonthLabel }}">
                         <x-ti-arrow-up-right class="size-3.5 shrink-0" aria-hidden="true" />
                         -{{ number_format((float) $this->walletStats['total_out'], 0, ',', '.') }}
                     </span>
@@ -174,22 +174,10 @@
             </div>
 
             <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-                <div class="grid flex-1 grid-cols-2 gap-3">
+                <div class="grid flex-1 grid-cols-1 gap-3 sm:grid-cols-2">
                     <x-input
                         wire:model.live.debounce.300ms="search"
                         placeholder="Keterangan"
-                    />
-
-                    <x-select.styled
-                        placeholder="Bulan"
-                        wire:model.live="monthFilter"
-                        :options="$this->monthOptions"
-                    />
-
-                    <x-select.styled
-                        placeholder="Jenis"
-                        wire:model.live="typeFilter"
-                        :options="\App\Enums\TransactionTypeEnum::choices()"
                     />
 
                     <x-select.styled
@@ -199,7 +187,7 @@
                     />
                 </div>
 
-                @if ($search !== '' || $flowFilter !== '' || $typeFilter !== '' || $monthFilter !== '' || $categoryFilter !== null)
+                @if ($search !== '' || $flowFilter !== '' || $categoryFilter !== null)
                     <x-button color="slate" flat sm wire:click="resetFilters" class="self-start sm:self-auto">
                         <x-ti-refresh class="size-4 mr-1" />
                         Reset
@@ -211,9 +199,35 @@
 
     {{-- Histori Masuk & Keluar Kantong (Tanpa Kode TRX) --}}
     <x-card paddingless>
+        {{-- Navigasi Bulan (Atas) --}}
+        <div class="flex items-center justify-between gap-2 border-b border-slate-200 px-3 py-2 sm:px-4">
+            <x-button color="slate" flat sm wire:click="previousMonth" class="rounded-xl shrink-0" aria-label="Bulan lalu" title="Bulan Lalu">
+                <x-ti-chevron-left class="size-4 sm:mr-1" />
+                <span class="hidden sm:inline">Bulan Lalu</span>
+            </x-button>
+
+            <div class="min-w-0 text-center">
+                <p class="text-sm font-semibold text-slate-900 truncate">{{ $this->activeMonthLabel }}</p>
+            </div>
+
+            <x-button
+                color="slate"
+                flat
+                sm
+                wire:click="nextMonth"
+                class="rounded-xl shrink-0"
+                :disabled="$this->isLatestMonth"
+                aria-label="Bulan depan"
+                title="Bulan Depan"
+            >
+                <span class="hidden sm:inline">Bulan Depan</span>
+                <x-ti-chevron-right class="size-4 sm:ml-1" />
+            </x-button>
+        </div>
+
         @if ($this->transactions->isEmpty())
             <div class="p-8 text-center space-y-2">
-                <p class="text-sm font-semibold text-slate-800">Belum Ada Transaksi di Kantong Ini</p>
+                <p class="text-sm font-semibold text-slate-800">Belum Ada Transaksi di {{ $this->activeMonthLabel }}</p>
                 <p class="text-xs text-slate-500">Gunakan tombol Masuk, Keluar, atau Pindah di atas untuk mulai mencatat.</p>
             </div>
         @else
@@ -296,11 +310,41 @@
                     @endforeach
                 @endforeach
             </div>
-
-            <div class="p-4 border-t border-slate-200">
-                {{ $this->transactions->links() }}
-            </div>
         @endif
+
+        {{-- Navigasi Bulan (Bawah) --}}
+        <div class="border-t border-slate-200">
+            <div class="flex items-center justify-between gap-2 px-3 py-2 sm:px-4">
+                <x-button color="slate" flat sm wire:click="previousMonth" class="rounded-xl shrink-0" aria-label="Bulan lalu" title="Bulan Lalu">
+                    <x-ti-chevron-left class="size-4 sm:mr-1" />
+                    <span class="hidden sm:inline">Bulan Lalu</span>
+                </x-button>
+
+                <p class="min-w-0 text-center text-xs font-semibold text-slate-500 truncate">
+                    {{ $this->activeMonthLabel }}
+                </p>
+
+                <x-button
+                    color="slate"
+                    flat
+                    sm
+                    wire:click="nextMonth"
+                    class="rounded-xl shrink-0"
+                    :disabled="$this->isLatestMonth"
+                    aria-label="Bulan depan"
+                    title="Bulan Depan"
+                >
+                    <span class="hidden sm:inline">Bulan Depan</span>
+                    <x-ti-chevron-right class="size-4 sm:ml-1" />
+                </x-button>
+            </div>
+
+            @if ($this->transactions->hasPages())
+                <div class="px-4 pb-4">
+                    {{ $this->transactions->links() }}
+                </div>
+            @endif
+        </div>
     </x-card>
 
     {{-- Modal Tambah Uang (Dari Luar / Langsung ATAU Ambil dari Kantong Lain) --}}

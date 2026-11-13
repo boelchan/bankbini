@@ -9,8 +9,8 @@ Aplikasi menggunakan **3 menu utama** yang intuitif, ramah, dan terstruktur untu
 
 1. **Home (`/home`)**:
    - Menampilkan **detail lengkap Kantong Utama** keluarga yang menjadi rekening operasional harian.
-   - Dilengkapi kartu saldo utama, statistik total uang masuk & keluar, serta tombol aksi cepat (**+ Masuk**, **- Keluar**, **⇄ Pindah**) yang melayang di ponsel.
-   - Menampilkan histori mutasi kantong utama lengkap dengan kartu filter: chip cepat aliran dana (**Semua / Masuk / Keluar / Pindah**), pencarian keterangan, filter bulan, jenis transaksi, kategori, serta tombol reset. Transaksi dikelompokkan per tanggal. Setiap transaksi dapat **dihapus** (saldo kantong dipulihkan otomatis); transaksi **pemasukan/pengeluaran** juga dapat **diubah** (nominal, tanggal, keterangan, kategori), sedangkan transaksi pindah/terima uang hanya dapat dihapus karena berdampak pada dua kantong.
+   - Dilengkapi kartu saldo utama, statistik total uang masuk & keluar **bulan aktif** (ikut berubah saat navigasi bulan digeser), serta tombol aksi cepat (**+ Masuk**, **- Keluar**, **⇄ Pindah**) yang melayang di ponsel.
+   - Menampilkan histori mutasi kantong utama **khusus bulan berjalan** dengan navigasi bulan (**‹ Bulan Lalu** dan **Bulan Depan ›**) yang tampil **di atas dan di bawah** daftar transaksi. Tombol bulan depan non-aktif saat riwayat sudah berada di bulan berjalan (tidak bisa melangkah ke bulan masa depan), sedangkan tombol bulan lalu selalu aktif. Label bulan aktif tampil di tengah navigasi dalam Bahasa Indonesia (contoh: *November 2026*). Kartu filter berisi chip cepat aliran dana (**Semua / Masuk / Keluar / Pindah**), pencarian keterangan, filter kategori, serta tombol reset; filter bulan tidak lagi memakai dropdown karena bulan aktif dikendalikan navigasi. Transaksi dikelompokkan per tanggal, dan teks daftar kosong menyebutkan bulan aktif. Setiap transaksi dapat **dihapus** (saldo kantong dipulihkan otomatis); transaksi **pemasukan/pengeluaran** juga dapat **diubah** (nominal, tanggal, keterangan, kategori), sedangkan transaksi pindah/terima uang hanya dapat dihapus karena berdampak pada dua kantong.
    - Responsif ganda: kartu daftar mutasi mobile di smartphone (`sm:hidden`) dan tabel multi-kolom di desktop (`hidden sm:block`).
 
 2. **Kantong (`/pockets`)**:
@@ -34,14 +34,14 @@ Aplikasi menggunakan **3 menu utama** yang intuitif, ramah, dan terstruktur untu
 
 ## 3. Halaman Detail Kantong (`/pockets/{wallet}`)
 Diakses dengan mengetuk kotak kantong pada halaman **Kantong**:
-- Menampilkan informasi kantong, status (`Aktif` / `Dibekukan`), total uang masuk, total uang keluar, dan saldo saat ini.
+- Menampilkan informasi kantong, status (`Aktif` / `Dibekukan`), total uang masuk, total uang keluar, dan saldo saat ini. Total masuk & keluar mengikuti **bulan aktif** riwayat transaksi di bawahnya.
 - **Tata letak mengikuti halaman Home**: kartu kantong (nama, badge, deskripsi, saldo, ringkasan masuk/keluar, serta tombol aksi), lalu kartu filter riwayat transaksi terpisah, dan terakhir kartu riwayat transaksi.
 - Menyediakan 3 tombol transaksi utama untuk kantong tersebut (melayang di bagian bawah ponsel):
   1. **↓ Masuk**: Pilih sumber uang dari **Pemasukan Baru (Langsung)** atau **Ambil dari Kantong Lain**.
   2. **↗ Keluar**: Catat pengeluaran dari kantong ini.
   3. **⇄ Pindah**: Pindahkan saldo dari kantong ini ke kantong aktif lain.
 - Menyediakan tombol pengelolaan kantong: **Ubah Kantong**, **Bekukan / Aktifkan**, dan **Hapus Kantong** (wajib memindahkan sisa saldo ke kantong lain bila saldo > Rp0).
-- Menampilkan **Histori Masuk & Keluar Kantong** tanpa kode TRX, lengkap dengan filter bulan transaksi, filter cepat aliran dana (Semua / Masuk / Keluar / Pindah), filter jenis transaksi, filter kategori, pencarian keterangan, tombol reset filter, serta daftar transaksi yang dikelompokkan per tanggal. Perilaku filter dan daftar transaksi **sama dengan riwayat transaksi di Home**: pencarian mencakup keterangan, catatan, nama kantong lawan, dan nama kategori; filter kategori memakai kategori transaksi; serta 15 transaksi per halaman. Setiap transaksi dapat **dihapus** (saldo dikembalikan) dan transaksi **pemasukan/pengeluaran** dapat **diubah** (nominal, tanggal, keterangan, kategori); transaksi pindah/terima uang hanya dapat dihapus agar pasangan antar kantong tetap konsisten.
+- Menampilkan **Histori Masuk & Keluar Kantong** tanpa kode TRX, dengan **navigasi bulan** (**‹ Bulan Lalu** / **Bulan Depan ›**) di atas dan di bawah daftar seperti di Home (default bulan berjalan, tidak bisa melangkah ke bulan masa depan), lengkap dengan filter cepat aliran dana (Semua / Masuk / Keluar / Pindah), filter kategori, pencarian keterangan, tombol reset filter, serta daftar transaksi yang dikelompokkan per tanggal. Perilaku filter dan daftar transaksi **sama dengan riwayat transaksi di Home**: pencarian mencakup keterangan, catatan, nama kantong lawan, dan nama kategori; filter kategori memakai kategori transaksi; serta 15 transaksi per halaman. Setiap transaksi dapat **dihapus** (saldo dikembalikan) dan transaksi **pemasukan/pengeluaran** dapat **diubah** (nominal, tanggal, keterangan, kategori); transaksi pindah/terima uang hanya dapat dihapus agar pasangan antar kantong tetap konsisten.
 
 ## 4. Integritas Keuangan & Database
 - Seluruh perubahan saldo diproses melalui backend service (`WalletService`, `TransactionService`, `TransferService`) di dalam `DB::transaction` dengan penguncian baris `SELECT ... FOR UPDATE` (`lockForUpdate()`).

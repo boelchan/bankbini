@@ -12,6 +12,7 @@ use App\Models\Wallet;
 use App\Services\TransactionService;
 use App\Services\TransferService;
 use App\Services\WalletService;
+use Carbon\Carbon;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
@@ -33,7 +34,6 @@ class extends Component
 
     /* Filter Riwayat Transaksi Kantong */
     public string $search = '';
-    public ?string $typeFilter = '';
     public ?string $flowFilter = '';
     public ?string $monthFilter = '';
     public ?int $categoryFilter = null;
@@ -89,6 +89,7 @@ class extends Component
     public function mount(Wallet $wallet): void
     {
         $this->wallet = $wallet;
+        $this->monthFilter = now()->format('Y-m');
         $now = now()->format('Y-m-d\TH:i');
         $this->income_date = $now;
         $this->expense_date = $now;
@@ -104,15 +105,6 @@ class extends Component
     }
 
     /**
-     * Reset halaman paginasi saat filter jenis transaksi berubah.
-     */
-    public function updatedTypeFilter(): void
-    {
-        $this->typeFilter = $this->typeFilter ?? '';
-        $this->resetPage();
-    }
-
-    /**
      * Reset halaman paginasi saat filter aliran dana berubah.
      */
     public function updatedFlowFilter(): void
@@ -122,11 +114,31 @@ class extends Component
     }
 
     /**
-     * Reset halaman paginasi saat filter bulan transaksi berubah.
+     * Berpindah ke riwayat transaksi bulan sebelumnya.
      */
-    public function updatedMonthFilter(): void
+    public function previousMonth(): void
     {
-        $this->monthFilter = $this->monthFilter ?? '';
+        $this->monthFilter = Carbon::createFromFormat('Y-m', $this->monthFilter ?: now()->format('Y-m'))
+            ->subMonthNoOverflow()
+            ->format('Y-m');
+        $this->resetPage();
+    }
+
+    /**
+     * Berpindah ke riwayat transaksi bulan berikutnya (maksimal bulan berjalan).
+     */
+    public function nextMonth(): void
+    {
+        $currentMonth = now()->format('Y-m');
+        $targetMonth = Carbon::createFromFormat('Y-m', $this->monthFilter ?: $currentMonth)
+            ->addMonthNoOverflow()
+            ->format('Y-m');
+
+        if ($targetMonth > $currentMonth) {
+            return;
+        }
+
+        $this->monthFilter = $targetMonth;
         $this->resetPage();
     }
 
@@ -148,49 +160,35 @@ class extends Component
     }
 
     /**
-     * Mereset seluruh filter transaksi ke kondisi default.
+     * Mereset seluruh filter transaksi ke kondisi default (kembali ke bulan berjalan).
      */
     public function resetFilters(): void
     {
         $this->search = '';
-        $this->typeFilter = '';
         $this->flowFilter = '';
-        $this->monthFilter = '';
+        $this->monthFilter = now()->format('Y-m');
         $this->categoryFilter = null;
         $this->resetPage();
     }
 
     /**
-     * Mengambil daftar pilihan bulan dari riwayat transaksi kantong ini.
-     *
-     * @return array<int, array{label: string, value: string}>
+     * Label bulan aktif pada riwayat transaksi kantong ini.
      */
     #[Computed]
-    public function monthOptions(): array
+    public function activeMonthLabel(): string
     {
-        $dates = Transaction::query()
-            ->where('wallet_id', $this->wallet->id)
-            ->whereNotNull('transaction_date')
-            ->selectRaw('DISTINCT DATE_FORMAT(transaction_date, "%Y-%m") as ym')
-            ->orderByDesc('ym')
-            ->pluck('ym')
-            ->filter()
-            ->values()
-            ->all();
+        return Carbon::createFromFormat('Y-m', $this->monthFilter ?: now()->format('Y-m'))
+            ->locale('id')
+            ->translatedFormat('F Y');
+    }
 
-        $currentYm = now()->format('Y-m');
-        if (!in_array($currentYm, $dates, true)) {
-            array_unshift($dates, $currentYm);
-        }
-
-        return array_map(function (string $ym): array {
-            $carbon = \Carbon\Carbon::createFromFormat('Y-m', $ym);
-
-            return [
-                'label' => $carbon ? $carbon->translatedFormat('F Y') : $ym,
-                'value' => $ym,
-            ];
-        }, $dates);
+    /**
+     * Menandai apakah riwayat sudah menampilkan bulan berjalan.
+     */
+    #[Computed]
+    public function isLatestMonth(): bool
+    {
+        return ($this->monthFilter ?: now()->format('Y-m')) >= now()->format('Y-m');
     }
 
     /**
@@ -212,7 +210,7 @@ class extends Component
     }
 
     /**
-     * Menghitung ringkasan uang masuk dan keluar pada kantong ini.
+     * Menghitung ringkasan uang masuk dan keluar kantong ini pada bulan aktif.
      *
      * @return array<string, float>
      */
@@ -220,7 +218,10 @@ class extends Component
     public function walletStats(): array
     {
         $baseQuery = Transaction::query()
-            ->where('wallet_id', $this->wallet->id);
+            ->where('wallet_id', $this->wallet->id)
+            ->when($this->monthFilter !== '', function ($query): void {
+                $query->whereRaw("DATE_FORMAT(transaction_date, '%Y-%m') = ?", [$this->monthFilter]);
+            });
 
         $totalIn = (float) (clone $baseQuery)
             ->whereIn('type', [TransactionTypeEnum::INCOME, TransactionTypeEnum::TRANSFER_IN])
@@ -262,9 +263,6 @@ class extends Component
                     'transfer' => $query->whereIn('type', [TransactionTypeEnum::TRANSFER_IN, TransactionTypeEnum::TRANSFER_OUT]),
                     default => null,
                 };
-            })
-            ->when($this->typeFilter !== '', function ($query): void {
-                $query->where('type', $this->typeFilter);
             })
             ->when($this->monthFilter !== '', function ($query): void {
                 $query->whereRaw("DATE_FORMAT(transaction_date, '%Y-%m') = ?", [$this->monthFilter]);
