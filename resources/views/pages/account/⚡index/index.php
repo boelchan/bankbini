@@ -8,7 +8,9 @@ use App\Enums\WalletIconEnum;
 use App\Models\TransactionCategory;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Title;
 use Livewire\Component;
@@ -140,9 +142,22 @@ new #[Title('Pengaturan & Profil')] class extends Component
             'password.confirmed' => 'Konfirmasi kata sandi baru tidak cocok.',
         ]);
 
-        Auth::user()->update([
+        $user = Auth::user();
+        $currentSessionId = session()->getId();
+
+        $user->update([
             'password' => Hash::make($this->password),
         ]);
+
+        if (config('session.driver') === 'database') {
+            DB::table(config('session.table', 'sessions'))
+                ->where('user_id', $user->getKey())
+                ->where('id', '!=', $currentSessionId)
+                ->delete();
+        }
+
+        $user->forceFill(['remember_token' => Str::random(60)])->saveQuietly();
+        session()->regenerate();
 
         $this->reset(['current_password', 'password', 'password_confirmation']);
 

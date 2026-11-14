@@ -237,6 +237,7 @@ class TransactionService
                 $wallets = Wallet::query()
                     ->withTrashed()
                     ->whereIn('id', $walletIds)
+                    ->orderBy('id')
                     ->lockForUpdate()
                     ->get()
                     ->keyBy('id');
@@ -245,6 +246,8 @@ class TransactionService
                     $wallet = $wallets->get($tx->wallet_id);
 
                     if ($wallet !== null) {
+                        $this->assertWalletCanTransact($wallet, 'menghapus transaksi pindah uang');
+
                         $amount = round((float) $tx->amount, 2);
                         $currentBalance = round((float) $wallet->balance, 2);
 
@@ -288,6 +291,8 @@ class TransactionService
                 ->find($transaction->wallet_id);
 
             if ($wallet !== null) {
+                $this->assertWalletCanTransact($wallet, 'menghapus transaksi');
+
                 $amount = round((float) $transaction->amount, 2);
                 $currentBalance = round((float) $wallet->balance, 2);
 

@@ -47,11 +47,17 @@ class DatabaseSeeder extends Seeder
 
         $this->seedDefaultCategories();
 
-        $mainUser = User::updateOrCreate(
+        if (app()->isProduction()) {
+            return;
+        }
+
+        $defaultPassword = (string) env('SEED_DEFAULT_PASSWORD', '123');
+
+        $mainUser = User::firstOrCreate(
             ['email' => 'admin@app.com'],
             [
                 'name' => 'Suami',
-                'password' => bcrypt('123'),
+                'password' => bcrypt($defaultPassword),
                 'phone' => '081234567890',
                 'jabatan' => 'Suami / Kepala Keluarga',
                 'status' => 'active',
@@ -59,11 +65,11 @@ class DatabaseSeeder extends Seeder
         );
         $mainUser->syncRoles(['administrator']);
 
-        $husbandUser = User::updateOrCreate(
+        $husbandUser = User::firstOrCreate(
             ['email' => 'suami@bankbini.id'],
             [
                 'name' => 'Suami Tercinta',
-                'password' => bcrypt('123'),
+                'password' => bcrypt($defaultPassword),
                 'phone' => '081234567891',
                 'jabatan' => 'Suami',
                 'status' => 'active',
@@ -71,11 +77,11 @@ class DatabaseSeeder extends Seeder
         );
         $husbandUser->syncRoles(['administrator']);
 
-        $wifeUser = User::updateOrCreate(
+        $wifeUser = User::firstOrCreate(
             ['email' => 'istri@bankbini.id'],
             [
                 'name' => 'Istri Tercinta',
-                'password' => bcrypt('123'),
+                'password' => bcrypt($defaultPassword),
                 'phone' => '081298765432',
                 'jabatan' => 'Istri / Menteri Keuangan Keluarga',
                 'status' => 'active',

@@ -12,6 +12,7 @@ use App\Models\WalletReconciliation;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Computed;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\Title;
 use Livewire\Attributes\Url;
 use Livewire\Component;
@@ -36,12 +37,14 @@ class extends Component
     public bool $keywordModal = false;
 
     /* Form Kata Kunci Rekap */
+    #[Locked]
     public ?int $editingKeywordId = null;
     public string $keyword_text = '';
     public string|int|float $keyword_budget_limit = '';
 
     /* State Modal Batas Kategori */
     public bool $categoryBudgetModal = false;
+    #[Locked]
     public ?int $editingCategoryId = null;
     public string $editingCategoryName = '';
     public string|int|float $category_budget_limit = '';
@@ -51,6 +54,7 @@ class extends Component
 
     /* State Modal Saldo Hitungan Manual */
     public bool $reconcileModal = false;
+    #[Locked]
     public ?int $editingReconcileId = null;
     public string $reconcile_label = '';
     public string|int|float $reconcile_amount = '';
@@ -412,15 +416,20 @@ class extends Component
             return;
         }
 
-        WalletReconciliation::updateOrCreate(
-            ['id' => $this->editingReconcileId],
-            [
-                'wallet_id' => $wallet->id,
+        if ($this->editingReconcileId !== null) {
+            $entry = $wallet->reconciliations()->findOrFail($this->editingReconcileId);
+            $entry->update([
                 'user_id' => (int) Auth::id(),
                 'label' => trim($this->reconcile_label),
                 'amount' => (float) $this->reconcile_amount,
-            ]
-        );
+            ]);
+        } else {
+            $wallet->reconciliations()->create([
+                'user_id' => (int) Auth::id(),
+                'label' => trim($this->reconcile_label),
+                'amount' => (float) $this->reconcile_amount,
+            ]);
+        }
 
         $this->reconcileModal = false;
         unset($this->reconciliationEntries, $this->reconciliationSummary);

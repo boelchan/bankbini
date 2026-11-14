@@ -162,7 +162,7 @@
         @else
             {{-- List Transaksi Kantong Utama (Simple & Clear Bank-Style) --}}
             <div class="divide-y divide-slate-100">
-                @foreach ($this->transactions->getCollection()->groupBy(fn ($tx) => $tx->transaction_date?->format('Y-m-d')) as $date => $rows)
+                @foreach ($this->transactions->groupBy(fn ($tx) => $tx->transaction_date?->format('Y-m-d')) as $date => $rows)
                     {{-- Header Grup Tanggal --}}
                     <div class="bg-slate-50/70 px-3.5 py-1.5 sm:px-4">
                         <span class="text-xs font-semibold text-slate-500">
@@ -267,12 +267,6 @@
                     <x-ti-chevron-right class="size-4 sm:ml-1" />
                 </x-button>
             </div>
-
-            @if ($this->transactions->hasPages())
-                <div class="px-4 pb-4">
-                    {{ $this->transactions->links() }}
-                </div>
-            @endif
         </div>
     </x-card>
 

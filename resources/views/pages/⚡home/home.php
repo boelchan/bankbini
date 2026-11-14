@@ -13,14 +13,14 @@ use App\Services\TransactionService;
 use App\Services\TransferService;
 use App\Services\WalletService;
 use Carbon\Carbon;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Computed;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\Title;
 use Livewire\Component;
-use Livewire\WithPagination;
 use TallStackUi\Traits\Interactions;
 
 new
@@ -28,7 +28,6 @@ new
 class extends Component
 {
     use Interactions;
-    use WithPagination;
 
     public Wallet $wallet;
 
@@ -65,6 +64,7 @@ class extends Component
 
     /* Form Ubah Transaksi (pemasukan/pengeluaran) */
     public bool $editTransactionModal = false;
+    #[Locked]
     public ?int $editTransactionId = null;
     public string $edit_tx_type = '';
     public ?int $edit_tx_category_id = null;
@@ -86,14 +86,6 @@ class extends Component
     }
 
     /**
-     * Reset halaman paginasi saat pencarian berubah.
-     */
-    public function updatedSearch(): void
-    {
-        $this->resetPage();
-    }
-
-    /**
      * Berpindah ke riwayat transaksi bulan sebelumnya.
      */
     public function previousMonth(): void
@@ -101,7 +93,6 @@ class extends Component
         $this->monthFilter = Carbon::createFromFormat('Y-m', $this->monthFilter ?: now()->format('Y-m'))
             ->subMonthNoOverflow()
             ->format('Y-m');
-        $this->resetPage();
     }
 
     /**
@@ -119,24 +110,6 @@ class extends Component
         }
 
         $this->monthFilter = $targetMonth;
-        $this->resetPage();
-    }
-
-    /**
-     * Reset halaman paginasi saat filter kategori berubah.
-     */
-    public function updatedCategoryFilter(): void
-    {
-        $this->resetPage();
-    }
-
-    /**
-     * Reset halaman paginasi saat filter aliran dana berubah.
-     */
-    public function updatedFlowFilter(): void
-    {
-        $this->flowFilter = $this->flowFilter ?? '';
-        $this->resetPage();
     }
 
     /**
@@ -145,7 +118,6 @@ class extends Component
     public function setFlowFilter(string $flow): void
     {
         $this->flowFilter = $flow;
-        $this->resetPage();
     }
 
     /**
@@ -157,7 +129,6 @@ class extends Component
         $this->flowFilter = '';
         $this->monthFilter = now()->format('Y-m');
         $this->categoryFilter = null;
-        $this->resetPage();
     }
 
     /**
@@ -433,7 +404,11 @@ class extends Component
         ]);
 
         try {
-            $transactionService->updateTransaction((int) $validated['editTransactionId'], [
+            $transaction = Transaction::query()
+                ->where('wallet_id', $this->wallet->id)
+                ->findOrFail((int) $validated['editTransactionId']);
+
+            $transactionService->updateTransaction($transaction->id, [
                 'category_id' => $validated['edit_tx_category_id'] ? (int) $validated['edit_tx_category_id'] : null,
                 'amount' => $validated['edit_tx_amount'],
                 'transaction_date' => $validated['edit_tx_date'],
@@ -627,12 +602,12 @@ class extends Component
     }
 
     /**
-     * Daftar riwayat mutasi transaksi kantong utama dengan paginasi dan filter lengkap.
+     * Daftar riwayat mutasi transaksi kantong utama dengan filter lengkap.
      *
-     * @return LengthAwarePaginator<Transaction>
+     * @return Collection<int, Transaction>
      */
     #[Computed]
-    public function transactions(): LengthAwarePaginator
+    public function transactions(): Collection
     {
         $search = trim($this->search);
 
@@ -663,7 +638,7 @@ class extends Component
             })
             ->latest('transaction_date')
             ->latest('id')
-            ->paginate(15);
+            ->get();
     }
 };
 ?>
