@@ -90,7 +90,7 @@ class extends Component
     {
         $this->wallet = $wallet;
         $this->monthFilter = now()->format('Y-m');
-        $now = now()->format('Y-m-d\TH:i');
+        $now = now()->format('Y-m-d');
         $this->income_date = $now;
         $this->expense_date = $now;
         $this->transfer_date = $now;
@@ -318,7 +318,7 @@ class extends Component
         $this->income_category_id = null;
         $this->income_amount = '';
         $this->income_description = '';
-        $this->income_date = now()->format('Y-m-d\TH:i');
+        $this->income_date = now()->format('Y-m-d');
         $this->incomeModal = true;
     }
 
@@ -420,7 +420,7 @@ class extends Component
         $this->expense_category_id = $defaultExpenseCat?->id;
         $this->expense_amount = '';
         $this->expense_description = '';
-        $this->expense_date = now()->format('Y-m-d\TH:i');
+        $this->expense_date = now()->format('Y-m-d');
         $this->expenseModal = true;
     }
 
@@ -471,7 +471,7 @@ class extends Component
         $this->transfer_destination_wallet_id = null;
         $this->transfer_amount = '';
         $this->transfer_description = '';
-        $this->transfer_date = now()->format('Y-m-d\TH:i');
+        $this->transfer_date = now()->format('Y-m-d');
         $this->transferModal = true;
     }
 
@@ -657,7 +657,7 @@ class extends Component
         $this->edit_tx_type = $tx->type instanceof TransactionTypeEnum ? $tx->type->value : (string) $tx->type;
         $this->edit_tx_category_id = $tx->category_id;
         $this->edit_tx_amount = (float) $tx->amount;
-        $this->edit_tx_date = $tx->transaction_date?->format('Y-m-d\TH:i') ?? now()->format('Y-m-d\TH:i');
+        $this->edit_tx_date = $tx->transaction_date?->format('Y-m-d') ?? now()->format('Y-m-d');
         $this->edit_tx_description = (string) $tx->description;
         unset($this->editTxCategoryOptions);
         $this->editTransactionModal = true;

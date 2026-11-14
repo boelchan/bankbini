@@ -79,7 +79,7 @@ class extends Component
     {
         $this->wallet = $walletService->getPrimaryWallet(Auth::id());
         $this->monthFilter = now()->format('Y-m');
-        $now = now()->format('Y-m-d\TH:i');
+        $now = now()->format('Y-m-d');
         $this->income_date = $now;
         $this->expense_date = $now;
         $this->transfer_date = $now;
@@ -146,7 +146,7 @@ class extends Component
         $this->income_source_wallet_id = null;
         $this->income_category_id = $defaultIncomeCat?->id;
         $this->income_amount = '';
-        $this->income_date = now()->format('Y-m-d\TH:i');
+        $this->income_date = now()->format('Y-m-d');
         $this->income_description = '';
         $this->incomeModal = true;
     }
@@ -168,7 +168,7 @@ class extends Component
                 'income_source_wallet_id.required' => 'Pilih kantong sumber dana terlebih dahulu.',
                 'income_amount.required' => 'Nominal uang wajib diisi.',
                 'income_amount.gt' => 'Nominal uang harus lebih dari Rp0.',
-                'income_date.required' => 'Tanggal dan waktu transaksi wajib diisi.',
+                'income_date.required' => 'Tanggal transaksi wajib diisi.',
             ]);
 
             try {
@@ -202,7 +202,7 @@ class extends Component
         ], [
             'income_amount.required' => 'Nominal uang masuk wajib diisi.',
             'income_amount.gt' => 'Nominal uang masuk harus lebih dari Rp0.',
-            'income_date.required' => 'Tanggal dan waktu transaksi wajib diisi.',
+            'income_date.required' => 'Tanggal transaksi wajib diisi.',
         ]);
 
         try {
@@ -239,7 +239,7 @@ class extends Component
 
         $this->expense_category_id = $defaultExpenseCat?->id;
         $this->expense_amount = '';
-        $this->expense_date = now()->format('Y-m-d\TH:i');
+        $this->expense_date = now()->format('Y-m-d');
         $this->expense_description = '';
         $this->expenseModal = true;
     }
@@ -288,7 +288,7 @@ class extends Component
     {
         $this->transfer_destination_wallet_id = null;
         $this->transfer_amount = '';
-        $this->transfer_date = now()->format('Y-m-d\TH:i');
+        $this->transfer_date = now()->format('Y-m-d');
         $this->transfer_description = '';
         $this->transferModal = true;
     }
@@ -379,7 +379,7 @@ class extends Component
         $this->edit_tx_type = $tx->type instanceof TransactionTypeEnum ? $tx->type->value : (string) $tx->type;
         $this->edit_tx_category_id = $tx->category_id;
         $this->edit_tx_amount = (float) $tx->amount;
-        $this->edit_tx_date = $tx->transaction_date?->format('Y-m-d\TH:i') ?? now()->format('Y-m-d\TH:i');
+        $this->edit_tx_date = $tx->transaction_date?->format('Y-m-d') ?? now()->format('Y-m-d');
         $this->edit_tx_description = (string) $tx->description;
         unset($this->editTxCategoryOptions);
         $this->editTransactionModal = true;

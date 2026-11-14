@@ -396,10 +396,7 @@
                     />
                 </x-amount-calculator>
 
-                <x-input
-                    type="datetime-local"
-                    wire:model="income_date"
-                />
+                <x-date wire:model="income_date" />
             </div>
 
             <x-input
@@ -440,10 +437,7 @@
                     />
                 </x-amount-calculator>
 
-                <x-input
-                    type="datetime-local"
-                    wire:model="expense_date"
-                />
+                <x-date wire:model="expense_date" />
             </div>
 
             <x-input
@@ -489,10 +483,7 @@
                     />
                 </x-amount-calculator>
 
-                <x-input
-                    type="datetime-local"
-                    wire:model="transfer_date"
-                />
+                <x-date wire:model="transfer_date" />
             </div>
 
             <x-input
@@ -603,10 +594,7 @@
                     />
                 </x-amount-calculator>
 
-                <x-input
-                    type="datetime-local"
-                    wire:model="edit_tx_date"
-                />
+                <x-date wire:model="edit_tx_date" />
             </div>
 
             <x-input
