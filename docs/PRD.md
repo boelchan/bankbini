@@ -16,7 +16,7 @@ Aplikasi menggunakan **3 menu utama** yang intuitif, ramah, dan terstruktur untu
 2. **Kantong (`/pockets`)**:
    - Menampilkan **daftar seluruh kantong-kantong keluarga** (*Pocket Grid*).
    - Menampilkan ringkasan metrik saldo: Total Seluruh Saldo, Pemasukan Bulan Ini, dan Pengeluaran Bulan Ini.
-   - Kotak-kotak kantong memakai latar **putih transparan dengan efek kaca (*glassmorphism*)**, tersusun **2 kolom** di semua ukuran layar. Setiap kotak menampilkan **ikon emoji besar** yang lucu (mis. 👛 🐷 🍰 🏖️ 🎡), nama kantong, dan saldo; mengetuk kotak membuka halaman detail kantong. Form tambah/ubah kantong menampilkan **bentuk ikon langsung pada setiap pilihan** (label berisi emoji) dan mendukung pencarian ikon.
+   - Kotak-kotak kantong memakai latar **putih transparan dengan efek kaca (*glassmorphism*)**, tersusun **2 kolom** di semua ukuran layar. Setiap kotak menampilkan **ikon emoji besar** yang lucu (mis. 👛 🐷 🍰 🏖️ 🎡 👧 👦 👪 🧸 🪆 🚂), nama kantong, dan saldo; mengetuk kotak membuka halaman detail kantong. Form tambah/ubah kantong menampilkan **bentuk ikon langsung pada setiap pilihan** (label berisi emoji) dan mendukung pencarian ikon.
    - Tombol **Tambah Kantong Baru** di header halaman untuk membuat pos anggaran baru.
 
 3. **Rekap (`/recap`)**:
@@ -34,7 +34,7 @@ Aplikasi menggunakan **3 menu utama** yang intuitif, ramah, dan terstruktur untu
 
 ## 3. Halaman Detail Kantong (`/pockets/{wallet}`)
 Diakses dengan mengetuk kotak kantong pada halaman **Kantong**:
-- Menampilkan informasi kantong, status (`Aktif` / `Dibekukan`), total uang masuk, total uang keluar, dan saldo saat ini. Total masuk & keluar mengikuti **bulan aktif** riwayat transaksi di bawahnya.
+- Menampilkan informasi kantong, status (`Aktif` / `Dibekukan`), total uang masuk, total uang keluar, dan saldo saat ini. Ikon emoji kantong ditampilkan **besar di atas nama kantong** agar jenis kantong langsung dikenali. Total masuk & keluar mengikuti **bulan aktif** riwayat transaksi di bawahnya.
 - **Tata letak mengikuti halaman Home**: kartu kantong (nama, badge, deskripsi, saldo, ringkasan masuk/keluar, serta tombol aksi), lalu kartu filter riwayat transaksi terpisah, dan terakhir kartu riwayat transaksi.
 - Menyediakan 3 tombol transaksi utama untuk kantong tersebut (melayang di bagian bawah ponsel):
   1. **↓ Masuk**: Pilih sumber uang dari **Pemasukan Baru (Langsung)** atau **Ambil dari Kantong Lain**.

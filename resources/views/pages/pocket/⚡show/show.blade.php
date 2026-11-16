@@ -85,6 +85,9 @@
     <div class="py-2">
         <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div class="space-y-2 min-w-0 flex-1 flex flex-col items-center text-center">
+                <span class="text-4xl leading-none sm:text-5xl" role="img" aria-label="{{ $wallet->iconEnum()->label() }}">
+                    {{ $wallet->iconEnum()->emoji() }}
+                </span>
                 <div class="flex items-center justify-center gap-1.5 flex-wrap">
                     <h2 class="text-base sm:text-lg font-bold {{ $colorEnum->accentTextClasses() }}">{{ $wallet->name }}</h2>
                     @if ($wallet->is_primary)

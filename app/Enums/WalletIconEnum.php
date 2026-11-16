@@ -38,6 +38,12 @@ enum WalletIconEnum: string
     case FERRIS_WHEEL = 'ferris-wheel';
     case POPCORN = 'popcorn';
     case MUSIC = 'music';
+    case GIRL = 'girl';
+    case BOY = 'boy';
+    case PARENTS = 'parents';
+    case TOY = 'toy';
+    case DOLL = 'doll';
+    case TOY_TRAIN = 'toy-train';
 
     /**
      * Mengambil label nama ikon dalam Bahasa Indonesia.
@@ -77,6 +83,12 @@ enum WalletIconEnum: string
             self::FERRIS_WHEEL => 'Wahana & Hiburan',
             self::POPCORN => 'Nonton & Film',
             self::MUSIC => 'Musik & Konser',
+            self::GIRL => 'Anak Perempuan',
+            self::BOY => 'Anak Laki-laki',
+            self::PARENTS => 'Orang Tua & Keluarga',
+            self::TOY => 'Mainan & Boneka',
+            self::DOLL => 'Boneka Anak Perempuan',
+            self::TOY_TRAIN => 'Mainan Anak Laki-laki',
         };
     }
 
@@ -118,6 +130,12 @@ enum WalletIconEnum: string
             self::FERRIS_WHEEL => '🎡',
             self::POPCORN => '🍿',
             self::MUSIC => '🎶',
+            self::GIRL => '👧',
+            self::BOY => '👦',
+            self::PARENTS => '👪',
+            self::TOY => '🧸',
+            self::DOLL => '🪆',
+            self::TOY_TRAIN => '🚂',
         };
     }
 
