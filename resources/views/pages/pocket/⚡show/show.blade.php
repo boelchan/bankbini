@@ -385,6 +385,7 @@
             @endif
 
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <x-date wire:model="income_date" />
                 <x-amount-calculator model="income_amount">
                     <x-currency
                         wire:model="income_amount"
@@ -396,7 +397,6 @@
                     />
                 </x-amount-calculator>
 
-                <x-date wire:model="income_date" />
             </div>
 
             <x-input
@@ -425,6 +425,7 @@
             />
 
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <x-date wire:model="expense_date" />
                 <x-amount-calculator model="expense_amount">
                     <x-currency
                         wire:model="expense_amount"
@@ -437,7 +438,6 @@
                     />
                 </x-amount-calculator>
 
-                <x-date wire:model="expense_date" />
             </div>
 
             <x-input
@@ -471,6 +471,7 @@
             @endif
 
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <x-date wire:model="transfer_date" />
                 <x-amount-calculator model="transfer_amount">
                     <x-currency
                         wire:model="transfer_amount"
@@ -483,7 +484,6 @@
                     />
                 </x-amount-calculator>
 
-                <x-date wire:model="transfer_date" />
             </div>
 
             <x-input
@@ -583,6 +583,7 @@
             />
 
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <x-date wire:model="edit_tx_date" />
                 <x-amount-calculator model="edit_tx_amount">
                     <x-currency
                         wire:model="edit_tx_amount"
@@ -594,7 +595,6 @@
                     />
                 </x-amount-calculator>
 
-                <x-date wire:model="edit_tx_date" />
             </div>
 
             <x-input
