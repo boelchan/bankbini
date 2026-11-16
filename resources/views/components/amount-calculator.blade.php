@@ -79,9 +79,9 @@
         x-on:click="toggle()"
         title="Kalkulator mini"
         aria-label="Buka kalkulator mini"
-        class="absolute right-1 top-0.5 z-10 flex size-8 cursor-pointer items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-100 hover:text-emerald-600"
+        class="absolute right-0.5 top-0.5 z-10 flex size-8 cursor-pointer items-center justify-center rounded-lg text-slate-600 transition-colors hover:text-rose-600"
     >
-        <x-ti-calculator class="size-4" />
+        <x-ti-calculator class="size-5" />
     </button>
 
     <div
