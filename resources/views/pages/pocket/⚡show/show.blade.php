@@ -249,11 +249,11 @@
                                     <x-transaction-icon :icon="$tx->category?->icon" :type="$tx->type" class="size-5" />
                                 </div>
 
-                                {{-- Info Keterangan & Metadata --}}
+                                {{-- Info Kategori & Keterangan --}}
                                 <div class="min-w-0 flex-1">
                                     <div class="flex items-center justify-between gap-2">
-                                        <h4 class="text-sm font-semibold text-slate-900 truncate" title="{{ $tx->displayDescription() }}">
-                                            {{ $tx->displayDescription() }}
+                                        <h4 class="text-sm font-semibold text-slate-900 truncate" title="{{ $tx->displayCategoryName() }}">
+                                            {{ $tx->displayCategoryName() }}
                                         </h4>
                                         {{-- Nominal Transaksi --}}
                                         <span class="text-sm sm:text-base font-bold tabular-nums shrink-0 {{ $tx->type->amountClass() }}">
@@ -262,18 +262,10 @@
                                     </div>
 
                                     <div class="mt-0.5 flex items-center justify-between gap-2 text-xs text-slate-500">
-                                        {{-- Kiri: Kategori / Lawan Transfer --}}
-                                        <div class="flex items-center gap-1.5 truncate">
-                                            @if ($tx->category)
-                                                <span class="truncate font-medium text-slate-700">{{ $tx->category->name }}</span>
-                                            @elseif ($tx->counterpart_wallet_name_snapshot)
-                                                <span class="truncate font-medium text-sky-800">
-                                                    {{ $tx->type === \App\Enums\TransactionTypeEnum::TRANSFER_IN ? 'Dari: ' : 'Ke: ' }}{{ $tx->resolvedCounterpartWalletName() }}
-                                                </span>
-                                            @else
-                                                <span class="truncate">{{ $tx->type->label() }}</span>
-                                            @endif
-                                        </div>
+                                        {{-- Kiri: Keterangan Transaksi --}}
+                                        <p class="min-w-0 truncate" title="{{ $tx->displayDescription() }}">
+                                            {{ $tx->displayDescription() }}
+                                        </p>
 
                                         <div class="flex items-center gap-1 shrink-0">
                                             @if (! in_array($tx->type, [\App\Enums\TransactionTypeEnum::TRANSFER_IN, \App\Enums\TransactionTypeEnum::TRANSFER_OUT], true) && empty($tx->transfer_reference))
