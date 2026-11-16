@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Enums\TransactionTypeEnum;
+use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Model;
@@ -156,6 +157,29 @@ class Transaction extends Model
         }
 
         return $this->category_name_snapshot ?: ($this->category?->name ?? 'Umum');
+    }
+
+    /**
+     * Mengambil label judul grup tanggal pada riwayat transaksi.
+     *
+     * Tanggal hari ini dan kemarin memakai sapaan "Hari Ini" / "Kemarin",
+     * sedangkan tanggal lain memakai tanggal ringkas berbahasa Indonesia.
+     */
+    public static function dateGroupLabel(?CarbonInterface $date): string
+    {
+        if ($date === null) {
+            return 'Tanpa Tanggal';
+        }
+
+        if ($date->isToday()) {
+            return 'Hari Ini';
+        }
+
+        if ($date->isYesterday()) {
+            return 'Kemarin';
+        }
+
+        return $date->locale('id')->translatedFormat('d M Y');
     }
 
     /**

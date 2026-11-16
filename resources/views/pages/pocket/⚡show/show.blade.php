@@ -237,7 +237,7 @@
                     {{-- Header Grup Tanggal --}}
                     <div class="bg-slate-50/70 px-3.5 py-1.5 sm:px-4">
                         <span class="text-xs font-semibold text-slate-500">
-                            {{ $rows->first()->transaction_date?->translatedFormat('d M Y') ?? 'Tanpa Tanggal' }}
+                            {{ \App\Models\Transaction::dateGroupLabel($rows->first()->transaction_date) }}
                         </span>
                     </div>
 
