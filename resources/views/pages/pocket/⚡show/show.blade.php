@@ -500,7 +500,8 @@
                 <x-select.styled
                     label="Ikon Kantong *"
                     wire:model="edit_icon"
-                    :options="\App\Enums\WalletIconEnum::choices()"
+                    :options="\App\Enums\WalletIconEnum::emojiChoices()"
+                    searchable
                 />
 
                 <x-select.styled

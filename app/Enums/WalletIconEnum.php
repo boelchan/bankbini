@@ -22,6 +22,22 @@ enum WalletIconEnum: string
     case COIN = 'coin';
     case BRIEFCASE = 'briefcase';
     case DEVICE_GAMEPAD_2 = 'device-gamepad-2';
+    case SHOPPING_CART = 'shopping-cart';
+    case CAKE = 'cake';
+    case COFFEE = 'coffee';
+    case BABY_CARRIAGE = 'baby-carriage';
+    case CAT = 'cat';
+    case BASKET = 'basket';
+    case GAS_STATION = 'gas-station';
+    case DEVICE_MOBILE = 'device-mobile';
+    case RIBBON = 'ribbon';
+    case BOOK = 'book';
+    case BEACH = 'beach';
+    case MOUNTAIN = 'mountain';
+    case TENT = 'tent';
+    case FERRIS_WHEEL = 'ferris-wheel';
+    case POPCORN = 'popcorn';
+    case MUSIC = 'music';
 
     /**
      * Mengambil label nama ikon dalam Bahasa Indonesia.
@@ -45,6 +61,63 @@ enum WalletIconEnum: string
             self::COIN => 'Investasi & Emas',
             self::BRIEFCASE => 'Gaji & Usaha',
             self::DEVICE_GAMEPAD_2 => 'Hiburan & Hobi',
+            self::SHOPPING_CART => 'Belanja Bulanan',
+            self::CAKE => 'Jajan & Kue',
+            self::COFFEE => 'Kopi & Nongkrong',
+            self::BABY_CARRIAGE => 'Anak & Bayi',
+            self::CAT => 'Kucing & Peliharaan',
+            self::BASKET => 'Belanja Dapur',
+            self::GAS_STATION => 'Bensin & Perjalanan',
+            self::DEVICE_MOBILE => 'Pulsa & Internet',
+            self::RIBBON => 'Perawatan & Kecantikan',
+            self::BOOK => 'Buku & Bacaan',
+            self::BEACH => 'Pantai & Liburan',
+            self::MOUNTAIN => 'Gunung & Alam',
+            self::TENT => 'Kemah & Camping',
+            self::FERRIS_WHEEL => 'Wahana & Hiburan',
+            self::POPCORN => 'Nonton & Film',
+            self::MUSIC => 'Musik & Konser',
+        };
+    }
+
+    /**
+     * Mengambil simbol ikon yang tampil di kartu dan pilihan ikon.
+     */
+    public function emoji(): string
+    {
+        return match ($this) {
+            self::WALLET => '👛',
+            self::PIG_MONEY => '🐷',
+            self::SHOPPING_BAG => '🛍️',
+            self::HEART => '💖',
+            self::PLANE_TILT => '✈️',
+            self::HOME => '🏠',
+            self::TOOLS_KITCHEN_2 => '🍳',
+            self::SPARKLES => '✨',
+            self::GIFT => '🎁',
+            self::FIRST_AID_KIT => '🩹',
+            self::SCHOOL => '🎓',
+            self::CAR => '🚗',
+            self::RECEIPT => '🧾',
+            self::COIN => '🪙',
+            self::BRIEFCASE => '💼',
+            self::DEVICE_GAMEPAD_2 => '🎮',
+            self::SHOPPING_CART => '🛒',
+            self::CAKE => '🍰',
+            self::COFFEE => '☕',
+            self::BABY_CARRIAGE => '👶',
+            self::CAT => '🐱',
+            self::BASKET => '🧺',
+            self::GAS_STATION => '⛽',
+            self::DEVICE_MOBILE => '📱',
+            self::RIBBON => '🎀',
+            self::BOOK => '📚',
+            self::BEACH => '🏖️',
+            self::MOUNTAIN => '🏔️',
+            self::TENT => '⛺',
+            self::FERRIS_WHEEL => '🎡',
+            self::POPCORN => '🍿',
+            self::MUSIC => '🎶',
         };
     }
 
@@ -68,6 +141,22 @@ enum WalletIconEnum: string
         return array_map(
             fn (self $case): array => [
                 'label' => $case->label(),
+                'value' => $case->value,
+            ],
+            self::cases()
+        );
+    }
+
+    /**
+     * Mengambil daftar pilihan ikon kantong beserta simbolnya.
+     *
+     * @return array<int, array{label: string, value: string}>
+     */
+    public static function emojiChoices(): array
+    {
+        return array_map(
+            fn (self $case): array => [
+                'label' => $case->emoji() . '  ' . $case->label(),
                 'value' => $case->value,
             ],
             self::cases()

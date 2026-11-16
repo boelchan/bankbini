@@ -79,21 +79,18 @@
     @else
         <div class="grid grid-cols-2 gap-3 sm:gap-4">
             @foreach ($this->wallets as $wallet)
-                @php
-                    $colorEnum = $wallet->colorEnum();
-                @endphp
                 <a
                     href="{{ route('pockets.show', $wallet) }}"
                     wire:navigate
                     class="block rounded-2xl focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-500 focus-visible:ring-offset-2"
                     aria-label="Lihat detail kantong {{ $wallet->name }}"
                 >
-                    <x-card round="2xl" class="h-full min-h-24 {{ $colorEnum->cardClasses() }}">
+                    <x-card round="2xl" class="glass-tile h-full min-h-24">
                         <div class="flex h-full flex-col items-center justify-between gap-2 text-center">
-                            <span class="flex size-12 shrink-0 items-center justify-center rounded-2xl sm:size-14 {{ $colorEnum->iconBoxClasses() }}">
-                                <x-dynamic-component :component="'ti-' . $wallet->iconEnum()->value" class="size-6 sm:size-7" />
+                            <span class="text-3xl leading-none sm:text-4xl" role="img" aria-label="{{ $wallet->iconEnum()->label() }}">
+                                {{ $wallet->iconEnum()->emoji() }}
                             </span>
-                            <h3 class="w-full truncate text-sm font-semibold {{ $colorEnum->accentTextClasses() }}">
+                            <h3 class="w-full truncate text-sm font-semibold text-slate-800">
                                 {{ $wallet->name }}
                             </h3>
                             <p class="w-full truncate text-lg font-bold text-slate-900 tabular-nums sm:text-xl">
@@ -119,7 +116,8 @@
                 <x-select.styled
                     label="Ikon Kantong *"
                     wire:model="pocket_icon"
-                    :options="\App\Enums\WalletIconEnum::choices()"
+                    :options="\App\Enums\WalletIconEnum::emojiChoices()"
+                    searchable
                 />
 
                 <x-select.styled
