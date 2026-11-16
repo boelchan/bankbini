@@ -88,12 +88,15 @@
                     class="block rounded-2xl focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-500 focus-visible:ring-offset-2"
                     aria-label="Lihat detail kantong {{ $wallet->name }}"
                 >
-                    <x-card round="2xl" class="h-full min-h-20 {{ $colorEnum->cardClasses() }}">
-                        <div class="flex h-full flex-col justify-between gap-3">
-                            <h3 class="truncate text-sm font-semibold {{ $colorEnum->accentTextClasses() }}">
+                    <x-card round="2xl" class="h-full min-h-24 {{ $colorEnum->cardClasses() }}">
+                        <div class="flex h-full flex-col items-center justify-between gap-2 text-center">
+                            <span class="flex size-12 shrink-0 items-center justify-center rounded-2xl sm:size-14 {{ $colorEnum->iconBoxClasses() }}">
+                                <x-dynamic-component :component="'ti-' . $wallet->iconEnum()->value" class="size-6 sm:size-7" />
+                            </span>
+                            <h3 class="w-full truncate text-sm font-semibold {{ $colorEnum->accentTextClasses() }}">
                                 {{ $wallet->name }}
                             </h3>
-                            <p class="truncate text-lg font-bold text-slate-900 tabular-nums sm:text-xl">
+                            <p class="w-full truncate text-lg font-bold text-slate-900 tabular-nums sm:text-xl">
                                 {{ $wallet->formattedBalance() }}
                             </p>
                         </div>

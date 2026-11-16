@@ -16,7 +16,7 @@ Aplikasi menggunakan **3 menu utama** yang intuitif, ramah, dan terstruktur untu
 2. **Kantong (`/pockets`)**:
    - Menampilkan **daftar seluruh kantong-kantong keluarga** (*Pocket Grid*).
    - Menampilkan ringkasan metrik saldo: Total Seluruh Saldo, Pemasukan Bulan Ini, dan Pengeluaran Bulan Ini.
-   - Kotak-kotak kantong dengan warna pastel manis (*playful candy colors*) tersusun **2 kolom** di semua ukuran layar. Setiap kotak hanya menampilkan nama kantong dan saldo; mengetuk kotak membuka halaman detail kantong.
+   - Kotak-kotak kantong dengan warna pastel manis (*playful candy colors*) tersusun **2 kolom** di semua ukuran layar. Setiap kotak menampilkan **ikon kantong berukuran besar**, nama kantong, dan saldo; mengetuk kotak membuka halaman detail kantong.
    - Tombol **Tambah Kantong Baru** di header halaman untuk membuat pos anggaran baru.
 
 3. **Rekap (`/recap`)**:
