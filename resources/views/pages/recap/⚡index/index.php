@@ -62,6 +62,9 @@ class extends Component
     /* Kantong utama yang menjadi pilihan bawaan filter */
     public ?int $defaultWalletId = null;
 
+    /* Tab grafik tren: pengeluaran atau pemasukan */
+    public string $trendType = 'expense';
+
     /**
      * Inisialisasi komponen.
      */
@@ -643,10 +646,11 @@ class extends Component
     }
 
     /**
-     * Data grafik tren pengeluaran per kategori pada 5 bulan terakhir.
+     * Data grafik tren per kategori pada 5 bulan terakhir.
      *
-     * Lima bulan dihitung mundur dari bulan yang sedang dipilih, mengikuti filter kantong.
-     * Kategori diurutkan dari pengeluaran terbesar; sisanya digabung menjadi "Kategori Lainnya".
+     * Lima bulan dihitung mundur dari bulan yang sedang dipilih, mengikuti filter kantong dan
+     * pilihan jenis transaksi (pengeluaran atau pemasukan). Kategori diurutkan dari nilai terbesar;
+     * sisanya digabung menjadi "Kategori Lainnya".
      *
      * @return array{labels: array<int, string>, series: array<int, array{name: string, data: array<int, float>}>, range_label: string, has_data: bool}
      */
@@ -668,8 +672,10 @@ class extends Component
             ->map(fn (Carbon $month): string => $month->locale('id')->translatedFormat($crossesYear ? 'M y' : 'M'))
             ->all();
 
+        $type = TransactionTypeEnum::tryFrom($this->trendType) ?? TransactionTypeEnum::EXPENSE;
+
         $rows = Transaction::query()
-            ->where('type', TransactionTypeEnum::EXPENSE)
+            ->where('type', $type)
             ->when($this->walletFilter !== null, fn ($q) => $q->where('wallet_id', $this->walletFilter))
             ->whereBetween('transaction_date', [
                 $months->first()->copy()->startOfMonth(),
@@ -692,7 +698,9 @@ class extends Component
                 'totals' => array_fill_keys($monthKeys, 0.0),
             ];
 
-            $grouped[$key]['totals'][$row->ym] += (float) $row->total_amount;
+            $monthKey = (string) $row->ym;
+            $grouped[$key]['totals'][$monthKey] = ($grouped[$key]['totals'][$monthKey] ?? 0.0)
+                + (float) $row->total_amount;
         }
 
         usort($grouped, fn (array $left, array $right): int => array_sum($right['totals']) <=> array_sum($left['totals']));
@@ -705,7 +713,7 @@ class extends Component
                 'name' => 'Kategori Lainnya',
                 'totals' => array_map(
                     fn (string $monthKey): float => array_sum(array_map(
-                        fn (array $entry): float => $entry['totals'][$monthKey],
+                        fn (array $entry): float => $entry['totals'][$monthKey] ?? 0.0,
                         $rest
                     )),
                     $monthKeys
@@ -719,7 +727,7 @@ class extends Component
                 fn (array $entry): array => [
                     'name' => $entry['name'],
                     'data' => array_map(
-                        fn (string $monthKey): float => round($entry['totals'][$monthKey], 2),
+                        fn (string $monthKey): float => round($entry['totals'][$monthKey] ?? 0.0, 2),
                         $monthKeys
                     ),
                 ],
@@ -730,6 +738,16 @@ class extends Component
                 . $anchor->locale('id')->translatedFormat('M Y'),
             'has_data' => $top !== [],
         ];
+    }
+
+    /**
+     * Mengubah sumber data grafik tren antara pengeluaran dan pemasukan.
+     */
+    public function setTrendType(string $type): void
+    {
+        $this->trendType = TransactionTypeEnum::tryFrom($type) === TransactionTypeEnum::INCOME
+            ? TransactionTypeEnum::INCOME->value
+            : TransactionTypeEnum::EXPENSE->value;
     }
 
     /**
