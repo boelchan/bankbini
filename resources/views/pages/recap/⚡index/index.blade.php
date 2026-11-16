@@ -366,6 +366,45 @@
         @endif
     </x-card>
 
+    {{-- Grafik Tren Pengeluaran per Kategori 5 Bulan Terakhir --}}
+    @php
+        $trend = $this->categoryTrendChart;
+    @endphp
+
+    <x-card paddingless>
+        <div class="flex flex-col gap-1 px-4 pt-4 sm:flex-row sm:items-start sm:justify-between">
+            <div class="min-w-0">
+                <h2 class="text-sm font-semibold text-slate-900 sm:text-base">Tren 5 Bulan Terakhir per Kategori</h2>
+                <p class="mt-0.5 text-xs text-slate-500">
+                    Total pengeluaran tiap kategori dari bulan ke bulan, mengikuti filter kantong dan bulan di atas.
+                </p>
+            </div>
+
+            <p class="text-xs font-medium text-slate-500 sm:text-right">{{ $trend['range_label'] }}</p>
+        </div>
+
+        @if ($trend['has_data'])
+            <div class="px-2 pt-2 pb-4 sm:px-4">
+                <x-chart
+                    :labels="$trend['labels']"
+                    :series="$trend['series']"
+                    bar
+                    stacked
+                    grid
+                    legend
+                    tooltip
+                    color="emerald"
+                    :formatter="fn (float $value): string => 'Rp ' . number_format($value, 0, ',', '.')"
+                    height="280"
+                />
+            </div>
+        @else
+            <p class="px-4 pt-3 pb-5 text-sm text-slate-500">
+                Belum ada pengeluaran pada 5 bulan terakhir. Grafik akan muncul otomatis setelah ada transaksi.
+            </p>
+        @endif
+    </x-card>
+
     {{-- Modal Tambah / Edit Saldo Hitungan Manual --}}
     <x-modal wire="reconcileModal" title="{{ $editingReconcileId ? 'Ubah Saldo Hitungan Manual' : 'Tambah Saldo Hitungan Manual' }}">
         <form wire:submit="saveReconcile" class="space-y-4">

@@ -643,6 +643,96 @@ class extends Component
     }
 
     /**
+     * Data grafik tren pengeluaran per kategori pada 5 bulan terakhir.
+     *
+     * Lima bulan dihitung mundur dari bulan yang sedang dipilih, mengikuti filter kantong.
+     * Kategori diurutkan dari pengeluaran terbesar; sisanya digabung menjadi "Kategori Lainnya".
+     *
+     * @return array{labels: array<int, string>, series: array<int, array{name: string, data: array<int, float>}>, range_label: string, has_data: bool}
+     */
+    #[Computed]
+    public function categoryTrendChart(): array
+    {
+        $anchor = filled($this->monthFilter)
+            ? Carbon::createFromFormat('Y-m', $this->monthFilter)->startOfMonth()
+            : now()->startOfMonth();
+
+        $months = collect(range(4, 0))
+            ->map(fn (int $offset): Carbon => $anchor->copy()->subMonthsNoOverflow($offset))
+            ->values();
+
+        $monthKeys = $months->map(fn (Carbon $month): string => $month->format('Y-m'))->all();
+        $crossesYear = $months->first()->year !== $months->last()->year;
+
+        $labels = $months
+            ->map(fn (Carbon $month): string => $month->locale('id')->translatedFormat($crossesYear ? 'M y' : 'M'))
+            ->all();
+
+        $rows = Transaction::query()
+            ->where('type', TransactionTypeEnum::EXPENSE)
+            ->when($this->walletFilter !== null, fn ($q) => $q->where('wallet_id', $this->walletFilter))
+            ->whereBetween('transaction_date', [
+                $months->first()->copy()->startOfMonth(),
+                $anchor->copy()->endOfMonth(),
+            ])
+            ->with('category:id,name')
+            ->selectRaw("DATE_FORMAT(transaction_date, '%Y-%m') as ym, category_id, category_name_snapshot, SUM(amount) as total_amount")
+            ->groupBy('ym', 'category_id', 'category_name_snapshot')
+            ->get();
+
+        $grouped = [];
+
+        foreach ($rows as $row) {
+            $key = $row->category_id !== null
+                ? 'id:' . $row->category_id
+                : 'snapshot:' . ($row->category_name_snapshot ?? 'Lainnya');
+
+            $grouped[$key] ??= [
+                'name' => $row->category?->name ?? $row->category_name_snapshot ?? 'Lainnya',
+                'totals' => array_fill_keys($monthKeys, 0.0),
+            ];
+
+            $grouped[$key]['totals'][$row->ym] += (float) $row->total_amount;
+        }
+
+        usort($grouped, fn (array $left, array $right): int => array_sum($right['totals']) <=> array_sum($left['totals']));
+
+        $top = array_slice($grouped, 0, 5);
+        $rest = array_slice($grouped, 5);
+
+        if ($rest !== []) {
+            $top[] = [
+                'name' => 'Kategori Lainnya',
+                'totals' => array_map(
+                    fn (string $monthKey): float => array_sum(array_map(
+                        fn (array $entry): float => $entry['totals'][$monthKey],
+                        $rest
+                    )),
+                    $monthKeys
+                ),
+            ];
+        }
+
+        return [
+            'labels' => $labels,
+            'series' => array_map(
+                fn (array $entry): array => [
+                    'name' => $entry['name'],
+                    'data' => array_map(
+                        fn (string $monthKey): float => round($entry['totals'][$monthKey], 2),
+                        $monthKeys
+                    ),
+                ],
+                $top
+            ),
+            'range_label' => $months->first()->locale('id')->translatedFormat('M Y')
+                . ' – '
+                . $anchor->locale('id')->translatedFormat('M Y'),
+            'has_data' => $top !== [],
+        ];
+    }
+
+    /**
      * Mengambil opsi seluruh kantong (termasuk yang sudah ditutup) untuk filter rekap.
      *
      * @return array<int, array{label: string, value: int}>
