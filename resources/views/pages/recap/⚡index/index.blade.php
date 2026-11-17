@@ -125,12 +125,14 @@
                         $usage = (float) ($cat['budget_percentage'] ?? $cat['percentage']);
                         $usageLabel = $this->formatPercentage($usage);
                         $tone = $this->budgetTone($usage, (float) ($cat['limit'] ?? 0));
-                        $isFulfilled = (float) ($cat['limit'] ?? 0) > 0 && $usage >= 100;
+                        $hasLimit = (float) ($cat['limit'] ?? 0) > 0;
+                        $isFulfilled = $hasLimit && $usage >= 100;
+                        $limitStruck = $hasLimit && (float) $cat['amount'] > 0;
                     @endphp
                     <tr>
                         <td class="px-3 py-3 align-top">
                             <div class="flex items-center gap-1.5">
-                                <span class="min-w-0 truncate text-sm font-medium {{ $isFulfilled ? 'italic line-through':'' }} {{ $isOver ? 'text-rose-900' : 'text-slate-800' }}">
+                                <span class="min-w-0 truncate text-sm font-medium {{ $isFulfilled ? 'line-through':'' }} {{ $isOver ? 'text-rose-900' : 'text-slate-800' }}">
                                     {{ $cat['name'] }}
                                 </span>
                                 @if (! empty($cat['category_id']))
@@ -149,7 +151,7 @@
                         </td>
 
                         <td class="px-3 py-3 align-top">
-                            <span class="text-sm tabular-nums {{ $isFulfilled ? 'line-through' : '' }} {{ $isOver ? 'font-semibold text-rose-700' : 'text-slate-700' }}">
+                            <span class="text-sm tabular-nums {{ $limitStruck ? 'line-through' : '' }} {{ $isOver ? 'font-semibold text-rose-700' : 'text-slate-700' }}">
                                 {{ $cat['formatted_limit'] }}
                             </span>
                         </td>
@@ -159,7 +161,7 @@
                                 {{ $cat['formatted_amount'] }}
                             </p>
                             @if ($isOver)
-                                <span class="mt-0.5 text-xs font-semibold text-rose-700 line-through">
+                                <span class="mt-0.5 text-xs font-semibold text-rose-700">
                                     <span>+{{ number_format($cat['over_amount'], 0, ',', '.') }}</span>
                                 </span>
                             @endif
@@ -207,12 +209,14 @@
                         $kwUsage = (float) ($kw['percentage'] ?? 0);
                         $kwUsageLabel = $this->formatPercentage($kwUsage);
                         $kwTone = $this->budgetTone($kwUsage, (float) ($kw['limit'] ?? 0));
-                        $kwFulfilled = (float) ($kw['limit'] ?? 0) > 0 && $kwUsage >= 100;
+                        $kwHasLimit = (float) ($kw['limit'] ?? 0) > 0;
+                        $kwFulfilled = $kwHasLimit && $kwUsage >= 100;
+                        $kwLimitStruck = $kwHasLimit && (float) $kw['amount'] > 0;
                     @endphp
                     <tr wire:key="keyword-{{ $kw['id'] }}" >
                         <td class="px-3 py-3 align-top">
                             <div class="flex items-center gap-1.5">
-                                <span class="text-sm font-semibold {{ $kwFulfilled ? 'italic line-through':'' }} {{ $kw['is_over_limit'] ? 'text-rose-900' : 'text-slate-900' }}">
+                                <span class="text-sm font-semibold {{ $kwLimitStruck ? 'line-through':'' }} {{ $kw['is_over_limit'] ? 'text-rose-900' : 'text-slate-900' }}">
                                     {{ $kw['keyword'] }}
                                 </span>
                                 <x-button.circle
@@ -229,7 +233,7 @@
                         </td>
 
                         <td class="px-3 py-3 align-top">
-                            <span class="text-sm tabular-nums {{ $kwFulfilled ? 'line-through' : '' }} {{ $kw['is_over_limit'] ? 'font-semibold text-rose-700' : 'text-slate-700' }}">
+                            <span class="text-sm tabular-nums {{ $kwLimitStruck ? 'line-through' : '' }} {{ $kw['is_over_limit'] ? 'font-semibold text-rose-700' : 'text-slate-700' }}">
                                 {{ $kw['formatted_limit'] }}
                             </span>
                         </td>
@@ -240,7 +244,7 @@
                             </p>
     
                             @if ($kw['is_over_limit'])
-                                <span class="mt-0.5 text-xs font-semibold text-rose-700 line-through">
+                                <span class="mt-0.5 text-xs font-semibold text-rose-700">
                                     <span>+{{ number_format($kw['over_amount'], 0, ',', '.') }}</span>
                                 </span>
                             @endif
