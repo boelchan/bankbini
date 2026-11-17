@@ -85,16 +85,13 @@
     <div class="py-2">
         <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div class="space-y-2 min-w-0 flex-1 flex flex-col items-center text-center">
-                <span class="text-4xl leading-none sm:text-5xl" role="img" aria-label="{{ $wallet->iconEnum()->label() }}">
-                    {{ $wallet->iconEnum()->emoji() }}
+                <span class="text-4xl leading-none sm:text-5xl" role="img" aria-label="{{ $wallet->iconLabel() }}">
+                    {{ $wallet->iconEmoji() }}
                 </span>
                 <div class="flex items-center justify-center gap-1.5 flex-wrap">
                     <h2 class="text-base sm:text-lg font-bold {{ $colorEnum->accentTextClasses() }}">{{ $wallet->name }}</h2>
                     @if ($wallet->is_primary)
-                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-900 border border-amber-300 shadow-2xs">
                             <x-ti-star-filled class="size-3 text-amber-500" />
-                            <span>Kantong Utama</span>
-                        </span>
                     @endif
                     @if (!$wallet->isActive())
                         <x-badge :text="$wallet->status->label()" :color="$wallet->status->color()" sm light />
@@ -500,11 +497,12 @@
             <x-input label="Nama Kantong *" wire:model="edit_name" />
 
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <x-select.styled
+                <x-input
                     label="Ikon Kantong *"
                     wire:model="edit_icon"
-                    :options="\App\Enums\WalletIconEnum::emojiChoices()"
-                    searchable
+                    class="text-2xl! sm:text-2xl!"
+                    placeholder="👛"
+                    hint="Ketik atau tempel emoji favoritmu."
                 />
 
                 <x-select.styled

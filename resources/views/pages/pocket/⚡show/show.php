@@ -66,7 +66,7 @@ class extends Component
 
     /* Form Ubah Informasi Kantong */
     public string $edit_name = '';
-    public string $edit_icon = 'wallet';
+    public string $edit_icon = '👛';
     public string $edit_color = 'rose';
     public string $edit_description = '';
 
@@ -519,7 +519,7 @@ class extends Component
     {
         $this->resetValidation();
         $this->edit_name = $this->wallet->name;
-        $this->edit_icon = $this->wallet->icon;
+        $this->edit_icon = $this->wallet->iconEmoji();
         $this->edit_color = $this->wallet->color;
         $this->edit_description = (string) ($this->wallet->description ?? '');
         $this->editModal = true;
@@ -532,7 +532,7 @@ class extends Component
     {
         $validated = $this->validate([
             'edit_name' => ['required', 'string', 'max:100'],
-            'edit_icon' => ['required', 'string'],
+            'edit_icon' => ['required', 'string', 'max:32'],
             'edit_color' => ['required', 'string'],
             'edit_description' => ['nullable', 'string', 'max:255'],
         ], [

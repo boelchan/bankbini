@@ -47,9 +47,11 @@ class WalletService
                 throw new DomainException('Saldo awal kantong tidak boleh bernilai negatif.');
             }
 
-            $icon = isset($data['icon']) && in_array($data['icon'], WalletIconEnum::values(), true)
-                ? $data['icon']
-                : WalletIconEnum::WALLET->value;
+            $icon = trim((string) ($data['icon'] ?? ''));
+
+            if ($icon === '') {
+                $icon = WalletIconEnum::WALLET->value;
+            }
 
             $color = isset($data['color']) && in_array($data['color'], WalletColorEnum::values(), true)
                 ? $data['color']
@@ -218,9 +220,11 @@ class WalletService
                 throw new DomainException('Nama kantong wajib diisi.');
             }
 
-            $icon = isset($data['icon']) && in_array($data['icon'], WalletIconEnum::values(), true)
-                ? $data['icon']
-                : $wallet->icon;
+            $icon = trim((string) ($data['icon'] ?? ''));
+
+            if ($icon === '') {
+                $icon = $wallet->icon;
+            }
 
             $color = isset($data['color']) && in_array($data['color'], WalletColorEnum::values(), true)
                 ? $data['color']

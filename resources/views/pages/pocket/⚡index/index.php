@@ -29,7 +29,7 @@ class extends Component
 
     /* Form Tambah Kantong Baru */
     public string $pocket_name = '';
-    public string $pocket_icon = 'wallet';
+    public string $pocket_icon = '👛';
     public string $pocket_color = 'rose';
     public string $pocket_description = '';
     public string|int|float $pocket_initial_balance = '';
@@ -55,7 +55,7 @@ class extends Component
     public function openPocketModal(): void
     {
         $this->pocket_name = '';
-        $this->pocket_icon = WalletIconEnum::WALLET->value;
+        $this->pocket_icon = WalletIconEnum::WALLET->emoji();
         $this->pocket_color = WalletColorEnum::ROSE->value;
         $this->pocket_description = '';
         $this->pocket_initial_balance = '';
@@ -69,13 +69,13 @@ class extends Component
     {
         $this->validate([
             'pocket_name' => ['required', 'string', 'max:100'],
-            'pocket_icon' => ['required', 'string'],
+            'pocket_icon' => ['required', 'string', 'max:32'],
             'pocket_color' => ['required', 'string'],
             'pocket_initial_balance' => ['nullable', 'numeric', 'gte:0'],
             'pocket_description' => ['nullable', 'string', 'max:255'],
         ], [
             'pocket_name.required' => 'Nama kantong wajib diisi.',
-            'pocket_icon.required' => 'Ikon kantong wajib dipilih.',
+            'pocket_icon.required' => 'Ikon kantong wajib diisi.',
             'pocket_color.required' => 'Warna kantong wajib dipilih.',
             'pocket_initial_balance.gte' => 'Saldo awal tidak boleh negatif.',
         ]);

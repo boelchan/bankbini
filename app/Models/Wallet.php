@@ -153,6 +153,30 @@ class Wallet extends Model
     }
 
     /**
+     * Mengambil emoji ikon kantong; mendukung emoji bebas di luar daftar enum.
+     */
+    public function iconEmoji(): string
+    {
+        $icon = trim((string) $this->icon);
+
+        if ($icon === '') {
+            return WalletIconEnum::WALLET->emoji();
+        }
+
+        return WalletIconEnum::tryFrom($icon)?->emoji() ?? $icon;
+    }
+
+    /**
+     * Mengambil label ikon kantong untuk atribut aksesibilitas.
+     */
+    public function iconLabel(): string
+    {
+        $icon = trim((string) $this->icon);
+
+        return WalletIconEnum::tryFrom($icon)?->label() ?? ($icon !== '' ? $icon : WalletIconEnum::WALLET->label());
+    }
+
+    /**
      * Memformat saldo kantong saat ini.
      */
     public function formattedBalance(): string

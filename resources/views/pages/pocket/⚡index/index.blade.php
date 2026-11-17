@@ -87,8 +87,8 @@
                 >
                     <x-card round="2xl" class="glass-tile h-full min-h-24">
                         <div class="flex h-full flex-col items-center justify-between gap-2 text-center">
-                            <span class="text-3xl leading-none sm:text-4xl" role="img" aria-label="{{ $wallet->iconEnum()->label() }}">
-                                {{ $wallet->iconEnum()->emoji() }}
+                            <span class="text-4xl leading-none sm:text-4xl" role="img" aria-label="{{ $wallet->iconLabel() }}">
+                                {{ $wallet->iconEmoji() }}
                             </span>
                             <h3 class="w-full truncate text-sm font-semibold text-slate-800">
                                 {{ $wallet->name }}
@@ -113,11 +113,12 @@
             />
 
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <x-select.styled
+                <x-input
                     label="Ikon Kantong *"
                     wire:model="pocket_icon"
-                    :options="\App\Enums\WalletIconEnum::emojiChoices()"
-                    searchable
+                    class="text-2xl! sm:text-2xl!"
+                    placeholder="👛"
+                    hint="Ketik atau tempel emoji favoritmu."
                 />
 
                 <x-select.styled
