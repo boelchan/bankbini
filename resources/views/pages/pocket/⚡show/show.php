@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Enums\CategoryTypeEnum;
 use App\Enums\IncomeSourceEnum;
+use App\Enums\PocketDisplayModeEnum;
 use App\Enums\TransactionTypeEnum;
 use App\Enums\WalletStatusEnum;
 use App\Models\Transaction;
@@ -36,6 +37,7 @@ class extends Component
     public ?string $flowFilter = '';
     public ?string $monthFilter = '';
     public ?int $categoryFilter = null;
+    public string $displayMode = PocketDisplayModeEnum::MONTHLY->value;
 
     /* Modal State */
     public bool $incomeModal = false;
@@ -89,11 +91,42 @@ class extends Component
     public function mount(Wallet $wallet): void
     {
         $this->wallet = $wallet;
+        $this->displayMode = $wallet->displayModeEnum()->value;
         $this->monthFilter = now()->format('Y-m');
         $now = now()->format('Y-m-d');
         $this->income_date = $now;
         $this->expense_date = $now;
         $this->transfer_date = $now;
+    }
+
+    /**
+     * Mengubah dan menyimpan pengaturan jenis tampilan riwayat transaksi kantong ke database.
+     */
+    public function setDisplayMode(string $mode, WalletService $walletService): void
+    {
+        $modeEnum = PocketDisplayModeEnum::tryFrom($mode);
+
+        if ($modeEnum === null) {
+            return;
+        }
+
+        if ($this->displayMode === $modeEnum->value && $this->wallet->displayModeEnum() === $modeEnum) {
+            return;
+        }
+
+        try {
+            $this->wallet = $walletService->updateDisplayMode($this->wallet, $modeEnum);
+            $this->displayMode = $modeEnum->value;
+
+            unset($this->isAllDisplayMode, $this->walletStats, $this->transactions);
+
+            $this->toast()->success(
+                'Tampilan Diperbarui',
+                sprintf('Riwayat kantong kini menggunakan mode %s.', $modeEnum->label())
+            )->send();
+        } catch (\DomainException $e) {
+            $this->toast()->error('Gagal Menyimpan Pengaturan', $e->getMessage())->send();
+        }
     }
 
     /**
@@ -163,6 +196,15 @@ class extends Component
     }
 
     /**
+     * Menandai apakah kantong memakai mode tampilan seluruh riwayat transaksi.
+     */
+    #[Computed]
+    public function isAllDisplayMode(): bool
+    {
+        return $this->displayMode === PocketDisplayModeEnum::ALL->value;
+    }
+
+    /**
      * Mengambil daftar pilihan kategori untuk filter transaksi.
      *
      * @return array<int, array{label: string, value: int}>
@@ -181,7 +223,7 @@ class extends Component
     }
 
     /**
-     * Menghitung ringkasan uang masuk dan keluar kantong ini pada bulan aktif.
+     * Menghitung ringkasan uang masuk dan keluar kantong ini sesuai mode tampilan (per bulan atau seluruh waktu).
      *
      * @return array<string, float>
      */
@@ -190,7 +232,7 @@ class extends Component
     {
         $baseQuery = Transaction::query()
             ->where('wallet_id', $this->wallet->id)
-            ->when($this->monthFilter !== '', function ($query): void {
+            ->when(!$this->isAllDisplayMode && $this->monthFilter !== '', function ($query): void {
                 $query->whereRaw("DATE_FORMAT(transaction_date, '%Y-%m') = ?", [$this->monthFilter]);
             });
 
@@ -237,7 +279,7 @@ class extends Component
                     default => null,
                 };
             })
-            ->when($this->monthFilter !== '', function ($query): void {
+            ->when(!$this->isAllDisplayMode && $this->monthFilter !== '', function ($query): void {
                 $query->whereRaw("DATE_FORMAT(transaction_date, '%Y-%m') = ?", [$this->monthFilter]);
             })
             ->when($this->categoryFilter !== null, function ($query): void {
@@ -753,6 +795,7 @@ class extends Component
     {
         $this->wallet->refresh();
         unset(
+            $this->isAllDisplayMode,
             $this->walletStats,
             $this->transactions,
             $this->otherActiveWalletOptions,

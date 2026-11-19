@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Enums\PocketDisplayModeEnum;
 use App\Enums\WalletColorEnum;
 use App\Enums\WalletIconEnum;
 use App\Enums\WalletStatusEnum;
@@ -25,6 +26,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
     'initial_balance',
     'balance',
     'is_primary',
+    'display_mode',
     'status',
 ])]
 class Wallet extends Model
@@ -42,6 +44,7 @@ class Wallet extends Model
             'initial_balance' => 'decimal:2',
             'balance' => 'decimal:2',
             'is_primary' => 'boolean',
+            'display_mode' => PocketDisplayModeEnum::class,
             'status' => WalletStatusEnum::class,
         ];
     }
@@ -142,6 +145,16 @@ class Wallet extends Model
     public function colorEnum(): WalletColorEnum
     {
         return WalletColorEnum::tryFrom((string) $this->color) ?? WalletColorEnum::ROSE;
+    }
+
+    /**
+     * Mengambil jenis tampilan riwayat kantong dengan fallback aman ke per bulan.
+     */
+    public function displayModeEnum(): PocketDisplayModeEnum
+    {
+        return $this->display_mode instanceof PocketDisplayModeEnum
+            ? $this->display_mode
+            : (PocketDisplayModeEnum::tryFrom((string) $this->display_mode) ?? PocketDisplayModeEnum::MONTHLY);
     }
 
     /**

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Enums\CategoryTypeEnum;
+use App\Enums\PocketDisplayModeEnum;
 use App\Enums\TransactionTypeEnum;
 use App\Enums\WalletColorEnum;
 use App\Enums\WalletIconEnum;
@@ -62,6 +63,10 @@ class WalletService
                 ->where('is_primary', true)
                 ->exists();
 
+            $displayMode = isset($data['display_mode']) && in_array($data['display_mode'], PocketDisplayModeEnum::values(), true)
+                ? $data['display_mode']
+                : PocketDisplayModeEnum::MONTHLY->value;
+
             $wallet = Wallet::create([
                 'user_id' => $userId,
                 'name' => $name,
@@ -71,6 +76,7 @@ class WalletService
                 'initial_balance' => number_format($initialAmount, 2, '.', ''),
                 'balance' => number_format($initialAmount, 2, '.', ''),
                 'is_primary' => (bool) ($data['is_primary'] ?? !$hasPrimary),
+                'display_mode' => $displayMode,
                 'status' => WalletStatusEnum::ACTIVE,
             ]);
 
@@ -246,6 +252,31 @@ class WalletService
             );
 
             return $wallet->fresh();
+        });
+    }
+
+    /**
+     * Memperbarui pengaturan jenis tampilan riwayat transaksi pada kantong.
+     */
+    public function updateDisplayMode(int|Wallet $wallet, PocketDisplayModeEnum $displayMode): Wallet
+    {
+        $walletId = $wallet instanceof Wallet ? (int) $wallet->id : (int) $wallet;
+
+        return DB::transaction(function () use ($walletId, $displayMode): Wallet {
+            $target = Wallet::query()
+                ->withTrashed()
+                ->lockForUpdate()
+                ->findOrFail($walletId);
+
+            if ($target->isRemoved()) {
+                throw new DomainException('Kantong yang sudah dihapus tidak dapat diubah pengaturannya.');
+            }
+
+            $target->update([
+                'display_mode' => $displayMode->value,
+            ]);
+
+            return $target->fresh();
         });
     }
 

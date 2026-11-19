@@ -105,14 +105,23 @@
                 <p class="text-3xl sm:text-4xl font-extrabold text-slate-900 tabular-nums text-center tracking-tight">
                     {{ $wallet->formattedBalance() }}
                 </p>
-                <div class="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-xs text-slate-600">
-                    <span class="inline-flex items-center gap-1 font-semibold text-emerald-700 tabular-nums" title="Total masuk {{ $this->activeMonthLabel }}">
+                <div class="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-xs text-slate-600">
+                    <span
+                        class="inline-flex items-center gap-1 font-semibold text-emerald-700 tabular-nums"
+                        title="{{ $this->isAllDisplayMode ? 'Total masuk seluruh waktu' : 'Total masuk ' . $this->activeMonthLabel }}"
+                    >
                         <x-ti-arrow-down-left class="size-3.5 shrink-0" aria-hidden="true" />
                         +{{ number_format((float) $this->walletStats['total_in'], 0, ',', '.') }}
                     </span>
-                    <span class="inline-flex items-center gap-1 font-semibold text-rose-700 tabular-nums" title="Total keluar {{ $this->activeMonthLabel }}">
+                    <span
+                        class="inline-flex items-center gap-1 font-semibold text-rose-700 tabular-nums"
+                        title="{{ $this->isAllDisplayMode ? 'Total keluar seluruh waktu' : 'Total keluar ' . $this->activeMonthLabel }}"
+                    >
                         <x-ti-arrow-up-right class="size-3.5 shrink-0" aria-hidden="true" />
                         -{{ number_format((float) $this->walletStats['total_out'], 0, ',', '.') }}
+                    </span>
+                    <span class="text-slate-600 font-medium">
+                        ({{ $this->isAllDisplayMode ? 'Semua Waktu' : $this->activeMonthLabel }})
                     </span>
                 </div>
             </div>
@@ -138,39 +147,41 @@
         </div>
     </div>
 
-    {{-- Filter Riwayat Transaksi --}}
+    {{-- Filter Riwayat Transaksi & Pengaturan Tampilan Kantong --}}
     <x-card>
         <div class="space-y-3">
-            {{-- Filter Cepat Aliran Dana --}}
-            <div class="flex items-center gap-1 self-start rounded-xl bg-slate-100 p-1 sm:self-auto">
-                <button
-                    type="button"
-                    wire:click="setFlowFilter('')"
-                    class="rounded-lg px-3 py-1 text-xs font-semibold transition-colors cursor-pointer {{ $flowFilter === '' ? 'bg-white text-rose-700 shadow-2xs' : 'text-slate-600 hover:text-slate-900' }}"
-                >
-                    Semua
-                </button>
-                <button
-                    type="button"
-                    wire:click="setFlowFilter('income')"
-                    class="rounded-lg px-3 py-1 text-xs font-semibold transition-colors cursor-pointer {{ $flowFilter === 'income' ? 'bg-white text-rose-700 shadow-2xs' : 'text-slate-600 hover:text-slate-900' }}"
-                >
-                    Masuk
-                </button>
-                <button
-                    type="button"
-                    wire:click="setFlowFilter('expense')"
-                    class="rounded-lg px-3 py-1 text-xs font-semibold transition-colors cursor-pointer {{ $flowFilter === 'expense' ? 'bg-white text-rose-700 shadow-2xs' : 'text-slate-600 hover:text-slate-900' }}"
-                >
-                    Keluar
-                </button>
-                <button
-                    type="button"
-                    wire:click="setFlowFilter('transfer')"
-                    class="rounded-lg px-3 py-1 text-xs font-semibold transition-colors cursor-pointer {{ $flowFilter === 'transfer' ? 'bg-white text-rose-700 shadow-2xs' : 'text-slate-600 hover:text-slate-900' }}"
-                >
-                    Pindah
-                </button>
+            <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                {{-- Filter Cepat Aliran Dana --}}
+                <div class="flex flex-wrap items-center gap-1 self-start rounded-xl bg-slate-100 p-1 sm:self-auto">
+                    <button
+                        type="button"
+                        wire:click="setFlowFilter('')"
+                        class="min-h-11 sm:min-h-8 rounded-lg px-3 py-1.5 sm:py-1 text-xs font-semibold transition-colors cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-600 {{ $flowFilter === '' ? 'bg-white text-rose-800 shadow-2xs' : 'text-slate-700 hover:text-slate-900' }}"
+                    >
+                        Semua
+                    </button>
+                    <button
+                        type="button"
+                        wire:click="setFlowFilter('income')"
+                        class="min-h-11 sm:min-h-8 rounded-lg px-3 py-1.5 sm:py-1 text-xs font-semibold transition-colors cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-600 {{ $flowFilter === 'income' ? 'bg-white text-rose-800 shadow-2xs' : 'text-slate-700 hover:text-slate-900' }}"
+                    >
+                        Masuk
+                    </button>
+                    <button
+                        type="button"
+                        wire:click="setFlowFilter('expense')"
+                        class="min-h-11 sm:min-h-8 rounded-lg px-3 py-1.5 sm:py-1 text-xs font-semibold transition-colors cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-600 {{ $flowFilter === 'expense' ? 'bg-white text-rose-800 shadow-2xs' : 'text-slate-700 hover:text-slate-900' }}"
+                    >
+                        Keluar
+                    </button>
+                    <button
+                        type="button"
+                        wire:click="setFlowFilter('transfer')"
+                        class="min-h-11 sm:min-h-8 rounded-lg px-3 py-1.5 sm:py-1 text-xs font-semibold transition-colors cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-600 {{ $flowFilter === 'transfer' ? 'bg-white text-rose-800 shadow-2xs' : 'text-slate-700 hover:text-slate-900' }}"
+                    >
+                        Pindah
+                    </button>
+                </div>
             </div>
 
             <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
@@ -197,38 +208,98 @@
         </div>
     </x-card>
 
-    {{-- Histori Masuk & Keluar Kantong (Tanpa Kode TRX) --}}
-    <x-card paddingless>
-        {{-- Navigasi Bulan (Atas) --}}
-        <div class="flex items-center justify-between gap-2 border-b border-slate-200 px-3 py-2 sm:px-4">
-            <x-button color="slate" flat sm wire:click="previousMonth" class="rounded-xl shrink-0" aria-label="Bulan lalu" title="Bulan Lalu">
-                <x-ti-chevron-left class="size-4 sm:mr-1" />
-                <span class="hidden sm:inline">Bulan Lalu</span>
-            </x-button>
-
-            <div class="min-w-0 text-center">
-                <p class="text-sm font-semibold text-slate-900 truncate">{{ $this->activeMonthLabel }}</p>
-            </div>
-
-            <x-button
-                color="slate"
-                flat
-                sm
-                wire:click="nextMonth"
-                class="rounded-xl shrink-0"
-                :disabled="$this->isLatestMonth"
-                aria-label="Bulan depan"
-                title="Bulan Depan"
+    {{-- Riwayat Transaksi dengan Pengaturan Tampilan di Atas Kartu --}}
+    <div class="space-y-2">
+        {{-- Pengaturan Jenis Tampilan per Kantong (Ikon Saja, Rata Kanan) --}}
+        <div class="flex justify-end">
+            <div
+                role="radiogroup"
+                aria-label="Jenis tampilan riwayat kantong"
+                class="inline-flex items-center gap-1 rounded-xl bg-slate-100 p-1"
             >
-                <span class="hidden sm:inline">Bulan Depan</span>
-                <x-ti-chevron-right class="size-4 sm:ml-1" />
-            </x-button>
+                @foreach (\App\Enums\PocketDisplayModeEnum::choices() as $modeOption)
+                    @php
+                        $isActiveMode = $displayMode === $modeOption['value'];
+                    @endphp
+                    <button
+                        type="button"
+                        role="radio"
+                        aria-checked="{{ $isActiveMode ? 'true' : 'false' }}"
+                        aria-label="{{ $modeOption['label'] }}"
+                        title="{{ $modeOption['label'] }}"
+                        wire:click="setDisplayMode('{{ $modeOption['value'] }}')"
+                        wire:loading.attr="disabled"
+                        wire:target="setDisplayMode"
+                        class="flex size-11 items-center justify-center rounded-lg transition-colors cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-600 disabled:opacity-60 sm:size-8 {{ $isActiveMode ? 'bg-white text-rose-800 shadow-2xs' : 'text-slate-700 hover:text-slate-900' }}"
+                    >
+                        <x-dynamic-component :component="'ti-' . $modeOption['icon']" class="size-4" aria-hidden="true" />
+                    </button>
+                @endforeach
+            </div>
+        </div>
+
+        {{-- Histori Masuk & Keluar Kantong (Tanpa Kode TRX) --}}
+        <x-card paddingless>
+            @if (!$this->isAllDisplayMode)
+            {{-- Navigasi Bulan (Atas) --}}
+            <div class="flex items-center justify-between gap-2 border-b border-slate-200 px-3 py-2 sm:px-4">
+                <x-button color="slate" flat sm wire:click="previousMonth" class="rounded-xl shrink-0" aria-label="Bulan lalu" title="Bulan Lalu">
+                    <x-ti-chevron-left class="size-4 sm:mr-1" />
+                    <span class="hidden sm:inline">Bulan Lalu</span>
+                </x-button>
+
+                <div class="min-w-0 text-center">
+                    <p class="text-sm font-semibold text-slate-900 truncate">{{ $this->activeMonthLabel }}</p>
+                </div>
+
+                <x-button
+                    color="slate"
+                    flat
+                    sm
+                    wire:click="nextMonth"
+                    class="rounded-xl shrink-0"
+                    :disabled="$this->isLatestMonth"
+                    aria-label="Bulan depan"
+                    title="Bulan Depan"
+                >
+                    <span class="hidden sm:inline">Bulan Depan</span>
+                    <x-ti-chevron-right class="size-4 sm:ml-1" />
+                </x-button>
+            </div>
+        @else
+            <div class="flex items-center justify-between gap-2 border-b border-slate-200 px-3.5 py-2.5 sm:px-4">
+                <p class="text-sm font-semibold text-slate-900">Semua Riwayat Transaksi</p>
+                <span class="text-xs font-medium text-slate-600 tabular-nums">
+                    {{ $this->transactions->count() }} transaksi
+                </span>
+            </div>
+        @endif
+
+        <div
+            wire:loading.flex
+            wire:target="setDisplayMode,previousMonth,nextMonth,setFlowFilter,resetFilters,search,categoryFilter"
+            class="items-center justify-center gap-2 border-b border-slate-100 bg-rose-50/70 px-4 py-2 text-xs font-medium text-rose-800"
+            role="status"
+            aria-live="polite"
+        >
+            <span>Memuat riwayat transaksi...</span>
         </div>
 
         @if ($this->transactions->isEmpty())
+            @php
+                $hasActiveFilter = $search !== '' || $flowFilter !== '' || $categoryFilter !== null;
+            @endphp
             <div class="p-8 text-center space-y-2">
-                <p class="text-sm font-semibold text-slate-800">Belum Ada Transaksi di {{ $this->activeMonthLabel }}</p>
-                <p class="text-xs text-slate-500">Gunakan tombol Masuk, Keluar, atau Pindah di atas untuk mulai mencatat.</p>
+                @if ($hasActiveFilter)
+                    <p class="text-sm font-semibold text-slate-800">Tidak Ada Transaksi yang Cocok</p>
+                    <p class="text-xs text-slate-600">Ubah kata kunci, aliran dana, atau kategori filter, atau tekan tombol Reset.</p>
+                @elseif ($this->isAllDisplayMode)
+                    <p class="text-sm font-semibold text-slate-800">Belum Ada Transaksi di Kantong Ini</p>
+                    <p class="text-xs text-slate-600">Gunakan tombol Masuk, Keluar, atau Pindah di atas untuk mulai mencatat.</p>
+                @else
+                    <p class="text-sm font-semibold text-slate-800">Belum Ada Transaksi di {{ $this->activeMonthLabel }}</p>
+                    <p class="text-xs text-slate-600">Gunakan tombol Masuk, Keluar, atau Pindah untuk mulai mencatat, atau ganti tampilan ke Tampil Semua.</p>
+                @endif
             </div>
         @else
             {{-- List Transaksi Kantong (Simple & Clear Bank-Style) --}}
@@ -304,34 +375,37 @@
             </div>
         @endif
 
-        {{-- Navigasi Bulan (Bawah) --}}
-        <div class="border-t border-slate-200">
-            <div class="flex items-center justify-between gap-2 px-3 py-2 sm:px-4">
-                <x-button color="slate" flat sm wire:click="previousMonth" class="rounded-xl shrink-0" aria-label="Bulan lalu" title="Bulan Lalu">
-                    <x-ti-chevron-left class="size-4 sm:mr-1" />
-                    <span class="hidden sm:inline">Bulan Lalu</span>
-                </x-button>
+        @if (!$this->isAllDisplayMode)
+            {{-- Navigasi Bulan (Bawah) --}}
+            <div class="border-t border-slate-200">
+                <div class="flex items-center justify-between gap-2 px-3 py-2 sm:px-4">
+                    <x-button color="slate" flat sm wire:click="previousMonth" class="rounded-xl shrink-0" aria-label="Bulan lalu" title="Bulan Lalu">
+                        <x-ti-chevron-left class="size-4 sm:mr-1" />
+                        <span class="hidden sm:inline">Bulan Lalu</span>
+                    </x-button>
 
-                <p class="min-w-0 text-center text-xs font-semibold text-slate-500 truncate">
-                    {{ $this->activeMonthLabel }}
-                </p>
+                    <p class="min-w-0 text-center text-xs font-semibold text-slate-600 truncate">
+                        {{ $this->activeMonthLabel }}
+                    </p>
 
-                <x-button
-                    color="slate"
-                    flat
-                    sm
-                    wire:click="nextMonth"
-                    class="rounded-xl shrink-0"
-                    :disabled="$this->isLatestMonth"
-                    aria-label="Bulan depan"
-                    title="Bulan Depan"
-                >
-                    <span class="hidden sm:inline">Bulan Depan</span>
-                    <x-ti-chevron-right class="size-4 sm:ml-1" />
-                </x-button>
+                    <x-button
+                        color="slate"
+                        flat
+                        sm
+                        wire:click="nextMonth"
+                        class="rounded-xl shrink-0"
+                        :disabled="$this->isLatestMonth"
+                        aria-label="Bulan depan"
+                        title="Bulan Depan"
+                    >
+                        <span class="hidden sm:inline">Bulan Depan</span>
+                        <x-ti-chevron-right class="size-4 sm:ml-1" />
+                    </x-button>
+                </div>
             </div>
-        </div>
-    </x-card>
+            @endif
+        </x-card>
+    </div>
 
     {{-- Modal Tambah Uang (Dari Luar / Langsung ATAU Ambil dari Kantong Lain) --}}
     <x-modal wire="incomeModal" title="Tambah Uang ke {{ $wallet->name }}" size="lg">
