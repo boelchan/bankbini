@@ -103,22 +103,25 @@
                     </p>
                 @endif
                 <p class="text-3xl sm:text-4xl font-extrabold text-slate-900 tabular-nums text-center tracking-tight">
-                    {{ $wallet->formattedBalance() }}
+                    <x-masked-amount :value="$wallet->formattedBalance()" />
                 </p>
+                <div class="flex justify-center">
+                    <x-balance-visibility-toggle />
+                </div>
                 <div class="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-xs text-slate-600">
                     <span
                         class="inline-flex items-center gap-1 font-semibold text-emerald-700 tabular-nums"
                         title="{{ $this->isAllDisplayMode ? 'Total masuk seluruh waktu' : 'Total masuk ' . $this->activeMonthLabel }}"
                     >
                         <x-ti-arrow-down-left class="size-3.5 shrink-0" aria-hidden="true" />
-                        +{{ number_format((float) $this->walletStats['total_in'], 0, ',', '.') }}
+                        <x-masked-amount :value="'+' . number_format((float) $this->walletStats['total_in'], 0, ',', '.')" />
                     </span>
                     <span
                         class="inline-flex items-center gap-1 font-semibold text-rose-700 tabular-nums"
                         title="{{ $this->isAllDisplayMode ? 'Total keluar seluruh waktu' : 'Total keluar ' . $this->activeMonthLabel }}"
                     >
                         <x-ti-arrow-up-right class="size-3.5 shrink-0" aria-hidden="true" />
-                        -{{ number_format((float) $this->walletStats['total_out'], 0, ',', '.') }}
+                        <x-masked-amount :value="'-' . number_format((float) $this->walletStats['total_out'], 0, ',', '.')" />
                     </span>
                     <span class="text-slate-600 font-medium">
                         ({{ $this->isAllDisplayMode ? 'Semua Waktu' : $this->activeMonthLabel }})
@@ -327,9 +330,10 @@
                                             {{ $tx->displayCategoryName() }}
                                         </h4>
                                         {{-- Nominal Transaksi --}}
-                                        <span class="text-sm sm:text-base font-bold tabular-nums shrink-0 {{ $tx->type->amountClass() }}">
-                                            {{ $tx->formattedSignedAmount() }}
-                                        </span>
+                                        <x-masked-amount
+                                            :value="$tx->formattedSignedAmount()"
+                                            class="text-sm sm:text-base font-bold tabular-nums shrink-0 {{ $tx->type->amountClass() }}"
+                                        />
                                     </div>
 
                                     <div class="mt-0.5 flex items-center justify-between gap-2 text-xs text-slate-500">
