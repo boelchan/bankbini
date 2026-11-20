@@ -36,6 +36,11 @@
         x-data="{
             sidebarOpen: localStorage.getItem('sidebar_expanded') !== 'false',
             mobileSidebarOpen: false,
+            balancesHidden: localStorage.getItem('bankbini.balanceHidden') === 'true',
+            toggleBalances() {
+                this.balancesHidden = !this.balancesHidden;
+                localStorage.setItem('bankbini.balanceHidden', String(this.balancesHidden));
+            },
             toggleSidebar() {
                 if (window.innerWidth >= 1024) {
                     this.sidebarOpen = !this.sidebarOpen;
