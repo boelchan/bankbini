@@ -16,9 +16,9 @@ Aplikasi menggunakan **3 menu utama** yang intuitif, ramah, dan terstruktur untu
 
 2. **Kantong (`/pockets`)**:
    - Menampilkan **daftar seluruh kantong-kantong keluarga** (*Pocket Grid*).
-   - Menampilkan ringkasan metrik saldo: Total Seluruh Saldo, Pemasukan Bulan Ini, dan Pengeluaran Bulan Ini.
+   - Menampilkan ringkasan metrik saldo hanya **Total Seluruh Saldo**, dengan tombol tampil/sembunyikan nominal di akhir baris saldo. Seluruh nominal saldo kantong juga mengikuti pengaturan sembunyikan nominal tersebut.
    - Kotak-kotak kantong memakai latar **putih transparan dengan efek kaca (*glassmorphism*)**, tersusun **2 kolom** di semua ukuran layar. Setiap kotak menampilkan **ikon emoji besar** yang lucu (mis. 👛 🐷 🍰 🏖️ 🎡 👧 👦 👪 🧸 🪆 🚂), nama kantong, dan saldo; mengetuk kotak membuka halaman detail kantong. Form tambah/ubah kantong memakai **input ikon bebas** berukuran besar (`text-2xl`): pengguna dapat mengetik atau menempel emoji apa pun (bukan lagi memilih dari daftar), dan emoji tersebut langsung tampil pada kartu serta halaman detail kantong.
-   - Tombol **Tambah Kantong Baru** di header halaman untuk membuat pos anggaran baru.
+   - Judul halaman cukup **Kantong** tanpa subjudul, dengan tombol **Tambah Kantong Baru** tepat di samping judul.
 
 3. **Rekap (`/recap`)**:
    - Halaman khusus rekapitulasi — **tanpa pencatatan transaksi** dan **tanpa daftar mutasi**; fokus hanya pada ringkasan dan analisis.

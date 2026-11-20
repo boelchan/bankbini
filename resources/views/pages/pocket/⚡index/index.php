@@ -2,14 +2,11 @@
 
 declare(strict_types=1);
 
-use App\Enums\TransactionTypeEnum;
 use App\Enums\WalletColorEnum;
 use App\Enums\WalletIconEnum;
 use App\Enums\WalletStatusEnum;
-use App\Models\Transaction;
 use App\Models\Wallet;
 use App\Services\WalletService;
-use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
@@ -103,32 +100,15 @@ class extends Component
     }
 
     /**
-     * Ringkasan saldo seluruh kantong, pemasukan bulan ini, dan pengeluaran bulan ini.
+     * Ringkasan total saldo seluruh kantong.
      *
-     * @return array{total_balance: float, monthly_income: float, monthly_expense: float}
+     * @return array{total_balance: float}
      */
     #[Computed]
     public function summary(): array
     {
-        $totalBalance = (float) Wallet::query()->visible()->sum('balance');
-
-        $startOfMonth = Carbon::now()->startOfMonth();
-        $endOfMonth = Carbon::now()->endOfMonth();
-
-        $monthlyIncome = (float) Transaction::query()
-            ->where('type', TransactionTypeEnum::INCOME)
-            ->whereBetween('transaction_date', [$startOfMonth, $endOfMonth])
-            ->sum('amount');
-
-        $monthlyExpense = (float) Transaction::query()
-            ->where('type', TransactionTypeEnum::EXPENSE)
-            ->whereBetween('transaction_date', [$startOfMonth, $endOfMonth])
-            ->sum('amount');
-
         return [
-            'total_balance' => round($totalBalance, 2),
-            'monthly_income' => round($monthlyIncome, 2),
-            'monthly_expense' => round($monthlyExpense, 2),
+            'total_balance' => round((float) Wallet::query()->visible()->sum('balance'), 2),
         ];
     }
 };

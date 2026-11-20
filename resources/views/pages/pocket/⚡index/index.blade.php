@@ -1,63 +1,23 @@
 <div class="space-y-6">
-    {{-- Header Sapaan & Kantong --}}
-    <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-            <h1 class="text-lg font-bold text-slate-900 sm:text-xl">
-                Kantong Keuangan Keluarga
-            </h1>
-            <p class="text-xs text-slate-500 mt-0.5">
-                Kelola seluruh pos belanja, tagihan, tabungan, dan anggaran keluarga Anda.
-            </p>
-        </div>
-
-        <div class="flex items-center gap-2">
-            <x-button color="rose" sm wire:click="openPocketModal" class="rounded-xl">
-                <x-ti-plus class="size-4 mr-1" />
-                <span>Tambah Kantong Baru</span>
-            </x-button>
-        </div>
+    {{-- Header Halaman --}}
+    <div class="flex flex-wrap items-center gap-2">
+        <h1 class="text-lg font-bold text-slate-900 sm:text-xl">Kantong</h1>
+        <x-button.circle color="rose" sm wire:click="openPocketModal" class="rounded-xl">
+            <x-ti-plus />
+        </x-button.circle>
     </div>
 
-    {{-- Ringkasan Saldo Ringkas (3 Bagian) --}}
-    <x-card paddingless>
-        <div class="grid grid-cols-1 divide-y divide-slate-200/80 sm:grid-cols-3 sm:divide-x sm:divide-y-0">
-            <div class="flex items-center gap-2.5 px-4 py-3">
-                <span class="flex size-8 shrink-0 items-center justify-center rounded-lg bg-emerald-50 text-emerald-700">
-                    <x-ti-wallet class="size-4" />
-                </span>
-                <div class="min-w-0">
-                    <p class="text-xs font-medium text-slate-500">Total Seluruh Saldo</p>
-                    <p class="text-sm font-bold text-emerald-700 tabular-nums truncate">
-                        {{ number_format((float) $this->summary['total_balance'], 0, ',', '.') }}
-                    </p>
-                </div>
-            </div>
+    {{-- Ringkasan Total Saldo (Tanpa Card - Bersih & Hangat) --}}
+    <div class="py-2 text-center space-y-2">
+        <span class="font-medium">Total Aset</span>
 
-            <div class="flex items-center gap-2.5 px-4 py-3">
-                <span class="flex size-8 shrink-0 items-center justify-center rounded-lg bg-sky-50 text-sky-700">
-                    <x-ti-arrow-down-left class="size-4" />
-                </span>
-                <div class="min-w-0">
-                    <p class="text-xs font-medium text-slate-500">Pemasukan Bulan Ini</p>
-                    <p class="text-sm font-bold text-sky-700 tabular-nums truncate">
-                        +{{ number_format((float) $this->summary['monthly_income'], 0, ',', '.') }}
-                    </p>
-                </div>
-            </div>
-
-            <div class="flex items-center gap-2.5 px-4 py-3">
-                <span class="flex size-8 shrink-0 items-center justify-center rounded-lg bg-rose-50 text-rose-700">
-                    <x-ti-arrow-up-right class="size-4" />
-                </span>
-                <div class="min-w-0">
-                    <p class="text-xs font-medium text-slate-500">Pengeluaran Bulan Ini</p>
-                    <p class="text-sm font-bold text-rose-600 tabular-nums truncate">
-                        -{{ number_format((float) $this->summary['monthly_expense'], 0, ',', '.') }}
-                    </p>
-                </div>
-            </div>
+        <div class="flex items-center justify-center gap-2 sm:gap-3">
+            <p class="text-3xl sm:text-4xl font-extrabold text-slate-900 tabular-nums tracking-tight">
+                <x-masked-amount :value="number_format((float) $this->summary['total_balance'], 0, ',', '.')" />
+            </p>
+            <x-balance-visibility-toggle />
         </div>
-    </x-card>
+    </div>
 
     {{-- Kotak-Kotak Kantong --}}
     @if ($this->wallets->isEmpty())
@@ -94,7 +54,7 @@
                                 {{ $wallet->name }}
                             </h3>
                             <p class="w-full truncate text-lg font-bold text-slate-900 tabular-nums sm:text-xl">
-                                {{ $wallet->formattedBalance() }}
+                                <x-masked-amount :value="$wallet->formattedBalance()" />
                             </p>
                         </div>
                     </x-card>

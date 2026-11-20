@@ -33,10 +33,8 @@
                 @endif
                 <p class="text-3xl sm:text-4xl font-extrabold text-slate-900 tabular-nums text-center tracking-tight">
                     <x-masked-amount :value="$wallet->formattedBalance()" />
-                </p>
-                <div class="flex justify-center">
                     <x-balance-visibility-toggle />
-                </div>
+                </p>
                 <div class="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-xs text-slate-600">
                     <span class="inline-flex items-center gap-1 font-semibold text-emerald-700 tabular-nums" title="Total masuk {{ $this->activeMonthLabel }}">
                         <x-ti-arrow-down-left class="size-3.5 shrink-0" aria-hidden="true" />
