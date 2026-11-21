@@ -151,7 +151,7 @@
                         </td>
 
                         <td class="px-3 py-3 align-top">
-                            <span class="text-sm tabular-nums {{ $limitStruck ? 'line-through' : '' }} {{ $isOver ? 'font-semibold text-rose-700' : 'text-slate-700' }}">
+                            <span class="text-sm tabular-nums {{ $isFulfilled ? 'line-through' : '' }} {{ $isOver ? 'font-semibold text-rose-700' : 'text-slate-700' }}">
                                 {{ $cat['formatted_limit'] }}
                             </span>
                         </td>
@@ -233,7 +233,7 @@
                         </td>
 
                         <td class="px-3 py-3 align-top">
-                            <span class="text-sm tabular-nums {{ $kwLimitStruck ? 'line-through' : '' }} {{ $kw['is_over_limit'] ? 'font-semibold text-rose-700' : 'text-slate-700' }}">
+                            <span class="text-sm tabular-nums {{ $kwFulfilled ? 'line-through' : '' }} {{ $kw['is_over_limit'] ? 'font-semibold text-rose-700' : 'text-slate-700' }}">
                                 {{ $kw['formatted_limit'] }}
                             </span>
                         </td>
