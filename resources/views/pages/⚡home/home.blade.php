@@ -165,10 +165,32 @@
             <div class="divide-y divide-slate-100">
                 @foreach ($this->transactions->groupBy(fn ($tx) => $tx->transaction_date?->format('Y-m-d')) as $date => $rows)
                     {{-- Header Grup Tanggal --}}
-                    <div class="bg-slate-50/70 px-3.5 py-1.5 sm:px-4">
+                    @php
+                        $dayIn = (float) $rows->filter(fn ($tx) => $tx->type->isPositive())->sum('amount');
+                        $dayOut = (float) $rows->filter(fn ($tx) => ! $tx->type->isPositive())->sum('amount');
+                    @endphp
+                    <div class="flex items-center justify-between gap-2 bg-slate-50/70 px-3.5 py-1.5 sm:px-4">
                         <span class="text-xs font-semibold text-slate-500">
                             {{ \App\Models\Transaction::dateGroupLabel($rows->first()->transaction_date) }}
                         </span>
+
+                        <div class="inline-flex items-center gap-2 text-xs font-semibold tabular-nums">
+                            @if ($dayIn > 0)
+                                <span class="text-emerald-700" title="Total masuk tanggal ini">
+                                    <x-masked-amount :value="'+' . number_format($dayIn, 0, ',', '.')" />
+                                </span>
+                            @endif
+                            @if ($dayOut > 0)
+                                <span class="text-rose-700" title="Total keluar tanggal ini">
+                                    <x-masked-amount :value="'-' . number_format($dayOut, 0, ',', '.')" />
+                                </span>
+                            @endif
+                            @if ($dayIn == 0 && $dayOut == 0)
+                                <span class="text-slate-400">
+                                    <x-masked-amount value="0" />
+                                </span>
+                            @endif
+                        </div>
                     </div>
 
                     @foreach ($rows as $tx)
@@ -192,13 +214,13 @@
                                         />
                                     </div>
 
-                                    <div class="mt-0.5 flex items-center justify-between gap-2 text-xs text-slate-500">
+                                    <div class="mt-0.5 flex items-start justify-between gap-2 text-xs text-slate-500">
                                         {{-- Kiri: Keterangan Transaksi --}}
-                                        <p class="min-w-0 truncate" title="{{ $tx->displayDescription() }}">
+                                        <p class="min-w-0 flex-1 break-words sm:truncate" title="{{ $tx->displayDescription() }}">
                                             {{ $tx->displayDescription() }}
                                         </p>
 
-                                        <div class="flex items-center gap-1 shrink-0">
+                                        <div class="flex items-center gap-1 shrink-0 pt-0.5">
                                             @if (! in_array($tx->type, [\App\Enums\TransactionTypeEnum::TRANSFER_IN, \App\Enums\TransactionTypeEnum::TRANSFER_OUT], true) && empty($tx->transfer_reference))
                                                 <button
                                                     type="button"
