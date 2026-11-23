@@ -9,6 +9,8 @@
     <link href="{{ asset('favicon/favicon.ico') }}" rel="shortcut icon" />
     <link href="{{ asset('favicon/apple-touch-icon.png') }}" rel="apple-touch-icon" sizes="180x180" />
     <meta name="apple-mobile-web-app-title" content="Bank BINI" />
+    <link href="{{ asset('favicon/manifest.json') }}" rel="manifest" />
+
 
     <title>{{ isset($title) ? $title . ' - Bank BINI' : 'Bank BINI - Kantong Keuangan Keluarga' }}</title>
 

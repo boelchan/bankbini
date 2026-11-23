@@ -164,34 +164,8 @@
             {{-- List Transaksi Kantong Utama (Simple & Clear Bank-Style) --}}
             <div class="divide-y divide-slate-100">
                 @foreach ($this->transactions->groupBy(fn ($tx) => $tx->transaction_date?->format('Y-m-d')) as $date => $rows)
-                    {{-- Header Grup Tanggal --}}
-                    @php
-                        $dayIn = (float) $rows->filter(fn ($tx) => $tx->type->isPositive())->sum('amount');
-                        $dayOut = (float) $rows->filter(fn ($tx) => ! $tx->type->isPositive())->sum('amount');
-                    @endphp
-                    <div class="flex items-center justify-between gap-2 bg-slate-50/70 px-3.5 py-1.5 sm:px-4">
-                        <span class="text-xs font-semibold text-slate-500">
-                            {{ \App\Models\Transaction::dateGroupLabel($rows->first()->transaction_date) }}
-                        </span>
-
-                        <div class="inline-flex items-center gap-2 text-xs font-semibold tabular-nums">
-                            @if ($dayIn > 0)
-                                <span class="text-emerald-700" title="Total masuk tanggal ini">
-                                    <x-masked-amount :value="'+' . number_format($dayIn, 0, ',', '.')" />
-                                </span>
-                            @endif
-                            @if ($dayOut > 0)
-                                <span class="text-rose-700" title="Total keluar tanggal ini">
-                                    <x-masked-amount :value="'-' . number_format($dayOut, 0, ',', '.')" />
-                                </span>
-                            @endif
-                            @if ($dayIn == 0 && $dayOut == 0)
-                                <span class="text-slate-400">
-                                    <x-masked-amount value="0" />
-                                </span>
-                            @endif
-                        </div>
-                    </div>
+                    {{-- Header Grup Tanggal (bisa diklik untuk melihat rincian) --}}
+                    <x-transaction-date-group-header :date="$date" :rows="$rows" :expanded="$this->expandedDate === $date" />
 
                     @foreach ($rows as $tx)
                         <div class="p-3.5 sm:p-4 hover:bg-slate-50/70 transition-colors">

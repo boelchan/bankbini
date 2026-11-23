@@ -65,6 +65,9 @@ class extends Component
     /* Tab grafik tren: pengeluaran atau pemasukan */
     public string $trendType = 'expense';
 
+    /* Tahun yang ditampilkan pada grafik tren bulanan */
+    public int $trendYear = 0;
+
     /**
      * Inisialisasi komponen.
      */
@@ -75,6 +78,9 @@ class extends Component
             ->value('id');
 
         $this->monthFilter ??= now()->format('Y-m');
+        $this->trendYear = filled($this->monthFilter)
+            ? (int) substr($this->monthFilter, 0, 4)
+            : now()->year;
 
         if ($this->walletFilter === null) {
             $this->walletFilter = $this->defaultWalletId;
@@ -128,6 +134,34 @@ class extends Component
                 'value' => $ym,
             ];
         })->all();
+    }
+
+    /**
+     * Pilihan tahun: lima tahun terakhir dan tahun yang memiliki transaksi.
+     *
+     * @return array<int, array{label: string, value: int}>
+     */
+    #[Computed]
+    public function yearOptions(): array
+    {
+        $currentYear = now()->year;
+
+        $years = collect(range($currentYear, $currentYear - 4))
+            ->merge(
+                Transaction::query()
+                    ->whereNotNull('transaction_date')
+                    ->selectRaw('DISTINCT YEAR(transaction_date) as yr')
+                    ->pluck('yr')
+                    ->map(fn (mixed $year): int => (int) $year)
+                    ->filter()
+            )
+            ->unique()
+            ->sortDesc()
+            ->values();
+
+        return $years
+            ->map(fn (int $year): array => ['label' => (string) $year, 'value' => $year])
+            ->all();
     }
 
     /**
@@ -482,7 +516,7 @@ class extends Component
             ->when(filled($this->monthFilter), fn ($q) => $q->whereRaw("DATE_FORMAT(transaction_date, '%Y-%m') = ?", [$this->monthFilter]));
 
         $totalExpense = (float) (clone $baseQuery)->sum('amount');
-        $keywords = RecapKeyword::orderBy('keyword')->get();
+        $keywords = RecapKeyword::orderByRaw('LOWER(keyword) ASC')->get();
 
         return $keywords->map(function (RecapKeyword $kw) use ($baseQuery, $totalExpense): array {
             $term = '%' . trim($kw->keyword) . '%';
@@ -552,6 +586,19 @@ class extends Component
     }
 
     /**
+     * Mengurutkan baris rekap menurut nama secara alfabetis ascending.
+     *
+     * @param array<int, array<string, mixed>> $rows
+     * @return array<int, array<string, mixed>>
+     */
+    private function sortRecapByName(array $rows): array
+    {
+        usort($rows, fn (array $left, array $right): int => strcasecmp((string) $left['name'], (string) $right['name']));
+
+        return $rows;
+    }
+
+    /**
      * Rekapitulasi transaksi pengeluaran per kategori.
      *
      * @return array<int, array{category_id: ?int, name: string, icon: string, color: string, amount: float, formatted_amount: string, total_tx: int, percentage: float, limit: float, formatted_limit: string, is_over_limit: bool, over_amount: float, budget_percentage: ?float}>
@@ -570,10 +617,9 @@ class extends Component
             ->with('category')
             ->selectRaw('category_id, category_name_snapshot, SUM(amount) as total_amount, COUNT(id) as total_tx')
             ->groupBy('category_id', 'category_name_snapshot')
-            ->orderByDesc('total_amount')
             ->get();
 
-        return $rows->map(function ($row) use ($totalExpense) {
+        return $this->sortRecapByName($rows->map(function ($row) use ($totalExpense) {
             $amount = (float) $row->total_amount;
             $percentage = $totalExpense > 0 ? round(($amount / $totalExpense) * 100, 1) : 0.0;
             $limit = (float) ($row->category?->budget_limit ?? 0);
@@ -596,7 +642,7 @@ class extends Component
                 'over_amount' => $overAmount,
                 'budget_percentage' => $budgetPercentage,
             ];
-        })->all();
+        })->all());
     }
 
     /**
@@ -618,10 +664,9 @@ class extends Component
             ->with('category')
             ->selectRaw('category_id, category_name_snapshot, SUM(amount) as total_amount, COUNT(id) as total_tx')
             ->groupBy('category_id', 'category_name_snapshot')
-            ->orderByDesc('total_amount')
             ->get();
 
-        return $rows->map(function ($row) use ($totalIncome) {
+        return $this->sortRecapByName($rows->map(function ($row) use ($totalIncome) {
             $amount = (float) $row->total_amount;
             $percentage = $totalIncome > 0 ? round(($amount / $totalIncome) * 100, 1) : 0.0;
             $limit = (float) ($row->category?->budget_limit ?? 0);
@@ -642,14 +687,14 @@ class extends Component
                 'over_amount' => 0.0,
                 'budget_percentage' => $budgetPercentage,
             ];
-        })->all();
+        })->all());
     }
 
     /**
-     * Data grafik tren per kategori pada 5 bulan terakhir.
+     * Data grafik tren bulanan per kategori pada tahun yang dipilih.
      *
-     * Lima bulan dihitung mundur dari bulan yang sedang dipilih, mengikuti filter kantong dan
-     * pilihan jenis transaksi (pengeluaran atau pemasukan). Kategori diurutkan dari nilai terbesar;
+     * Seluruh bulan dalam tahun ditampilkan, mengikuti filter kantong dan pilihan jenis
+     * transaksi (pengeluaran atau pemasukan). Kategori diurutkan dari nilai terbesar;
      * sisanya digabung menjadi "Kategori Lainnya".
      *
      * @return array{labels: array<int, string>, series: array<int, array{name: string, data: array<int, float>}>, range_label: string, has_data: bool}
@@ -657,19 +702,14 @@ class extends Component
     #[Computed]
     public function categoryTrendChart(): array
     {
-        $anchor = filled($this->monthFilter)
-            ? Carbon::createFromFormat('Y-m', $this->monthFilter)->startOfMonth()
-            : now()->startOfMonth();
+        $year = $this->trendYear !== 0 ? $this->trendYear : now()->year;
 
-        $months = collect(range(4, 0))
-            ->map(fn (int $offset): Carbon => $anchor->copy()->subMonthsNoOverflow($offset))
-            ->values();
+        $monthKeys = collect(range(1, 12))
+            ->map(fn (int $month): string => (string) $month)
+            ->all();
 
-        $monthKeys = $months->map(fn (Carbon $month): string => $month->format('Y-m'))->all();
-        $crossesYear = $months->first()->year !== $months->last()->year;
-
-        $labels = $months
-            ->map(fn (Carbon $month): string => $month->locale('id')->translatedFormat($crossesYear ? 'M y' : 'M'))
+        $labels = collect(range(1, 12))
+            ->map(fn (int $month): string => Carbon::createFromDate($year, $month, 1)->locale('id')->translatedFormat('M'))
             ->all();
 
         $type = TransactionTypeEnum::tryFrom($this->trendType) ?? TransactionTypeEnum::EXPENSE;
@@ -678,12 +718,12 @@ class extends Component
             ->where('type', $type)
             ->when($this->walletFilter !== null, fn ($q) => $q->where('wallet_id', $this->walletFilter))
             ->whereBetween('transaction_date', [
-                $months->first()->copy()->startOfMonth(),
-                $anchor->copy()->endOfMonth(),
+                Carbon::createFromDate($year, 1, 1)->startOfDay(),
+                Carbon::createFromDate($year, 12, 1)->endOfMonth()->endOfDay(),
             ])
             ->with('category:id,name')
-            ->selectRaw("DATE_FORMAT(transaction_date, '%Y-%m') as ym, category_id, category_name_snapshot, SUM(amount) as total_amount")
-            ->groupBy('ym', 'category_id', 'category_name_snapshot')
+            ->selectRaw('MONTH(transaction_date) as mo, category_id, category_name_snapshot, SUM(amount) as total_amount')
+            ->groupBy('mo', 'category_id', 'category_name_snapshot')
             ->get();
 
         $grouped = [];
@@ -698,7 +738,7 @@ class extends Component
                 'totals' => array_fill_keys($monthKeys, 0.0),
             ];
 
-            $monthKey = (string) $row->ym;
+            $monthKey = (string) $row->mo;
             $grouped[$key]['totals'][$monthKey] = ($grouped[$key]['totals'][$monthKey] ?? 0.0)
                 + (float) $row->total_amount;
         }
@@ -733,9 +773,7 @@ class extends Component
                 ],
                 $top
             ),
-            'range_label' => $months->first()->locale('id')->translatedFormat('M Y')
-                . ' – '
-                . $anchor->locale('id')->translatedFormat('M Y'),
+            'range_label' => 'Januari – Desember ' . $year,
             'has_data' => $top !== [],
         ];
     }

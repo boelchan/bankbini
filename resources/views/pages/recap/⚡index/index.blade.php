@@ -61,12 +61,12 @@
             </div>
 
             <div class="flex items-center gap-2.5 px-4 py-3">
-                <span class="flex size-8 shrink-0 items-center justify-center rounded-lg {{ $this->recapSummary['net_cashflow'] >= 0 ? 'bg-sky-50 text-sky-700' : 'bg-amber-50 text-amber-700' }}">
+                <span class="flex size-8 shrink-0 items-center justify-center rounded-lg {{ $this->recapSummary['net_cashflow'] >= 0 ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700' }}">
                     <x-ti-scale class="size-4" />
                 </span>
                 <div class="min-w-0">
                     <p class="text-xs font-medium text-slate-500">Arus Kas Bersih</p>
-                    <p class="text-sm font-bold tabular-nums truncate {{ $this->recapSummary['net_cashflow'] >= 0 ? 'text-sky-700' : 'text-amber-700' }}">
+                    <p class="text-sm font-bold tabular-nums truncate {{ $this->recapSummary['net_cashflow'] >= 0 ? 'text-emerald-700' : 'text-amber-700' }}">
                         {{ $this->recapSummary['net_cashflow'] >= 0 ? '+' : '' }}{{ number_format((float) $this->recapSummary['net_cashflow'], 0, ',', '.') }}
                     </p>
                 </div>
@@ -78,6 +78,8 @@
     @php
         $isExpenseTab = $categoryRecapTab === 'expense';
         $categoryRows = $isExpenseTab ? $this->categoryExpenseRecap : $this->categoryIncomeRecap;
+        $categoryLimitTotal = array_sum(array_column($categoryRows, 'limit'));
+        $categoryActualTotal = array_sum(array_column($categoryRows, 'amount'));
     @endphp
 
     <x-table flush>
@@ -169,10 +171,27 @@
                     </tr>
                 @endforeach
             </tbody>
+
+            <tfoot class="border-t border-slate-200 bg-slate-50">
+                <tr>
+                    <td class="px-3 py-3 text-sm font-semibold text-slate-900">Jumlah</td>
+                    <td class="px-3 py-3 text-sm font-semibold tabular-nums text-slate-900">
+                        {{ number_format($categoryLimitTotal, 0, ',', '.') }}
+                    </td>
+                    <td class="px-3 py-3 text-sm font-semibold tabular-nums text-slate-900">
+                        {{ number_format($categoryActualTotal, 0, ',', '.') }}
+                    </td>
+                </tr>
+            </tfoot>
         @endif
     </x-table>
 
     {{-- Seksi Rekap per Kata Kunci di Keterangan --}}
+    @php
+        $keywordRows = $this->keywordRecap;
+        $keywordLimitTotal = array_sum(array_column($keywordRows, 'limit'));
+        $keywordActualTotal = array_sum(array_column($keywordRows, 'amount'));
+    @endphp
     <x-table flush>
         <x-slot:header>
             <div class="flex items-center justify-between gap-2">
@@ -190,7 +209,7 @@
             </div>
         </x-slot:header>
 
-        @if (empty($this->keywordRecap))
+        @if (empty($keywordRows))
             <x-slot:empty>
                 <div class="px-4 py-8 text-center text-xs text-slate-400">
                     Belum ada kata kunci. Tambahkan kata kunci belanja (contoh: Beras, Skincare, Kopi) untuk memantau pengeluaran pos tersebut.
@@ -204,7 +223,7 @@
             </x-table.thead>
 
             <tbody>
-                @foreach ($this->keywordRecap as $kw)
+                @foreach ($keywordRows as $kw)
                     @php
                         $kwUsage = (float) ($kw['percentage'] ?? 0);
                         $kwUsageLabel = $this->formatPercentage($kwUsage);
@@ -252,6 +271,18 @@
                     </tr>
                 @endforeach
             </tbody>
+
+            <tfoot class="border-t border-slate-200 bg-slate-50">
+                <tr>
+                    <td class="px-3 py-3 text-sm font-semibold text-slate-900">Jumlah</td>
+                    <td class="px-3 py-3 text-sm font-semibold tabular-nums text-slate-900">
+                        {{ number_format($keywordLimitTotal, 0, ',', '.') }}
+                    </td>
+                    <td class="px-3 py-3 text-sm font-semibold tabular-nums text-slate-900">
+                        {{ number_format($keywordActualTotal, 0, ',', '.') }}
+                    </td>
+                </tr>
+            </tfoot>
         @endif
     </x-table>
 
@@ -370,65 +401,111 @@
         @endif
     </x-card>
 
-    {{-- Grafik Tren per Kategori 5 Bulan Terakhir --}}
+    {{-- Grafik dan rincian tren bulanan per kategori dalam satu kartu --}}
     @php
         $trend = $this->categoryTrendChart;
         $isTrendExpense = $trendType === 'expense';
         $trendLabel = $isTrendExpense ? 'pengeluaran' : 'pemasukan';
     @endphp
 
-    <x-card paddingless>
-        <div class="flex flex-col gap-2 px-4 pt-4 sm:flex-row sm:items-start sm:justify-between">
-            <div class="min-w-0">
-                <h2 class="text-sm font-semibold text-slate-900 sm:text-base">Tren 5 Bulan Terakhir per Kategori</h2>
-            </div>
+    <x-table flush tableClass="w-full min-w-288 text-left text-sm">
+        <x-slot:header>
+            <div class="space-y-3">
+                <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                    <div class="min-w-0">
+                        <h2 class="text-sm font-semibold text-slate-900 sm:text-base">Tren Bulanan per Kategori</h2>
+                        <p class="text-xs font-medium text-slate-500">{{ $trend['range_label'] }}</p>
+                    </div>
 
-            <div class="flex flex-col items-start gap-1.5 sm:items-end">
-                {{-- Tab Pilihan: Pengeluaran atau Pemasukan --}}
-                <div class="flex items-center gap-1 bg-slate-100 p-1 rounded-xl">
-                    <button
-                        type="button"
-                        wire:click="setTrendType('expense')"
-                        class="rounded-lg px-3 py-1 text-xs font-semibold transition-colors cursor-pointer {{ $isTrendExpense ? 'bg-white text-rose-700 shadow-2xs' : 'text-slate-600 hover:text-slate-900' }}"
-                    >
-                        Pengeluaran
-                    </button>
+                    <div class="flex flex-wrap items-center gap-2">
+                        <div
+                            role="group"
+                            aria-label="Jenis transaksi tren"
+                            class="flex items-center gap-1 rounded-xl bg-slate-100 p-1"
+                        >
+                            <button
+                                type="button"
+                                wire:click="setTrendType('expense')"
+                                class="rounded-lg px-3 py-1 text-xs font-semibold transition-colors cursor-pointer {{ $isTrendExpense ? 'bg-white text-rose-700 shadow-2xs' : 'text-slate-600 hover:text-slate-900' }}"
+                            >
+                                Pengeluaran
+                            </button>
 
-                    <button
-                        type="button"
-                        wire:click="setTrendType('income')"
-                        class="rounded-lg px-3 py-1 text-xs font-semibold transition-colors cursor-pointer {{ ! $isTrendExpense ? 'bg-white text-emerald-700 shadow-2xs' : 'text-slate-600 hover:text-slate-900' }}"
-                    >
-                        Pemasukan
-                    </button>
+                            <button
+                                type="button"
+                                wire:click="setTrendType('income')"
+                                class="rounded-lg px-3 py-1 text-xs font-semibold transition-colors cursor-pointer {{ ! $isTrendExpense ? 'bg-white text-emerald-700 shadow-2xs' : 'text-slate-600 hover:text-slate-900' }}"
+                            >
+                                Pemasukan
+                            </button>
+                        </div>
+
+                        <div class="w-32 sm:w-36">
+                            <x-select.styled
+                                placeholder="Tahun"
+                                wire:model.live="trendYear"
+                                :options="$this->yearOptions"
+                            />
+                        </div>
+                    </div>
                 </div>
 
-                <p class="text-xs font-medium text-slate-500">{{ $trend['range_label'] }}</p>
+                @if ($trend['has_data'])
+                    <div wire:key="trend-chart-{{ $trendType }}-{{ $trendYear }}-{{ $walletFilter ?? 'all' }}-{{ $monthFilter ?? 'all' }}">
+                        <x-chart
+                            :labels="$trend['labels']"
+                            :series="$trend['series']"
+                            area
+                            markers
+                            curve="smooth"
+                            grid
+                            legend
+                            tooltip
+                            color="{{ $isTrendExpense ? 'rose' : 'emerald' }}"
+                            :formatter="fn (float $value): string => number_format($value, 0, ',', '.')"
+                            height="300"
+                        />
+                    </div>
+                @else
+                    <p class="rounded-xl bg-slate-50 px-4 py-6 text-center text-sm text-slate-600">
+                        Belum ada {{ $trendLabel }} pada tahun {{ $trendYear }}. Grafik dan rincian akan muncul otomatis setelah ada transaksi.
+                    </p>
+                @endif
             </div>
-        </div>
+        </x-slot:header>
 
         @if ($trend['has_data'])
-            <div class="px-2 pt-2 pb-4 sm:px-4">
-                <x-chart
-                    :labels="$trend['labels']"
-                    :series="$trend['series']"
-                    area
-                    markers
-                    curve="smooth"
-                    grid
-                    legend
-                    tooltip
-                    color="{{ $isTrendExpense ? 'rose' : 'emerald' }}"
-                    :formatter="fn (float $value): string => number_format($value, 0, ',', '.')"
-                    height="300"
-                />
-            </div>
-        @else
-            <p class="px-4 pt-3 pb-5 text-sm text-slate-500">
-                Belum ada {{ $trendLabel }} pada 5 bulan terakhir. Grafik akan muncul otomatis setelah ada transaksi.
-            </p>
+            <x-table.thead class="bg-slate-100 text-right">
+                <x-table.th label="Kategori" width="5%" />
+                @foreach ($trend['labels'] as $monthLabel)
+                    <x-table.th :label="$monthLabel" width="5%" />
+                @endforeach
+                <x-table.th label="Total" width="5%" />
+            </x-table.thead>
+
+            <tbody>
+                @foreach ($trend['series'] as $series)
+                    @php
+                        $seriesTotal = array_sum($series['data']);
+                        $valueTone = $isTrendExpense ? 'text-rose-700' : 'text-emerald-700';
+                    @endphp
+                    <tr>
+                        <td class="px-3 py-2.5 align-middle">
+                            <span class="block truncate text-xs font-medium text-slate-800">{{ $series['name'] }}</span>
+                        </td>
+                        @foreach ($series['data'] as $value)
+                            <td class="px-3 py-2.5 text-right text-xs tabular-nums {{ $value > 0 ? $valueTone : 'text-slate-400' }}">
+                                {{ number_format($value, 0, ',', '.') }}
+                            </td>
+                        @endforeach
+                        <td class="px-3 py-2.5 text-right text-xs font-semibold tabular-nums {{ $valueTone }}">
+                            {{ number_format($seriesTotal, 0, ',', '.') }}
+                        </td>
+                    </tr>
+                @endforeach
+            </tbody>
         @endif
-    </x-card>
+    </x-table>
 
     {{-- Modal Tambah / Edit Saldo Hitungan Manual --}}
     <x-modal wire="reconcileModal" title="{{ $editingReconcileId ? 'Ubah Saldo Hitungan Manual' : 'Tambah Saldo Hitungan Manual' }}">

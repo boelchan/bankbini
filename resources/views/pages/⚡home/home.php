@@ -37,6 +37,9 @@ class extends Component
     public ?string $monthFilter = '';
     public ?int $categoryFilter = null;
 
+    /* Tanggal grup yang sedang dibuka rincian per kategorinya */
+    public ?string $expandedDate = null;
+
     /* Modal State */
     public bool $incomeModal = false;
     public bool $expenseModal = false;
@@ -90,6 +93,7 @@ class extends Component
      */
     public function previousMonth(): void
     {
+        $this->expandedDate = null;
         $this->monthFilter = Carbon::createFromFormat('Y-m', $this->monthFilter ?: now()->format('Y-m'))
             ->subMonthNoOverflow()
             ->format('Y-m');
@@ -100,6 +104,7 @@ class extends Component
      */
     public function nextMonth(): void
     {
+        $this->expandedDate = null;
         $currentMonth = now()->format('Y-m');
         $targetMonth = Carbon::createFromFormat('Y-m', $this->monthFilter ?: $currentMonth)
             ->addMonthNoOverflow()
@@ -118,6 +123,15 @@ class extends Component
     public function setFlowFilter(string $flow): void
     {
         $this->flowFilter = $flow;
+        $this->expandedDate = null;
+    }
+
+    /**
+     * Membuka atau menutup rincian jumlah per kategori pada suatu tanggal.
+     */
+    public function toggleDateDetail(string $date): void
+    {
+        $this->expandedDate = $this->expandedDate === $date ? null : $date;
     }
 
     /**
@@ -129,6 +143,7 @@ class extends Component
         $this->flowFilter = '';
         $this->monthFilter = now()->format('Y-m');
         $this->categoryFilter = null;
+        $this->expandedDate = null;
     }
 
     /**

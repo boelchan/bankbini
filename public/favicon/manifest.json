@@ -1,8 +1,8 @@
 {
-  "name": "Kantong Kehamilan Puskesmas Pragaan Sumenep",
-  "short_name": "Kantong Kehamilan",
+  "name": "Bank Bini",
+  "short_name": "Bank Bini",
   "start_url": "/",
-  "description": "Puskesmas Pragaan Sumenep",
+  "description": "Bank Bini adalah aplikasi keuangan keluarga yang membantu Anda mengelola pengeluaran, tabungan, dan anggaran dengan mudah.",
   "icons": [
     {
       "src": "/web-app-manifest-192x192.png",
