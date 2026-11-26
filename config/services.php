@@ -35,4 +35,21 @@ return [
         ],
     ],
 
+    'fcm' => [
+        'enabled' => (bool) env('FCM_ENABLED', false),
+        'service_account_path' => env('FCM_SERVICE_ACCOUNT_PATH'),
+        'project_id' => env('FCM_PROJECT_ID'),
+        'ttl_seconds' => (int) env('FCM_TTL_SECONDS', 10800),
+    ],
+
+    'firebase_web' => [
+        'sdk_version' => '12.4.0',
+        'api_key' => env('FIREBASE_API_KEY'),
+        'auth_domain' => env('FIREBASE_AUTH_DOMAIN'),
+        'project_id' => env('FIREBASE_PROJECT_ID'),
+        'messaging_sender_id' => env('FIREBASE_MESSAGING_SENDER_ID'),
+        'app_id' => env('FIREBASE_APP_ID'),
+        'vapid_key' => env('FIREBASE_VAPID_KEY'),
+    ],
+
 ];

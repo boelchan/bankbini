@@ -35,6 +35,8 @@
             >
                 <x-ti-settings class="size-4 text-slate-500" aria-hidden="true" /> Profil & Kategori
             </a>
+            <livewire:notification-setup />
+
             <button
                 type="button"
                 role="menuitem"

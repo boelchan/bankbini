@@ -57,7 +57,16 @@ Diakses dengan mengetuk kotak kantong pada halaman **Kantong**:
 - Kantong yang dibekukan tidak dapat menerima atau mengeluarkan uang, namun saldonya tetap dihitung dalam Total Saldo.
 - Kantong yang dihapus menggunakan *Soft Delete* setelah saldonya menjadi `Rp0`, dan riwayat transaksinya tetap tersimpan permanen.
 
-## 5. Pengoptimalan Tampilan Mobile First (Smartphone Utama)
+## 5. Notifikasi Transaksi Berbasis FCM
+- Notifikasi transaksi memakai **Firebase Cloud Messaging (FCM) HTTP v1** dengan service account pada server dan Web Push certificate (VAPID) pada browser.
+- Tombol **Aktifkan Notifikasi HP** tersedia di menu **Akun** hanya saat aplikasi dibuka pada perangkat HP yang terdeteksi sebagai Android atau iPhone. Browser desktop sengaja tidak menampilkan tombol dan tidak menyimpan token.
+- Token FCM disimpan permanen di tabel `fcm_tokens` yang berrelasi dengan `users`, lengkap dengan platform dan label perangkat. Token yang ditolak FCM sebagai `UNREGISTERED` dihapus otomatis.
+- Setiap transaksi baru yang berhasil disimpan, baik pemasukan, pengeluaran, maupun pindah uang, memicu notifikasi ke **semua akun aktif kecuali akun yang menginput**. Pengiriman dilakukan setelah transaksi database selesai di-commit agar notifikasi tidak muncul untuk transaksi gagal.
+- Isi notifikasi menyebutkan nama penginput, jenis transaksi, nominal bertanda, nama kantong, dan keterangan singkat bila ada. Mengetuk notifikasi membuka halaman detail kantong terkait.
+- Perubahan dan penghapusan transaksi tidak memicu notifikasi.
+- Bila kredensial FCM belum diisi, fitur dimatikan dengan aman tanpa mengganggu pencatatan transaksi. Langkah lengkap ada pada `docs/FCM_SETUP.md`.
+
+## 6. Pengoptimalan Tampilan Mobile First (Smartphone Utama)
 Karena aplikasi utamanya digunakan langsung dari smartphone (HP) oleh istri:
 - **Riwayat Transaksi Responsif**:
   - Di layar ponsel (`sm:hidden`): Riwayat transaksi disajikan dalam bentuk daftar kartu transaksi vertikal yang padat, rapi, dan mudah dibaca tanpa perlu geser layar ke kanan (*no horizontal scroll fatigue*), menampilkan tanggal & waktu, nominal berwarna tebal (`+Rp...` / `-Rp...`), nama kantong dengan swatch warna, badge jenis/kategori, serta aksi ubah/hapus transaksi.
@@ -72,7 +81,7 @@ Karena aplikasi utamanya digunakan langsung dari smartphone (HP) oleh istri:
   - Tombol-tombol aksi utama, pemilihan kategori radio 3 kolom, dan menu tab di profil dirancang dengan ukuran sentuh nyaman (touch target >= 40-44px) yang bersahabat untuk sentuhan jempol di smartphone.
   - Pembuatan kantong baru hanya melalui tombol **Tambah Kantong Baru** di header halaman Kantong, tanpa kartu kosong tambahan di dalam daftar.
 
-## 6. Kalkulator Mini pada Field Nominal
+## 7. Kalkulator Mini pada Field Nominal
 Field **Nominal** pada form **Masuk** dan **Keluar** (di Home maupun detail kantong) dilengkapi **popup kalkulator mini** untuk menghitung nominal langsung tanpa keluar dari form:
 - Tombol ikon kalkulator di sisi kanan field membuka popup berisi keypad angka (0-9) dan empat operasi aritmetika: **+ − × ÷**.
 - Display popup menampilkan ekspresi yang sedang disusun (contoh: `12 × 5`), dengan tombol `C` (bersihkan) dan `⌫` (hapus satu karakter).
@@ -81,7 +90,7 @@ Field **Nominal** pada form **Masuk** dan **Keluar** (di Home maupun detail kant
 - Hasil perhitungan ditulis ke field dengan simulasi input yang sama seperti ketikan pengguna, sehingga sinkronisasi Livewire (`wire:model` pada `x-currency`) tetap bekerja normal.
 - Implementasi memakai komponen Blade reusable `resources/views/components/amount-calculator.blade.php` yang membungkus field: `<x-amount-calculator model="...">...</x-amount-calculator>`; ekspresi divalidasi whitelist (`0-9 + - * / .`) sebelum dievaluasi. Diterapkan pada seluruh field nominal transaksi: form **Masuk**, **Keluar**, **Pindah**, dan modal **Ubah Transaksi** (di Home maupun detail kantong). Tombol kalkulator tampil sebagai *addon* di **dalam field** (sisi kanan, vertikal tengah) dan popup muncul **di atas** field.
 
-## 7. Rekonsiliasi Saldo Akhir (Rekap)
+## 8. Rekonsiliasi Saldo Akhir (Rekap)
 Di bagian **paling bawah halaman Rekap (`/recap`)** terdapat kartu **"Saldo Akhir & Rekonsiliasi"** untuk membandingkan saldo akhir kantong hasil hitungan sistem dengan **saldo yang dihitung manual** oleh keluarga (contoh: Tunai, Bank A, Bank B):
 - **Pemilihan kantong**: dropdown di kanan judul kartu untuk memilih kantong yang direkonsiliasi; **default = kantong utama (primary)**. Opsi kantong hanya memuat kantong aktif/dibekukan; kantong utama ditandai akhiran "(Utama)". Setiap kantong memiliki daftar saldo manualnya sendiri (berdasarkan `wallet_id`).
 - **Kartu ringkasan 3 metrik**: **Saldo Akhir Kantong** (saldo kantong saat ini dari kolom `balance`), **Total Hitungan Manual** (penjumlahan seluruh entri saldo manual), dan **Selisih** (total manual − saldo akhir). Selisih tampil **"Cocok"** berwarna emerald bila nilainya 0, dan **`+/-` nominal** berwarna rose bila berbeda; Saldo Akhir netral slate, Total Manual aksen sky.

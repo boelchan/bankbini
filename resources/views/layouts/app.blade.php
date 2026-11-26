@@ -21,6 +21,17 @@
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
+    <script>
+        window.BINI_FIREBASE_CONFIG = {{ Illuminate\Support\Js::from([
+            'apiKey' => config('services.firebase_web.api_key'),
+            'authDomain' => config('services.firebase_web.auth_domain'),
+            'projectId' => config('services.firebase_web.project_id'),
+            'messagingSenderId' => config('services.firebase_web.messaging_sender_id'),
+            'appId' => config('services.firebase_web.app_id'),
+            'vapidKey' => config('services.firebase_web.vapid_key'),
+        ]) }};
+    </script>
+
     @livewireStyles
     <tallstackui:script />
     @stack('styles')

@@ -2,8 +2,12 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\FirebaseServiceWorkerController;
 use App\Http\Controllers\LogoutController;
 use Illuminate\Support\Facades\Route;
+
+/* Service worker FCM harus bisa diakses sebelum pengguna login. */
+Route::get('/firebase-messaging-sw.js', FirebaseServiceWorkerController::class);
 
 Route::get('/', function () {
     return auth()->check() ? to_route('home') : to_route('login');

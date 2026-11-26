@@ -5,11 +5,13 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Enums\TransactionTypeEnum;
+use App\Services\TransactionNotificationService;
 use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\DB;
 
 #[Table(name: 'transactions', key: 'id')]
 #[Fillable([
@@ -47,6 +49,18 @@ class Transaction extends Model
             'balance_after' => 'decimal:2',
             'transaction_date' => 'datetime',
         ];
+    }
+
+    /**
+     * Mengirim notifikasi FCM setelah transaksi baru benar-benar tersimpan.
+     */
+    protected static function booted(): void
+    {
+        static::created(function (Transaction $transaction): void {
+            DB::afterCommit(function () use ($transaction): void {
+                app(TransactionNotificationService::class)->notify($transaction);
+            });
+        });
     }
 
     /**
@@ -128,7 +142,7 @@ class Transaction extends Model
      */
     public function formattedSignedAmount(): string
     {
-        return $this->type->sign() . number_format((float) $this->amount, 0, ',', '.');
+        return $this->type->sign().number_format((float) $this->amount, 0, ',', '.');
     }
 
     /**
@@ -191,16 +205,16 @@ class Transaction extends Model
 
         if ($this->type === TransactionTypeEnum::TRANSFER_OUT) {
             if (str_starts_with($desc, 'Transfer keluar ke ')) {
-                return 'Pindah ke ' . substr($desc, strlen('Transfer keluar ke '));
+                return 'Pindah ke '.substr($desc, strlen('Transfer keluar ke '));
             }
             if (str_starts_with($desc, 'Pindah ke kantong ')) {
-                return 'Pindah ke ' . substr($desc, strlen('Pindah ke kantong '));
+                return 'Pindah ke '.substr($desc, strlen('Pindah ke kantong '));
             }
         }
 
         if ($this->type === TransactionTypeEnum::TRANSFER_IN) {
             if (str_starts_with($desc, 'Transfer masuk dari ')) {
-                return 'Terima dari ' . substr($desc, strlen('Transfer masuk dari '));
+                return 'Terima dari '.substr($desc, strlen('Transfer masuk dari '));
             }
         }
 
